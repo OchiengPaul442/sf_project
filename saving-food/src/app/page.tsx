@@ -113,7 +113,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Fullscreen Video Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Video Background */}
         <video
           className="absolute inset-0 w-full h-screen object-cover"
@@ -183,64 +183,8 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Fourth Section: Text in Video */}
-      <section className="relative w-full h-screen container mx-auto flex flex-col items-center justify-start pt-20 overflow-hidden">
-        {/* Top Text */}
-        <div className="text-gray-300 text-lg md:text-xl font-medium mb-2 z-10">
-          We&apos;re
-        </div>
-
-        {/* Masked Video Text */}
-        <div className="relative w-full max-w-5xl h-[150px] flex justify-center items-center">
-          {/* Background Video */}
-          <video
-            className="absolute top-0 left-0 w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="/video/video.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-
-          {/* SVG for Text Mask */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="absolute w-full h-full"
-            viewBox="0 0 1200 200"
-            preserveAspectRatio="xMidYMid slice"
-          >
-            <defs>
-              <mask id="text-mask-1" x="0" y="0" width="100%" height="100%">
-                <rect x="0" y="0" width="100%" height="100%" fill="white" />
-                <text
-                  x="50%"
-                  y="50%"
-                  textAnchor="middle"
-                  fill="black"
-                  fontFamily="Arial, sans-serif"
-                  fontWeight="bold"
-                  fontSize="100"
-                >
-                  Saving Food
-                </text>
-              </mask>
-            </defs>
-            <rect
-              x="0"
-              y="0"
-              width="100%"
-              height="100%"
-              fill="black"
-              mask="url(#text-mask-1)"
-            />
-          </svg>
-        </div>
-      </section>
-
-      {/* Fifth Section: Text in Video with Animation */}
-      <section className="relative w-full container mx-auto h-screen flex flex-col items-center justify-start pt-20 overflow-hidden">
+      {/* Sixth Section: Text in Video with Animation */}
+      <section className="relative w-full h-screen container mx-auto pt-20 flex flex-col justify-center items-center mb-40">
         {/* Top Text */}
         <div className="text-gray-300 text-lg md:text-xl font-medium mb-2 z-10">
           We&apos;re
@@ -294,25 +238,6 @@ const LandingPage: React.FC = () => {
           </svg>
         </div>
 
-        {/* Problem Statement Section */}
-        <div className="mt-12 text-start text-white px-4">
-          <h2 className="font-thin text-5xl text-[#A8A8A8] mb-4 tracking-wide">
-            The problem statement
-          </h2>
-          <p className="text-[#A8A8A8] text-5xl font-medium leading-tight">
-            <span className="font-bold text-white">
-              By building a platform that empowers restaurants
-            </span>
-            <br />
-            to cut food waste,{" "}
-            <span className="font-bold">protect their bottom line</span>, and
-            have a meaningful, cumulative impact on global sustainability.
-          </p>
-        </div>
-      </section>
-
-      {/* Sixth Section: Text in Video with Animation */}
-      <section className="relative w-full h-screen container mx-auto pt-20 flex flex-col justify-center items-center">
         {/* Problem Statement Text */}
         <div className="text-start text-white w-full mb-16">
           <h2 className="font-thin text-5xl md:text-6xl text-[#A8A8A8] mb-8 tracking-wide">
