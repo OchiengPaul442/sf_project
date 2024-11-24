@@ -1,9 +1,15 @@
-import dynamic from "next/dynamic";
+"use client";
 
-const LandingPage = dynamic(() => import("./LandingPage"));
+import React, { Suspense } from "react";
+import Loader from "../components/loader";
+import LandingPage from "./LandingPage";
 
-const page = () => {
-  return <LandingPage />;
+const Page = () => {
+  return (
+    <Suspense fallback={<Loader />}>
+      <LandingPage />
+    </Suspense>
+  );
 };
 
-export default page;
+export default Page;

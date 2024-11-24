@@ -14,7 +14,7 @@ import foodAnimation from "../lottie/food.json";
 import animationWithUs from "@public/animations/animationWithUs.json";
 import animationWithoutUs from "@public/animations/animationWithoutUs.json";
 
-const LandingPage: React.FC = () => {
+const LandingPage = () => {
   const { scrollY } = useScroll();
 
   // Transformations for fade-out and animations
@@ -24,10 +24,9 @@ const LandingPage: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (

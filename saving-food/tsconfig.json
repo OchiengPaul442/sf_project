@@ -22,6 +22,7 @@
       "@/*": ["./src/*"],
       "@public/*": ["./public/*"],
       "@/styles/*": ["./styles/*"],
+      "@/components/*": ["./components/*"],
       "@/lottie/*": ["./lottie/*"]
     }
   },
