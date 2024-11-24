@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { FiMenu } from "react-icons/fi";
 import Lottie from "lottie-react";
@@ -13,8 +13,10 @@ import energyAnimation from "../lottie/energy.json";
 import foodAnimation from "../lottie/food.json";
 import animationWithUs from "@public/animations/animationWithUs.json";
 import animationWithoutUs from "@public/animations/animationWithoutUs.json";
+import Loader from "../components/loader";
 
 const LandingPage = () => {
+  const [isDocumentReady, setIsDocumentReady] = useState(false);
   const { scrollY } = useScroll();
 
   // Transformations for fade-out and animations
@@ -28,6 +30,17 @@ const LandingPage = () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
+
+  // Ensure document is ready
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      setIsDocumentReady(true);
+    }
+  }, []);
+
+  if (!isDocumentReady) {
+    return <Loader />;
+  }
 
   return (
     <div>

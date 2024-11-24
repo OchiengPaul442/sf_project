@@ -1,16 +1,19 @@
-"use client";
-import { FC } from "react";
-import Lottie from "lottie-react";
-import animationData from "@public/animations/loader.json";
+import React from "react";
 
-const Loading: FC = () => {
+const Loading = () => {
   return (
-    <div className="flex items-center justify-center w-screen h-screen">
-      <Lottie
-        animationData={animationData}
-        loop
-        className="w-32 h-32 md:w-48 md:h-48"
-      />
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-black text-white">
+      {/* Pulsing Text */}
+      <h1 className="text-3xl md:text-5xl font-bold animate-pulse mb-6">
+        Saving Food
+      </h1>
+
+      {/* Pulsing Dots */}
+      <div className="flex space-x-2">
+        <span className="w-4 h-4 bg-white rounded-full animate-bounce delay-100"></span>
+        <span className="w-4 h-4 bg-white rounded-full animate-bounce delay-200"></span>
+        <span className="w-4 h-4 bg-white rounded-full animate-bounce delay-300"></span>
+      </div>
     </div>
   );
 };

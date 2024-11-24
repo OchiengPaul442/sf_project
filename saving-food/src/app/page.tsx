@@ -1,15 +1,8 @@
-"use client";
-
-import React, { Suspense } from "react";
-import Loader from "../components/loader";
+import React from "react";
 import LandingPage from "./LandingPage";
 
 const Page = () => {
-  return (
-    <Suspense fallback={<Loader />}>
-      <LandingPage />
-    </Suspense>
-  );
+  return <LandingPage />;
 };
 
 export default Page;
