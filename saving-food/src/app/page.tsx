@@ -1,4 +1,6 @@
-import LandingPage from "./Landing";
+import dynamic from "next/dynamic";
+
+const LandingPage = dynamic(() => import("./LandingPage"));
 
 const page = () => {
   return <LandingPage />;
