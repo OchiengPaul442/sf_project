@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { FiArrowDownLeft, FiArrowUpRight } from "react-icons/fi";
 import dynamic from "next/dynamic";
@@ -19,8 +19,10 @@ import MaskedTextSection from "./MaskedTextSection";
 import FormSection from "./FormSection";
 import FooterSection from "./FooterSection";
 
+const Loader = dynamic(() => import("@/components/loader"), { ssr: false });
+
 const LandingPage = () => {
-  // State for hover interactions
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isHoveringWithUs, setIsHoveringWithUs] = useState<boolean>(false);
   const [isHoveringWithoutUs, setIsHoveringWithoutUs] =
     useState<boolean>(false);
@@ -40,6 +42,18 @@ const LandingPage = () => {
     hidden: { opacity: 0, y: 50 },
     visible: { opacity: 1, y: 0 },
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div>
