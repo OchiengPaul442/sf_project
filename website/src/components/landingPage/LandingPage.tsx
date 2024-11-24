@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, motionValue } from "framer-motion";
 import { FiMenu } from "react-icons/fi";
 import Lottie from "lottie-react";
 
@@ -16,15 +16,27 @@ import animationWithoutUs from "@/lottie/animationWithoutUs.json";
 import Loader from "@/components/loader";
 
 const LandingPage = () => {
+  // State for document readiness
   const [isDocumentReady, setIsDocumentReady] = useState(false);
+
+  // Always call `useScroll` hook
   const { scrollY } = useScroll();
 
+  // Use a fallback `motionValue` for SSR
+  const isBrowser = typeof window !== "undefined";
+  const safeScrollY = isBrowser ? scrollY : motionValue(0);
+
   // Transformations for fade-out and animations
-  const opacityText = useTransform(scrollY, [0, 500], [1, 0], { clamp: true });
+  const safeOpacityText = useTransform(safeScrollY, [0, 500], [1, 0], {
+    clamp: true,
+  });
+
+  // State for hover interactions
   const [isHoveringWithUs, setIsHoveringWithUs] = useState(false);
   const [isHoveringWithoutUs, setIsHoveringWithoutUs] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
+  // Scroll to top function
   const scrollToTop = () => {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -33,7 +45,7 @@ const LandingPage = () => {
 
   // Ensure document is ready
   useEffect(() => {
-    if (typeof document !== "undefined") {
+    if (typeof window !== "undefined") {
       setIsDocumentReady(true);
     }
   }, []);
@@ -48,7 +60,7 @@ const LandingPage = () => {
       <section className="relative bg-white h-screen flex items-center justify-center overflow-hidden">
         {/* Top Bar */}
         <motion.header
-          style={{ opacity: opacityText }}
+          style={{ opacity: safeOpacityText }}
           className="fixed top-0 left-0 right-0 flex justify-between items-center px-6 py-4 z-50 bg-transparent"
         >
           <div className="text-black font-bold text-xl">sf.</div>
@@ -59,7 +71,7 @@ const LandingPage = () => {
         <div className="relative z-10 container mx-auto flex flex-col items-center">
           {/* Subtitle */}
           <motion.h2
-            style={{ opacity: opacityText }}
+            style={{ opacity: safeOpacityText }}
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -70,7 +82,7 @@ const LandingPage = () => {
 
           {/* Title */}
           <motion.h1
-            style={{ opacity: opacityText }}
+            style={{ opacity: safeOpacityText }}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
