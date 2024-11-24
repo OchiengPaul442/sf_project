@@ -1,58 +1,34 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, useScroll, useTransform, motionValue } from "framer-motion";
-import { FiMenu } from "react-icons/fi";
-import Lottie from "lottie-react";
-
-import { FiArrowDownLeft, FiArrowUpRight } from "react-icons/fi";
+import React, { useState } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { FiMenu, FiArrowDownLeft, FiArrowUpRight } from "react-icons/fi";
 import { PiArrowULeftUp } from "react-icons/pi";
+import dynamic from "next/dynamic";
+
+// Dynamically import Lottie with SSR disabled
+const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+
 import stuffAnimation from "@/lottie/stuff.json";
 import waterAnimation from "@/lottie/water.json";
 import energyAnimation from "@/lottie/energy.json";
 import foodAnimation from "@/lottie/food.json";
 import animationWithUs from "@/lottie/animationWithUs.json";
 import animationWithoutUs from "@/lottie/animationWithoutUs.json";
-import Loader from "@/components/loader";
 
 const LandingPage = () => {
-  // State for document readiness
-  const [isDocumentReady, setIsDocumentReady] = useState(false);
-
-  // Always call `useScroll` hook
-  const { scrollY } = useScroll();
-
-  // Use a fallback `motionValue` for SSR
-  const isBrowser = typeof window !== "undefined";
-  const safeScrollY = isBrowser ? scrollY : motionValue(0);
-
-  // Transformations for fade-out and animations
-  const safeOpacityText = useTransform(safeScrollY, [0, 500], [1, 0], {
-    clamp: true,
-  });
-
-  // State for hover interactions
   const [isHoveringWithUs, setIsHoveringWithUs] = useState(false);
   const [isHoveringWithoutUs, setIsHoveringWithoutUs] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
 
+  // Framer Motion hooks for scroll-based animations
+  const { scrollY } = useScroll();
+  const opacityText = useTransform(scrollY, [0, 500], [1, 0], { clamp: true });
+
   // Scroll to top function
   const scrollToTop = () => {
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // Ensure document is ready
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsDocumentReady(true);
-    }
-  }, []);
-
-  if (!isDocumentReady) {
-    return <Loader />;
-  }
 
   return (
     <div>
@@ -60,7 +36,7 @@ const LandingPage = () => {
       <section className="relative bg-white h-screen flex items-center justify-center overflow-hidden">
         {/* Top Bar */}
         <motion.header
-          style={{ opacity: safeOpacityText }}
+          style={{ opacity: opacityText }}
           className="fixed top-0 left-0 right-0 flex justify-between items-center px-6 py-4 z-50 bg-transparent"
         >
           <div className="text-black font-bold text-xl">sf.</div>
@@ -71,7 +47,7 @@ const LandingPage = () => {
         <div className="relative z-10 container mx-auto flex flex-col items-center">
           {/* Subtitle */}
           <motion.h2
-            style={{ opacity: safeOpacityText }}
+            style={{ opacity: opacityText }}
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -82,7 +58,7 @@ const LandingPage = () => {
 
           {/* Title */}
           <motion.h1
-            style={{ opacity: safeOpacityText }}
+            style={{ opacity: opacityText }}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut", delay: 0.5 }}
@@ -407,7 +383,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* section 8 */}
+      {/* Section 8 */}
       <section className="w-full h-screen flex justify-center items-center bg-black px-4">
         <div className="container mx-auto flex flex-col justify-center items-center bg-white rounded-3xl px-12 py-12 text-center shadow-lg">
           {/* Heading */}
