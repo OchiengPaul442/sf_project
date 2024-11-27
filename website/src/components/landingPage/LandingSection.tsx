@@ -14,7 +14,7 @@ const LandingSection = () => {
   });
 
   // Transform values for animations
-  const scale = useTransform(scrollYProgress, [0, 0.3], [1, 60]);
+  const scale = useTransform(scrollYProgress, [0, 0.1], [1, 60]);
   const x = useTransform(scrollYProgress, [0, 0.3], ["0%", "-33.33%"]);
   const textOpacity = useTransform(scrollYProgress, [0.25, 0.3], [1, 0]);
   const videoOpacity = useTransform(scrollYProgress, [0.3, 0.35], [0, 1]);
@@ -29,7 +29,7 @@ const LandingSection = () => {
   }, []);
 
   return (
-    <main ref={containerRef} className="relative h-[500vh] bg-black">
+    <main ref={containerRef} className="relative h-[500vh] bg-white">
       {/* First Section with Scaling Text and Masked Video */}
       <div className="sticky top-0 h-screen overflow-hidden flex items-center justify-center">
         {/* Container for Masked Video within Text */}
@@ -39,8 +39,8 @@ const LandingSection = () => {
             x,
             opacity: textOpacity,
             position: "relative",
-            width: "80vw", // Adjust width as needed
-            height: "20vh", // Adjust height as needed
+            width: "80vw",
+            height: "20vh",
           }}
           className="relative"
         >
@@ -55,19 +55,19 @@ const LandingSection = () => {
             <defs>
               <mask id="text-mask" x="0" y="0" width="100%" height="100%">
                 {/* White background for mask */}
-                <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                <rect x="0" y="0" width="100%" height="100%" fill="black" />
                 {/* Black text defines the mask area */}
                 <text
                   x="50%"
                   y="50%"
                   textAnchor="middle"
-                  fill="black"
+                  fill="white"
                   fontFamily="Arial, sans-serif"
                   fontWeight="bold"
-                  fontSize="150" // Adjust font size as needed
+                  fontSize="150"
                   dy=".35em"
                 >
-                  OCEAN
+                  Saving Food
                 </text>
               </mask>
             </defs>
