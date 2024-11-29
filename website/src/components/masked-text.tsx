@@ -269,10 +269,10 @@ export function MaskedText() {
                       fontWeight="bold"
                       className="tracking-tight"
                       style={{
-                        scale: combinedScale, // Combined scale
-                        x: xMove, // Existing x movement
-                        y: combinedY, // Combined y movement
-                        fontSize: textFontSize, // Existing font size
+                        scale: combinedScale,
+                        x: xMove,
+                        y: combinedY,
+                        fontSize: textFontSize,
                         originX: responsiveOrigin.originX,
                         originY: responsiveOrigin.originY,
                       }}
@@ -310,13 +310,13 @@ export function MaskedText() {
             {/* "We're" Text Positioned Above "Saving Food." */}
             <motion.section
               style={{
-                y: weY, // Existing y movement
-                opacity: weOpacity, // Existing opacity
+                y: weY,
+                opacity: weOpacity,
               }}
               className="absolute top-1/3 left-1/2 transform -translate-x-1/2 z-30"
             >
               <motion.div
-                className="font-light"
+                className="font-light font-mono"
                 style={{
                   marginBottom: "40px",
                   color: "#A8A8A8",

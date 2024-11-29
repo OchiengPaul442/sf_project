@@ -159,7 +159,7 @@ const WithWithoutSection: React.FC<WithWithoutSectionProps> = ({
             opacity: isHovered ? 1 : 0.5,
           }}
           transition={{ duration: 0.3 }}
-          className={`text-white transform ${
+          className={`text-white transform relative top-6 ${
             isWithUs ? "rotate-[-45deg]" : "rotate-45"
           }`}
         >
