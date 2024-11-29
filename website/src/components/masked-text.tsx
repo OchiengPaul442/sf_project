@@ -1,6 +1,12 @@
 "use client";
-
-import { motion, useTransform, MotionValue } from "framer-motion";
+import { useEffect } from "react";
+import {
+  motion,
+  useTransform,
+  MotionValue,
+  useMotionValue,
+  animate,
+} from "framer-motion";
 import { Nav } from "./nav";
 import { useRef } from "react";
 
@@ -11,21 +17,84 @@ interface MaskedTextProps {
 export function MaskedText({ scrollProgress }: MaskedTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Create a smoothed version of scrollProgress
+  const smoothScrollProgress = useMotionValue(scrollProgress.get());
+
+  useEffect(() => {
+    const unsubscribe = scrollProgress.onChange((latest) => {
+      animate(smoothScrollProgress, latest, { duration: 0.3 });
+    });
+    return () => unsubscribe();
+  }, [scrollProgress]);
+
+  // Common input range for animations
+  //   const commonInputRange = [0, 0.15, 0.35, 0.36, 0.45];
+
   // Transform values for animations
-  const scale = useTransform(scrollProgress, [0, 0.3], [1, 46]);
-  const xMove = useTransform(scrollProgress, [0, 0.3], ["0%", "30%"]);
-  const navOpacity = useTransform(scrollProgress, [0, 0.15], [1, 0]);
-  const whiteOverlayOpacity = useTransform(scrollProgress, [0.2, 0.3], [1, 0]);
+  const scale = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    [1, 46, 46, 46, 1]
+  );
 
-  // Transforms for "We're" text
-  const weY = useTransform(scrollProgress, [0, 0.3], [0, -800]); // Moves up by 800px
-  const weOpacity = useTransform(scrollProgress, [0, 0.1], [1, 0]);
+  const xMove = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    ["0%", "30%", "30%", "30%", "0%"]
+  );
 
-  // Overlay opacity that decreases as text is revealed
-  const textOverlayOpacity = useTransform(scrollProgress, [0, 0.3], [1, 0]);
+  const navOpacity = useTransform(smoothScrollProgress, [0, 0.15], [1, 0]);
+
+  const whiteOverlayOpacity = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    [1, 1, 1, 1, 1]
+  );
+
+  const textOverlayOpacity = useTransform(
+    smoothScrollProgress,
+    [0, 0.3, 0.5, 0.6, 0.8],
+    [1, 0, 0, 1, 1]
+  );
+
+  const rectFill = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    ["white", "white", "white", "black", "black"]
+  );
+
+  const textY = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    ["0%", "0%", "0%", "0%", "0%"]
+  );
+
+  const textFontSize = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    ["12vw", "12vw", "12vw", "12vw", "12vw"]
+  );
+
+  const weY = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    [0, -800, -800, -800, 0]
+  );
+
+  const weOpacity = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36],
+    [1, 0, 1, 1]
+  );
+
+  const weFontSize = useTransform(
+    smoothScrollProgress,
+    [0, 0.15, 0.35, 0.36, 0.45],
+    ["2vw", "2vw", "2vw", "2vw", "1vw"]
+  );
 
   return (
-    <main className="bg-white text-black">
+    <main>
       {/* Navigation Bar */}
       <motion.div
         style={{ opacity: navOpacity }}
@@ -70,12 +139,13 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
                       textAnchor="middle"
                       dominantBaseline="middle"
                       fill="black"
-                      fontSize="12vw"
                       fontWeight="bold"
                       className="tracking-tight"
                       style={{
                         scale,
                         x: xMove,
+                        y: textY,
+                        fontSize: textFontSize,
                         originY: 0.48,
                         originX: 0.61,
                       }}
@@ -102,27 +172,33 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
                   y="0"
                   width="100%"
                   height="100%"
-                  fill="white"
+                  style={{
+                    fill: rectFill,
+                  }}
                   mask="url(#textMask)"
                 />
               </svg>
             </motion.div>
 
             {/* "We're" Text Positioned Above "Saving Food." */}
-            <motion.div
+            <motion.section
               style={{
                 y: weY,
                 opacity: weOpacity,
               }}
               className="absolute top-1/3 left-1/2 transform -translate-x-1/2 z-30"
             >
-              <div
-                className="text-gray-400 text-[2vw] font-light"
-                style={{ marginBottom: "40px" }}
+              <motion.div
+                className="font-light"
+                style={{
+                  marginBottom: "40px",
+                  color: "#A8A8A8",
+                  fontSize: weFontSize,
+                }}
               >
                 {"We're"}
-              </div>
-            </motion.div>
+              </motion.div>
+            </motion.section>
           </div>
         </div>
       </div>
