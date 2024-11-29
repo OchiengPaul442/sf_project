@@ -7,6 +7,7 @@ import FooterSection from "@/components/landingPage/FooterSection";
 import { WorkWithUs } from "@/components/landingPage/WorkWithUs";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
+import { ProblemStatement } from "@/components/landingPage/ProblemStatement";
 
 const Loader = dynamic(() => import("@/components/loader"), { ssr: false });
 
@@ -59,12 +60,22 @@ export default function Home() {
       {/* MaskedText Section */}
       <MaskedText />
 
+      <motion.section
+        className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={sectionVariants}
+      >
+        <ProblemStatement />
+      </motion.section>
+
       {/* WorkWithUs Section */}
       <motion.section
         className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }} // Trigger animation when 30% of the section is in view
+        viewport={{ once: true, amount: 0.3 }}
         variants={sectionVariants}
       >
         <WorkWithUs />
@@ -75,7 +86,7 @@ export default function Home() {
         className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.4 }} // Trigger animation when 40% of the section is in view
+        viewport={{ once: true, amount: 0.4 }}
         variants={sectionVariants}
       >
         <FormSection />
@@ -86,7 +97,7 @@ export default function Home() {
         className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }} // Trigger animation when 20% of the section is in view
+        viewport={{ once: true, amount: 0.2 }}
         variants={sectionVariants}
       >
         <FooterSection />

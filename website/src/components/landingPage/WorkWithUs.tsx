@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { motion } from "framer-motion";
 
@@ -6,44 +7,75 @@ export const WorkWithUs = () => {
   const [isHovering, setIsHovering] = useState<boolean>(false);
 
   return (
-    <section className="w-full flex justify-center h-full items-center pt-20">
-      <div className="bg-[#F5F5F5] rounded-3xl px-8 py-12 text-center">
+    <section className="w-full min-h-screen flex items-center justify-center p-4">
+      <motion.div
+        className="w-full bg-white rounded-3xl py-20 px-8 text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         {/* Top Heading */}
-        <h2 className="text-[36px] font-normal text-gray-600 tracking-wide mb-4">
+        <motion.h2
+          className="text-xl font-mono mb-6 text-black/70"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           Work with us
-        </h2>
+        </motion.h2>
 
         {/* Main Question */}
-        <h1 className="text-4xl md:text-[96px] font-semibold text-black leading-[96px] mb-8">
-          Are you’re an engineer <br />
-          who’s excited about our mission?
-        </h1>
+        <motion.h1
+          className="text-4xl sm:text-6xl lg:text-[72px] font-bold font-mono text-black leading-tight max-w-4xl mx-auto mb-12"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          Are you&apos;re an engineer who&apos;s excited about our mission?
+        </motion.h1>
 
         {/* Button */}
-        <div className="flex justify-center items-center">
+        <motion.div
+          className="flex justify-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           <motion.button
-            className="flex items-center gap-4 px-6 py-2 w-[140px] bg-gray-300 rounded-full relative shadow-md"
-            whileHover={{
-              scale: 1.05,
-              transition: { duration: 0.3 },
-            }}
+            className="group relative flex items-center bg-[#E8E8E8] text-black rounded-full pl-6 pr-14 py-3 font-mono"
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            <span className="text-lg text-black font-medium">Reach out</span>
+            <span className="text-base font-bold relative z-10">Reach out</span>
             <motion.div
-              className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-full absolute -right-4"
+              className="absolute -right-3 w-10 h-10 bg-black text-white rounded-full flex items-center justify-center"
               animate={{
-                x: isHovering ? 10 : 0,
+                x: isHovering ? 5 : 0,
               }}
-              transition={{ type: "spring", stiffness: 200, damping: 10 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
+              }}
             >
-              →
+              <motion.span
+                animate={{
+                  x: isHovering ? 2 : 0,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                }}
+              >
+                →
+              </motion.span>
             </motion.div>
           </motion.button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };
