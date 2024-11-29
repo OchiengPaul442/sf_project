@@ -17,13 +17,16 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
   const navOpacity = useTransform(scrollProgress, [0, 0.15], [1, 0]);
   const whiteOverlayOpacity = useTransform(scrollProgress, [0.2, 0.3], [1, 0]);
 
-  // Transform for "We're" text
+  // Transforms for "We're" text
   const weY = useTransform(scrollProgress, [0, 0.3], [0, -800]); // Moves up by 800px
   const weOpacity = useTransform(scrollProgress, [0, 0.1], [1, 0]);
 
+  // Overlay opacity that decreases as text is revealed
+  const textOverlayOpacity = useTransform(scrollProgress, [0, 0.3], [1, 0]);
+
   return (
     <main className="bg-white text-black">
-      {/* Nav Component */}
+      {/* Navigation Bar */}
       <motion.div
         style={{ opacity: navOpacity }}
         className="fixed top-0 w-full z-50"
@@ -52,13 +55,14 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
             {/* White Overlay with Masked Text */}
             <motion.div
               className="absolute inset-0 z-10"
-              style={{ opacity: whiteOverlayOpacity }}
+              style={{ opacity: whiteOverlayOpacity, color: "black" }}
             >
               <svg width="100%" height="100%" className="overflow-visible">
                 <defs>
                   <mask id="textMask">
                     {/* White background for mask */}
                     <rect x="0" y="0" width="100%" height="100%" fill="white" />
+
                     {/* Black text for transparency */}
                     <motion.text
                       x="50%"
@@ -80,8 +84,20 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
                     </motion.text>
                   </mask>
                 </defs>
+                {/* Overlay Rectangle */}
+                <motion.rect
+                  x="0"
+                  y="0"
+                  width="100%"
+                  height="100%"
+                  fill="black"
+                  style={{
+                    opacity: textOverlayOpacity,
+                    transition: "opacity 0.3s ease-out",
+                  }}
+                />
                 {/* White rectangle with applied mask */}
-                <rect
+                <motion.rect
                   x="0"
                   y="0"
                   width="100%"
@@ -98,9 +114,12 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
                 y: weY,
                 opacity: weOpacity,
               }}
-              className="absolute top-1/3 left-1/2 transform -translate-x-1/2 z-20"
+              className="absolute top-1/3 left-1/2 transform -translate-x-1/2 z-30"
             >
-              <div className="text-gray-400 text-[2vw] font-light">
+              <div
+                className="text-gray-400 text-[2vw] font-light"
+                style={{ marginBottom: "40px" }}
+              >
                 {"We're"}
               </div>
             </motion.div>
