@@ -4,15 +4,9 @@ import { motion } from "framer-motion";
 
 export const WorkWithUs = () => {
   const [isHovering, setIsHovering] = useState<boolean>(false);
+
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      variants={sectionVariants}
-      transition={{ duration: 0.8, delay: 1.0 }}
-      className="w-full flex justify-center h-screen items-center pt-20 container mx-auto px-8"
-    >
+    <section className="w-full flex justify-center h-full items-center pt-20">
       <div className="bg-[#F5F5F5] rounded-3xl px-8 py-12 text-center">
         {/* Top Heading */}
         <h2 className="text-[36px] font-normal text-gray-600 tracking-wide mb-4">
@@ -50,6 +44,6 @@ export const WorkWithUs = () => {
           </motion.button>
         </div>
       </div>
-    </motion.div>
+    </section>
   );
 };

@@ -3,8 +3,8 @@
 import React from "react";
 
 const FormSection: React.FC = () => (
-  <section className="w-full h-screen flex justify-center items-center bg-black px-4">
-    <div className="container mx-auto flex flex-col justify-center items-center bg-white rounded-3xl px-12 py-12 text-center shadow-lg">
+  <section className="w-full h-full flex justify-center items-center bg-black">
+    <div className="flex flex-col justify-center w-full items-center bg-white rounded-3xl px-12 py-12 text-center shadow-lg">
       {/* Heading */}
       <h2 className="text-lg font-normal text-gray-600 mb-4 tracking-wide">
         Participate in our seed round

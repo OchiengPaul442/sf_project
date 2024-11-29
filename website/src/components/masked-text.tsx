@@ -1,75 +1,107 @@
 "use client";
-import { useEffect } from "react";
+
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
   motion,
   useTransform,
-  MotionValue,
   useMotionValue,
   animate,
+  useScroll,
 } from "framer-motion";
 import { Nav } from "./nav";
-import { useRef } from "react";
+import { useWindowSize } from "@/hooks/use-window-size";
 
-interface MaskedTextProps {
-  scrollProgress: MotionValue<number>;
-}
-
-export function MaskedText({ scrollProgress }: MaskedTextProps) {
+export function MaskedText() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { width: windowWidth } = useWindowSize();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Use useScroll hook to get scrollProgress
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
 
   // Create a smoothed version of scrollProgress
-  const smoothScrollProgress = useMotionValue(scrollProgress.get());
+  const smoothScrollProgress = useMotionValue(0);
 
   useEffect(() => {
-    const unsubscribe = scrollProgress.onChange((latest) => {
+    const unsubscribe = scrollYProgress.onChange((latest) => {
       animate(smoothScrollProgress, latest, { duration: 0.3 });
+      setIsInitialLoad(false);
     });
     return () => unsubscribe();
-  }, [scrollProgress]);
+  }, [scrollYProgress, smoothScrollProgress]);
 
-  // Common input range for animations
-  const commonInputRange = [0, 0.15, 0.35, 0.36, 0.45, 1];
+  // Define common input ranges for consistency
+  const COMMON_INPUT_RANGE = [0, 0.15, 0.35, 0.36, 0.45, 0.6, 1];
+  const TEXT_ANIMATION_RANGE = [0, 0.3, 1]; // Updated range
 
-  // Transform values for animations
-  const scale = useTransform(
-    smoothScrollProgress,
-    commonInputRange,
-    [1, 46, 46, 46, 1, 1]
-  );
+  // Define additional input ranges for size and position animations
+  const SIZE_ANIMATION_RANGE = [0.6, 0.8, 1]; // New size animation range
+  const POSITION_ANIMATION_RANGE = [0.6, 0.8, 1]; // New position animation range
 
-  const xMove = useTransform(smoothScrollProgress, commonInputRange, [
+  // Responsive scaling factor
+  const responsiveScale = useMemo(() => {
+    if (windowWidth < 640) return 20; // Mobile
+    if (windowWidth < 1024) return 30; // Tablet
+    return 46; // Desktop
+  }, [windowWidth]);
+
+  // Responsive origin for mask text
+  const responsiveOrigin = useMemo(() => {
+    if (windowWidth < 640) {
+      return { originX: 0.5, originY: 0.5 }; // Mobile
+    } else if (windowWidth < 1024) {
+      return { originX: 0.55, originY: 0.5 }; // Tablet
+    }
+    return { originX: 0.61, originY: 0.48 }; // Desktop
+  }, [windowWidth]);
+
+  // Animation transforms
+  const scale = useTransform(smoothScrollProgress, COMMON_INPUT_RANGE, [
+    1,
+    responsiveScale,
+    responsiveScale,
+    responsiveScale,
+    1,
+    1,
+    1,
+  ]);
+
+  const xMove = useTransform(smoothScrollProgress, COMMON_INPUT_RANGE, [
     "0%",
     "30%",
     "30%",
     "30%",
+    "0%",
     "0%",
     "0%",
   ]);
 
   const navOpacity = useTransform(smoothScrollProgress, [0, 0.15], [1, 0]);
 
-  const whiteOverlayOpacity = useTransform(
-    smoothScrollProgress,
-    commonInputRange,
-    [1, 1, 1, 1, 1, 1]
-  );
+  const whiteOverlayOpacity = useMotionValue(isInitialLoad ? 1 : 0);
 
+  // Updated textOverlayOpacity
   const textOverlayOpacity = useTransform(
     smoothScrollProgress,
-    [0, 0.3, 0.5, 0.6, 0.8],
-    [1, 0, 0, 1, 1]
+    TEXT_ANIMATION_RANGE,
+    [1, 0, 0] // Fade out and stay transparent
   );
 
-  const rectFill = useTransform(smoothScrollProgress, commonInputRange, [
+  const rectFill = useTransform(smoothScrollProgress, COMMON_INPUT_RANGE, [
     "white",
     "white",
     "white",
     "black",
     "black",
     "black",
+    "black",
   ]);
 
-  const textY = useTransform(smoothScrollProgress, commonInputRange, [
+  const textY = useTransform(smoothScrollProgress, COMMON_INPUT_RANGE, [
+    "0%",
     "0%",
     "0%",
     "0%",
@@ -78,43 +110,117 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
     "0%",
   ]);
 
-  const textFontSize = useTransform(smoothScrollProgress, commonInputRange, [
-    "12vw",
-    "12vw",
-    "12vw",
-    "12vw",
-    "12vw",
-    "12vw",
-  ]);
+  // Responsive font size for main text
+  const responsiveFontSize = useMemo(() => {
+    if (windowWidth < 640) return "8vw"; // Mobile
+    if (windowWidth < 1024) return "9vw"; // Tablet
+    return "12vw"; // Desktop
+  }, [windowWidth]);
 
+  const textFontSize = useTransform(
+    smoothScrollProgress,
+    COMMON_INPUT_RANGE,
+    Array(7).fill(responsiveFontSize)
+  );
+
+  // Animation for "We're" text
   const weY = useTransform(
     smoothScrollProgress,
-    commonInputRange,
-    [0, -800, -800, -800, 0, 0]
+    COMMON_INPUT_RANGE,
+    [0, -400, -400, -400, 0, 0, 0]
   );
 
   const weOpacity = useTransform(
     smoothScrollProgress,
-    commonInputRange,
-    [1, 0, 1, 1, 1, 1]
+    COMMON_INPUT_RANGE,
+    [1, 0, 1, 1, 1, 1, 1]
   );
 
-  const weFontSize = useTransform(smoothScrollProgress, commonInputRange, [
-    "2vw",
-    "2vw",
-    "2vw",
-    "2vw",
-    "2vw",
-    "2vw",
+  // Responsive font size for "We're" text
+  const responsiveWeFontSize = useMemo(() => {
+    if (windowWidth < 640) return "1.5vw"; // Mobile
+    if (windowWidth < 1024) return "1.75vw"; // Tablet
+    return "2vw"; // Desktop
+  }, [windowWidth]);
+
+  const weFontSize = useTransform(
+    smoothScrollProgress,
+    COMMON_INPUT_RANGE,
+    Array(7).fill(responsiveWeFontSize)
+  );
+
+  // Additional transforms for size and position (Separate transforms to avoid TypeScript errors)
+
+  // "Saving Food." Text Scale Down
+  const savingFoodScaleDown = useTransform(
+    smoothScrollProgress,
+    SIZE_ANIMATION_RANGE,
+    [1, 0.8, 0.8]
+  );
+
+  // "Saving Food." Text Move Up
+  const savingFoodMoveY = useTransform(
+    smoothScrollProgress,
+    POSITION_ANIMATION_RANGE,
+    ["0%", "-10%", "-10%"]
+  );
+
+  // "We're" Text Scale Down
+  const weScaleDown = useTransform(
+    smoothScrollProgress,
+    SIZE_ANIMATION_RANGE,
+    [1, 0.8, 0.8]
+  );
+
+  // "We're" Text Move Up
+  const weMoveY = useTransform(smoothScrollProgress, POSITION_ANIMATION_RANGE, [
+    "0%",
+    "-100%",
+    "-100%",
   ]);
 
+  // Combine scale and savingFoodScaleDown into combinedScale
+  const combinedScale = useMotionValue(1);
+  useEffect(() => {
+    const unsubscribe1 = scale.onChange((s) => {
+      combinedScale.set(savingFoodScaleDown.get() * s);
+    });
+
+    const unsubscribe2 = savingFoodScaleDown.onChange((sd) => {
+      combinedScale.set(scale.get() * sd);
+    });
+
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
+  }, [scale, savingFoodScaleDown, combinedScale]);
+
+  // Combine y and savingFoodMoveY into combinedY
+  const combinedY = useMotionValue("0%");
+  useEffect(() => {
+    const unsubscribe1 = textY.onChange((ty) => {
+      const tyNum = parseFloat(ty);
+      const myNum = parseFloat(savingFoodMoveY.get());
+      combinedY.set(`${tyNum + myNum}%`);
+    });
+
+    const unsubscribe2 = savingFoodMoveY.onChange((my) => {
+      const tyNum = parseFloat(textY.get());
+      const myNum = parseFloat(my);
+      combinedY.set(`${tyNum + myNum}%`);
+    });
+
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
+  }, [textY, savingFoodMoveY, combinedY]);
+
   return (
-    <main>
+    <section>
       {/* Navigation Bar */}
-      <motion.div
-        style={{ opacity: navOpacity }}
-        className="fixed top-0 w-full z-50"
-      >
+      <motion.div style={{ opacity: navOpacity }}>
         <Nav />
       </motion.div>
 
@@ -139,7 +245,13 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
             {/* White Overlay with Masked Text */}
             <motion.div
               className="absolute inset-0 z-10"
-              style={{ opacity: whiteOverlayOpacity, color: "black" }}
+              style={{
+                opacity: whiteOverlayOpacity,
+                color: "black",
+                backgroundColor: isInitialLoad ? "white" : "transparent",
+                transition:
+                  "background-color 0.3s ease-out, opacity 0.3s ease-out",
+              }}
             >
               <svg width="100%" height="100%" className="overflow-visible">
                 <defs>
@@ -157,12 +269,12 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
                       fontWeight="bold"
                       className="tracking-tight"
                       style={{
-                        scale,
-                        x: xMove,
-                        y: textY,
-                        fontSize: textFontSize,
-                        originY: 0.48,
-                        originX: 0.61,
+                        scale: combinedScale, // Combined scale
+                        x: xMove, // Existing x movement
+                        y: combinedY, // Combined y movement
+                        fontSize: textFontSize, // Existing font size
+                        originX: responsiveOrigin.originX,
+                        originY: responsiveOrigin.originY,
                       }}
                     >
                       Saving Food.
@@ -198,8 +310,8 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
             {/* "We're" Text Positioned Above "Saving Food." */}
             <motion.section
               style={{
-                y: weY,
-                opacity: weOpacity,
+                y: weY, // Existing y movement
+                opacity: weOpacity, // Existing opacity
               }}
               className="absolute top-1/3 left-1/2 transform -translate-x-1/2 z-30"
             >
@@ -209,6 +321,9 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
                   marginBottom: "40px",
                   color: "#A8A8A8",
                   fontSize: weFontSize,
+                  // Apply scale down and move up transforms
+                  scale: weScaleDown,
+                  y: weMoveY,
                 }}
               >
                 {"We're"}
@@ -217,6 +332,6 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
           </div>
         </div>
       </div>
-    </main>
+    </section>
   );
 }
