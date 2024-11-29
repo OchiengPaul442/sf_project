@@ -19,7 +19,7 @@ const FooterSection: React.FC<FooterSectionProps> = ({ scrollToTop }) => (
 
     {/* Footer Content */}
     <div className="w-full max-w-6xl px-8 text-center mt-44">
-      <div className="flex justify-between items-center px-2 mb-6">
+      <div className="flex justify-between items-center px-8 mb-6">
         {/* Left Text */}
         <p className="text-lg font-light">We’re</p>
 
