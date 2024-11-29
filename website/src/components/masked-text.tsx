@@ -28,27 +28,30 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
   }, [scrollProgress]);
 
   // Common input range for animations
-  //   const commonInputRange = [0, 0.15, 0.35, 0.36, 0.45];
+  const commonInputRange = [0, 0.15, 0.35, 0.36, 0.45, 1];
 
   // Transform values for animations
   const scale = useTransform(
     smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    [1, 46, 46, 46, 1]
+    commonInputRange,
+    [1, 46, 46, 46, 1, 1]
   );
 
-  const xMove = useTransform(
-    smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    ["0%", "30%", "30%", "30%", "0%"]
-  );
+  const xMove = useTransform(smoothScrollProgress, commonInputRange, [
+    "0%",
+    "30%",
+    "30%",
+    "30%",
+    "0%",
+    "0%",
+  ]);
 
   const navOpacity = useTransform(smoothScrollProgress, [0, 0.15], [1, 0]);
 
   const whiteOverlayOpacity = useTransform(
     smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    [1, 1, 1, 1, 1]
+    commonInputRange,
+    [1, 1, 1, 1, 1, 1]
   );
 
   const textOverlayOpacity = useTransform(
@@ -57,41 +60,53 @@ export function MaskedText({ scrollProgress }: MaskedTextProps) {
     [1, 0, 0, 1, 1]
   );
 
-  const rectFill = useTransform(
-    smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    ["white", "white", "white", "black", "black"]
-  );
+  const rectFill = useTransform(smoothScrollProgress, commonInputRange, [
+    "white",
+    "white",
+    "white",
+    "black",
+    "black",
+    "black",
+  ]);
 
-  const textY = useTransform(
-    smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    ["0%", "0%", "0%", "0%", "0%"]
-  );
+  const textY = useTransform(smoothScrollProgress, commonInputRange, [
+    "0%",
+    "0%",
+    "0%",
+    "0%",
+    "0%",
+    "0%",
+  ]);
 
-  const textFontSize = useTransform(
-    smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    ["12vw", "12vw", "12vw", "12vw", "12vw"]
-  );
+  const textFontSize = useTransform(smoothScrollProgress, commonInputRange, [
+    "12vw",
+    "12vw",
+    "12vw",
+    "12vw",
+    "12vw",
+    "12vw",
+  ]);
 
   const weY = useTransform(
     smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    [0, -800, -800, -800, 0]
+    commonInputRange,
+    [0, -800, -800, -800, 0, 0]
   );
 
   const weOpacity = useTransform(
     smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36],
-    [1, 0, 1, 1]
+    commonInputRange,
+    [1, 0, 1, 1, 1, 1]
   );
 
-  const weFontSize = useTransform(
-    smoothScrollProgress,
-    [0, 0.15, 0.35, 0.36, 0.45],
-    ["2vw", "2vw", "2vw", "2vw", "1vw"]
-  );
+  const weFontSize = useTransform(smoothScrollProgress, commonInputRange, [
+    "2vw",
+    "2vw",
+    "2vw",
+    "2vw",
+    "2vw",
+    "2vw",
+  ]);
 
   return (
     <main>
