@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MaskedText } from "@/components/masked-text";
+import { MaskedText } from "@/components/landingPage/masked-text";
 import FormSection from "@/components/landingPage/FormSection";
-import FooterSection from "@/components/landingPage/FooterSection";
+import FooterSection from "@/components/layout/Footer/FooterSection";
 import { WorkWithUs } from "@/components/landingPage/WorkWithUs";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";

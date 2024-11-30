@@ -8,7 +8,7 @@ import {
   animate,
   useScroll,
 } from "framer-motion";
-import { Nav } from "./nav";
+import { Nav } from "../layout/Navs/nav";
 import { useWindowSize } from "@/hooks/use-window-size";
 
 export function MaskedText() {
@@ -43,17 +43,17 @@ export function MaskedText() {
 
   // Responsive scaling factor
   const responsiveScale = useMemo(() => {
-    if (windowWidth < 640) return 20; // Mobile
-    if (windowWidth < 1024) return 30; // Tablet
+    if (windowWidth < 640) return 180; // Mobile
+    if (windowWidth < 1024) return 130; // Tablet
     return 46; // Desktop
   }, [windowWidth]);
 
   // Responsive origin for mask text
   const responsiveOrigin = useMemo(() => {
     if (windowWidth < 640) {
-      return { originX: 0.5, originY: 0.5 }; // Mobile
+      return { originX: 0.61, originY: 0.48 }; // Mobile
     } else if (windowWidth < 1024) {
-      return { originX: 0.55, originY: 0.5 }; // Tablet
+      return { originX: 0.61, originY: 0.49 }; // Tablet
     }
     return { originX: 0.61, originY: 0.48 }; // Desktop
   }, [windowWidth]);

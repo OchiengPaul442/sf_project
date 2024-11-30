@@ -71,7 +71,7 @@ export const ProblemStatement: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="absolute top-full left-1/4 transform -translate-x-1/2 w-full max-w-[600px] md:max-w-[800px] aspect-square"
+                  className="absolute top-full md:left-1/5 lg:left-1/4 transform -translate-x-1/2 w-full max-w-[600px] md:max-w-[800px] aspect-square"
                 >
                   <Lottie
                     animationData={

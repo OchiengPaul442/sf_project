@@ -52,7 +52,7 @@ const FooterSection = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-7xl sm:text-8xl md:text-9xl lg:text-[180px] xl:text-[200px] font-mono leading-none tracking-tight text-center mx-auto max-w-[90vw]"
+            className="text-7xl sm:text-8xl md:text-9xl lg:text-[200px] font-mono leading-none tracking-tight text-center mx-auto max-w-[90vw]"
           >
             Saving Food.
           </motion.h1>
