@@ -50,7 +50,11 @@ export const ProblemStatement: React.FC = () => {
 
         {/* Interactive Section */}
         <div className="flex flex-col items-center w-full mt-16 sm:mt-24 md:mt-32">
-          <div className="flex justify-between items-start w-full mb-8 sm:mb-12 md:mb-16 relative">
+          <div
+            className={`flex justify-between items-start w-full ${
+              hoveredSection ? "mb-8 sm:mb-[400px] md:mb-[800px]" : ""
+            } relative`}
+          >
             <WithWithoutSection
               type="with"
               hoveredSection={hoveredSection}
