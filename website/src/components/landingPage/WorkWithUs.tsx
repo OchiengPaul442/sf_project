@@ -9,7 +9,7 @@ export const WorkWithUs = () => {
   return (
     <section className="w-full min-h-screen flex items-center justify-center p-4">
       <motion.div
-        className="w-full bg-white rounded-3xl py-20 px-8 text-center"
+        className="w-full bg-white rounded-3xl px-4 py-10 lg:py-20 lg:px-8 text-center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -26,7 +26,7 @@ export const WorkWithUs = () => {
 
         {/* Main Question */}
         <motion.h1
-          className="text-4xl sm:text-6xl lg:text-[72px] font-bold font-mono text-black leading-tight max-w-4xl mx-auto mb-12"
+          className="text-xl md:text-6xl lg:text-[72px] font-bold font-mono text-black leading-tight max-w-4xl mx-auto mb-12"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}

@@ -15,7 +15,7 @@ export const ProblemStatement: React.FC = () => {
   >(null);
 
   return (
-    <section className="min-h-screen w-full py-16 md:py-24 lg:py-32 font-mono -mt-52 md:-mt-[350px]">
+    <section className="min-h-screen w-full py-16 md:py-24 lg:py-32 font-mono">
       <div className="container mx-auto px-4">
         {/* Header Section */}
         <div className="mb-12 md:mb-16 lg:mb-20 flex flex-col items-start">
@@ -23,7 +23,7 @@ export const ProblemStatement: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-white text-xl sm:text-2xl mb-4 sm:mb-6"
+            className="text-white text-lg md:text-2xl mb-4 sm:mb-6"
           >
             The problem statement
           </motion.h2>
@@ -32,7 +32,7 @@ export const ProblemStatement: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-white text-4xl sm:text-5xl md:text-6xl font-normal mb-4"
+            className="text-white text-2xl md:text-6xl font-normal mb-4"
           >
             By building a platform that empowers restaurants
           </motion.h3>
@@ -41,7 +41,7 @@ export const ProblemStatement: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="text-gray-400 text-2xl sm:text-3xl md:text-4xl leading-relaxed"
+            className="text-gray-400 text-xl md:text-4xl leading-relaxed"
           >
             to cut food waste, protect their bottom line, and have a meaningful,
             cumulative impact on global sustainability.
@@ -129,7 +129,7 @@ const WithWithoutSection: React.FC<WithWithoutSectionProps> = ({
               lineHeight: isHovered ? "1" : "1.2",
             }}
             transition={{ duration: 0.3 }}
-            className="text-white sm:text-3xl md:text-4xl lg:text-5xl"
+            className="text-white text-xl md:text-4xl lg:text-5xl"
           >
             {isWithUs ? "With" : "Without"}
           </motion.p>
@@ -140,7 +140,7 @@ const WithWithoutSection: React.FC<WithWithoutSectionProps> = ({
               lineHeight: isHovered ? "1" : "1.2",
             }}
             transition={{ duration: 0.3 }}
-            className="text-white sm:text-3xl md:text-4xl lg:text-5xl"
+            className="text-white text-xl md:text-4xl lg:text-5xl"
           >
             Us
           </motion.p>

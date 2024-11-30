@@ -13,7 +13,7 @@ import { useWindowSize } from "@/hooks/use-window-size";
 
 export function MaskedText() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { width: windowWidth } = useWindowSize();
+  const { width: windowWidth, height: windowHeight } = useWindowSize();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Use useScroll hook to get scrollProgress
@@ -35,27 +35,29 @@ export function MaskedText() {
 
   // Define common input ranges for consistency
   const COMMON_INPUT_RANGE = [0, 0.15, 0.35, 0.36, 0.45, 0.6, 1];
-  const TEXT_ANIMATION_RANGE = [0, 0.3, 1]; // Updated range
+  const TEXT_ANIMATION_RANGE = [0, 0.3, 1];
 
   // Define additional input ranges for size and position animations
-  const SIZE_ANIMATION_RANGE = [0.6, 0.8, 1]; // New size animation range
-  const POSITION_ANIMATION_RANGE = [0.6, 0.8, 1]; // New position animation range
+  const SIZE_ANIMATION_RANGE = [0.6, 0.8, 1];
+  const POSITION_ANIMATION_RANGE = [0.6, 0.8, 1];
 
   // Responsive scaling factor
   const responsiveScale = useMemo(() => {
-    if (windowWidth < 640) return 180; // Mobile
-    if (windowWidth < 1024) return 130; // Tablet
-    return 46; // Desktop
+    if (windowWidth < 640) return 260;
+    if (windowWidth < 1024) return 150;
+    return 55;
   }, [windowWidth]);
 
   // Responsive origin for mask text
   const responsiveOrigin = useMemo(() => {
-    if (windowWidth < 640) {
-      return { originX: 0.61, originY: 0.48 }; // Mobile
+    if (windowWidth <= 393) {
+      return { originX: 0.61, originY: 0.47 };
+    } else if (windowWidth < 640) {
+      return { originX: 0.61, originY: 0.491 };
     } else if (windowWidth < 1024) {
-      return { originX: 0.61, originY: 0.49 }; // Tablet
+      return { originX: 0.61, originY: 0.491 };
     }
-    return { originX: 0.61, originY: 0.48 }; // Desktop
+    return { originX: 0.61, originY: 0.48 };
   }, [windowWidth]);
 
   // Animation transforms
@@ -87,7 +89,7 @@ export function MaskedText() {
   const textOverlayOpacity = useTransform(
     smoothScrollProgress,
     TEXT_ANIMATION_RANGE,
-    [1, 0, 0] // Fade out and stay transparent
+    [1, 0, 0]
   );
 
   const rectFill = useTransform(smoothScrollProgress, COMMON_INPUT_RANGE, [
@@ -112,9 +114,9 @@ export function MaskedText() {
 
   // Responsive font size for main text
   const responsiveFontSize = useMemo(() => {
-    if (windowWidth < 640) return "8vw"; // Mobile
-    if (windowWidth < 1024) return "9vw"; // Tablet
-    return "12vw"; // Desktop
+    if (windowWidth < 640) return "8vw";
+    if (windowWidth < 1024) return "9vw";
+    return "12vw";
   }, [windowWidth]);
 
   const textFontSize = useTransform(
@@ -124,23 +126,17 @@ export function MaskedText() {
   );
 
   // Animation for "We're" text
-  const weY = useTransform(
-    smoothScrollProgress,
-    COMMON_INPUT_RANGE,
-    [0, -400, -400, -400, 0, 0, 0]
-  );
-
   const weOpacity = useTransform(
     smoothScrollProgress,
     COMMON_INPUT_RANGE,
-    [1, 0, 1, 1, 1, 1, 1]
+    [1, 0, 0, 0, 1, 1, 1]
   );
 
   // Responsive font size for "We're" text
   const responsiveWeFontSize = useMemo(() => {
-    if (windowWidth < 640) return "1.5vw"; // Mobile
-    if (windowWidth < 1024) return "1.75vw"; // Tablet
-    return "2vw"; // Desktop
+    if (windowWidth < 640) return "4vw";
+    if (windowWidth < 1024) return "3vw";
+    return "2vw";
   }, [windowWidth]);
 
   const weFontSize = useTransform(
@@ -149,20 +145,51 @@ export function MaskedText() {
     Array(7).fill(responsiveWeFontSize)
   );
 
-  // Additional transforms for size and position (Separate transforms to avoid TypeScript errors)
+  // Define responsive weY
+  const weY = useTransform(
+    smoothScrollProgress,
+    COMMON_INPUT_RANGE,
+    useMemo(() => {
+      if (windowWidth === 393 && windowHeight === 852) {
+        return [100, -170, -170, -170, 100, 80, 80];
+      } else if (windowHeight <= 932 && windowWidth < 430) {
+        return [-20, -180, -180, -180, -20, -20, -20];
+      } else if (windowWidth < 640) {
+        return [100, -200, -200, -200, 100, 100, 50];
+      } else if (windowWidth < 1024) {
+        return [100, -300, -300, -300, 100, 100, 60];
+      }
+      return [0, -400, -400, -400, 0, 0, 0];
+    }, [windowWidth, windowHeight])
+  );
+
+  // Define responsive savingFoodMoveY
+  const savingFoodMoveY = useTransform(
+    smoothScrollProgress,
+    POSITION_ANIMATION_RANGE,
+    useMemo(() => {
+      if (windowWidth < 640) return ["0%", "-5%", "-5%"];
+      if (windowWidth < 1024) return ["0%", "-7%", "-7%"];
+      return ["0%", "-10%", "-10%"];
+    }, [windowWidth])
+  );
+
+  // Define responsive weMoveY
+  const weMoveY = useTransform(
+    smoothScrollProgress,
+    POSITION_ANIMATION_RANGE,
+    useMemo(() => {
+      if (windowWidth < 640) return ["0%", "-80%", "-80%"];
+      if (windowWidth < 1024) return ["0%", "-90%", "-90%"];
+      return ["0%", "-100%", "-100%"];
+    }, [windowWidth])
+  );
 
   // "Saving Food." Text Scale Down
   const savingFoodScaleDown = useTransform(
     smoothScrollProgress,
     SIZE_ANIMATION_RANGE,
     [1, 0.8, 0.8]
-  );
-
-  // "Saving Food." Text Move Up
-  const savingFoodMoveY = useTransform(
-    smoothScrollProgress,
-    POSITION_ANIMATION_RANGE,
-    ["0%", "-10%", "-10%"]
   );
 
   // "We're" Text Scale Down
@@ -173,11 +200,7 @@ export function MaskedText() {
   );
 
   // "We're" Text Move Up
-  const weMoveY = useTransform(smoothScrollProgress, POSITION_ANIMATION_RANGE, [
-    "0%",
-    "-100%",
-    "-100%",
-  ]);
+  const weMoveYResponsive = weMoveY;
 
   // Combine scale and savingFoodScaleDown into combinedScale
   const combinedScale = useMotionValue(1);
@@ -323,7 +346,7 @@ export function MaskedText() {
                   fontSize: weFontSize,
                   // Apply scale down and move up transforms
                   scale: weScaleDown,
-                  y: weMoveY,
+                  y: weMoveYResponsive,
                 }}
               >
                 {"We're"}
