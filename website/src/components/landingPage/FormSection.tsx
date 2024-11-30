@@ -7,14 +7,14 @@ const FormSection: React.FC = () => {
   return (
     <section className="w-full min-h-screen flex justify-center items-center bg-black p-4">
       <motion.div
-        className="w-full bg-white rounded-3xl px-8 sm:px-12 py-16 text-center"
+        className="w-full bg-white rounded-3xl px-4 py-8 lg:px-12 lg:py-16 text-center"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Headings */}
         <motion.h2
-          className="text-xl font-mono text-black/70 mb-4"
+          className="text-sm md:text-xl font-mono text-black/70 mb-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
@@ -23,7 +23,7 @@ const FormSection: React.FC = () => {
         </motion.h2>
 
         <motion.h1
-          className="text-3xl sm:text-4xl font-mono max-w-4xl w-full font-bold mx-auto text-black mb-12"
+          className="text-xl md:text-4xl font-mono max-w-4xl w-full font-bold mx-auto text-black mb-12"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}

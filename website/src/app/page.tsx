@@ -15,11 +15,11 @@ const Loader = dynamic(() => import("@/components/loader"), { ssr: false });
 const sectionVariants = {
   hidden: {
     opacity: 0,
-    y: 50, // Start slightly below
+    y: 50,
   },
   visible: {
     opacity: 1,
-    y: 0, // Slide into place
+    y: 0,
     transition: {
       duration: 0.8,
       ease: "easeInOut",
@@ -61,7 +61,7 @@ export default function Home() {
       <MaskedText />
 
       <motion.section
-        className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
+        className="h-full md:h-screen flex items-center container mx-auto justify-center"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
@@ -72,7 +72,7 @@ export default function Home() {
 
       {/* WorkWithUs Section */}
       <motion.section
-        className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
+        className="h-full md:h-screen flex items-center container mx-auto justify-center"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.3 }}
@@ -83,7 +83,7 @@ export default function Home() {
 
       {/* FormSection */}
       <motion.section
-        className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
+        className="h-full md:h-screen flex items-center container mx-auto justify-center"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.4 }}
@@ -94,7 +94,7 @@ export default function Home() {
 
       {/* FooterSection */}
       <motion.section
-        className="h-screen flex items-center container mx-auto justify-center px-4 md:px-8"
+        className="h-full md:h-screen flex items-center container mx-auto justify-center"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.2 }}

@@ -12,7 +12,7 @@ const FooterSection = () => {
   };
 
   return (
-    <footer className="relative w-full min-h-[80vh] bg-black text-white flex flex-col items-center justify-between py-20">
+    <footer className="relative w-full min-h-[80vh] bg-black text-white flex flex-col items-center justify-between px-4 py-10 lg:py-20">
       {/* Back to Top Button */}
       <motion.button
         onClick={scrollToTop}
@@ -52,7 +52,7 @@ const FooterSection = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-7xl sm:text-8xl md:text-9xl lg:text-[200px] font-mono leading-none tracking-tight text-center mx-auto max-w-[90vw]"
+            className="text-6xl md:text-9xl lg:text-[200px] font-mono leading-none tracking-tight text-center mx-auto max-w-[90vw]"
           >
             Saving Food.
           </motion.h1>
