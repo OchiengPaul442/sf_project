@@ -57,7 +57,7 @@ export function MaskedText() {
     } else if (windowWidth < 1024) {
       return { originX: 0.61, originY: 0.491 };
     }
-    return { originX: 0.61, originY: 0.48 };
+    return { originX: 0.61, originY: 0.49 };
   }, [windowWidth]);
 
   // Animation transforms
