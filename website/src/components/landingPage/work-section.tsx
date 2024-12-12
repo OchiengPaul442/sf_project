@@ -2,8 +2,10 @@
 
 import { Space_Mono } from "next/font/google";
 import { ArrowRight } from "lucide-react";
-import Lottie from "lottie-react";
+// import Lottie from "lottie-react";
 import Link from "next/link";
+import Image from "next/image";
+import Work from "@/public/images/Layer 1.png";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -12,49 +14,49 @@ const spaceMono = Space_Mono({
 });
 
 // Placeholder animation data
-const placeholderAnimation = {
-  v: "5.5.7",
-  fr: 30,
-  ip: 0,
-  op: 60,
-  w: 500,
-  h: 500,
-  assets: [],
-  layers: [
-    {
-      ddd: 0,
-      ind: 1,
-      ty: 4,
-      nm: "Tools",
-      sr: 1,
-      ks: {
-        o: { a: 0, k: 100 },
-        r: { a: 0, k: 0 },
-        p: { a: 0, k: [200, 200, 0] },
-        a: { a: 0, k: [0, 0, 0] },
-        s: { a: 0, k: [100, 100, 100] },
-      },
-      ao: 0,
-      shapes: [],
-      ip: 0,
-      op: 60,
-      st: 0,
-      bm: 0,
-    },
-  ],
-};
+// const placeholderAnimation = {
+//   v: "5.5.7",
+//   fr: 30,
+//   ip: 0,
+//   op: 60,
+//   w: 500,
+//   h: 500,
+//   assets: [],
+//   layers: [
+//     {
+//       ddd: 0,
+//       ind: 1,
+//       ty: 4,
+//       nm: "Tools",
+//       sr: 1,
+//       ks: {
+//         o: { a: 0, k: 100 },
+//         r: { a: 0, k: 0 },
+//         p: { a: 0, k: [200, 200, 0] },
+//         a: { a: 0, k: [0, 0, 0] },
+//         s: { a: 0, k: [100, 100, 100] },
+//       },
+//       ao: 0,
+//       shapes: [],
+//       ip: 0,
+//       op: 60,
+//       st: 0,
+//       bm: 0,
+//     },
+//   ],
+// };
 
 export default function WorkSection() {
   return (
     <section
       className={`${spaceMono.variable} min-h-screen bg-[#f5f5f5] relative overflow-hidden py-12 sm:py-16 md:py-24`}
     >
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">
         <div className="text-center space-y-6 sm:space-y-8 mb-12 sm:mb-16">
           <h2 className="text-xl sm:text-2xl md:text-3xl text-black font-mono">
             Work with us
           </h2>
-          <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-mono tracking-[-0.02em] leading-[1.1] max-w-[1200px]">
+          <h3 className="text-[24px] sm:text-[40px] md:text-[48px] lg:text-[64px] xl:text-[96px] font-mono tracking-[-0.02em] leading-[1.1] max-w-7xl">
             Are you an engineer who&apos;s excited about our mission?
           </h3>
         </div>
@@ -72,7 +74,7 @@ export default function WorkSection() {
         </Link>
 
         <div className="absolute bottom-0 right-0 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] lg:w-[500px] lg:h-[500px] pointer-events-none">
-          <Lottie
+          {/* <Lottie
             animationData={placeholderAnimation}
             loop={true}
             autoplay={true}
@@ -81,6 +83,12 @@ export default function WorkSection() {
               height: "100%",
               filter: "brightness(0)",
             }}
+          /> */}
+
+          <Image
+            src={Work}
+            alt="Work"
+            className="w-full h-full object-contain"
           />
         </div>
       </div>

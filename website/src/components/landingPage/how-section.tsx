@@ -5,7 +5,13 @@ import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
 import { GradientSeparator } from "@/components/ui/separator";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import Lottie from "lottie-react";
+// import Lottie from "lottie-react";
+import Image from "next/image";
+import Ship from "@/public/images/Ship.png";
+import Integrity from "@/public/images/Group 2.png";
+import Tight from "@/public/images/Group 3.png";
+import Recipe from "@/public/images/Group 4.png";
+import Fraud from "@/public/images/Group 5.png";
 
 interface Step {
   id: string;
@@ -22,274 +28,19 @@ const STEPS: Step[] = [
 
 const placeholderAnimations: Record<string, any> = {
   "smooth-onboarding": {
-    animationData: {
-      v: "5.5.7",
-      fr: 30,
-      ip: 0,
-      op: 60,
-      w: 400,
-      h: 400,
-      assets: [],
-      layers: [
-        {
-          ddd: 0,
-          ind: 1,
-          ty: 4,
-          nm: "Shape Layer 1",
-          sr: 1,
-          ks: {
-            o: { a: 0, k: 100, ix: 11 },
-            r: { a: 0, k: 0, ix: 10 },
-            p: { a: 0, k: [200, 200, 0], ix: 2 },
-            a: { a: 0, k: [0, 0, 0], ix: 1 },
-            s: { a: 0, k: [100, 100, 100], ix: 6 },
-          },
-          ao: 0,
-          shapes: [
-            {
-              ty: "rc",
-              d: 1,
-              s: { a: 0, k: [100, 100], ix: 2 },
-              p: { a: 0, k: [0, 0], ix: 3 },
-              r: { a: 0, k: 0, ix: 4 },
-              nm: "Rectangle Path 1",
-              mn: "ADBE Vector Shape - Rect",
-              hd: false,
-            },
-            {
-              ty: "fl",
-              c: { a: 0, k: [1, 1, 1, 1], ix: 4 },
-              o: { a: 0, k: 100, ix: 5 },
-              r: 1,
-              bm: 0,
-              nm: "Fill 1",
-              mn: "ADBE Vector Graphic - Fill",
-              hd: false,
-            },
-          ],
-          ip: 0,
-          op: 60,
-          st: 0,
-          bm: 0,
-        },
-      ],
-    },
+    animationData: Ship,
   },
   "data-integrity": {
-    animationData: {
-      v: "5.5.7",
-      fr: 30,
-      ip: 0,
-      op: 60,
-      w: 400,
-      h: 400,
-      assets: [],
-      layers: [
-        {
-          ddd: 0,
-          ind: 1,
-          ty: 4,
-          nm: "Shape Layer 1",
-          sr: 1,
-          ks: {
-            o: { a: 0, k: 100, ix: 11 },
-            r: { a: 0, k: 0, ix: 10 },
-            p: { a: 0, k: [200, 200, 0], ix: 2 },
-            a: { a: 0, k: [0, 0, 0], ix: 1 },
-            s: { a: 0, k: [100, 100, 100], ix: 6 },
-          },
-          ao: 0,
-          shapes: [
-            {
-              ty: "rc",
-              d: 1,
-              s: { a: 0, k: [100, 100], ix: 2 },
-              p: { a: 0, k: [0, 0], ix: 3 },
-              r: { a: 0, k: 0, ix: 4 },
-              nm: "Rectangle Path 1",
-              mn: "ADBE Vector Shape - Rect",
-              hd: false,
-            },
-            {
-              ty: "fl",
-              c: { a: 0, k: [1, 1, 1, 1], ix: 4 },
-              o: { a: 0, k: 100, ix: 5 },
-              r: 1,
-              bm: 0,
-              nm: "Fill 1",
-              mn: "ADBE Vector Graphic - Fill",
-              hd: false,
-            },
-          ],
-          ip: 0,
-          op: 60,
-          st: 0,
-          bm: 0,
-        },
-      ],
-    },
+    animationData: Integrity,
   },
   "managed-consumables": {
-    animationData: {
-      v: "5.5.7",
-      fr: 30,
-      ip: 0,
-      op: 60,
-      w: 400,
-      h: 400,
-      assets: [],
-      layers: [
-        {
-          ddd: 0,
-          ind: 1,
-          ty: 4,
-          nm: "Shape Layer 1",
-          sr: 1,
-          ks: {
-            o: { a: 0, k: 100, ix: 11 },
-            r: { a: 0, k: 0, ix: 10 },
-            p: { a: 0, k: [200, 200, 0], ix: 2 },
-            a: { a: 0, k: [0, 0, 0], ix: 1 },
-            s: { a: 0, k: [100, 100, 100], ix: 6 },
-          },
-          ao: 0,
-          shapes: [
-            {
-              ty: "rc",
-              d: 1,
-              s: { a: 0, k: [100, 100], ix: 2 },
-              p: { a: 0, k: [0, 0], ix: 3 },
-              r: { a: 0, k: 0, ix: 4 },
-              nm: "Rectangle Path 1",
-              mn: "ADBE Vector Shape - Rect",
-              hd: false,
-            },
-            {
-              ty: "fl",
-              c: { a: 0, k: [1, 1, 1, 1], ix: 4 },
-              o: { a: 0, k: 100, ix: 5 },
-              r: 1,
-              bm: 0,
-              nm: "Fill 1",
-              mn: "ADBE Vector Graphic - Fill",
-              hd: false,
-            },
-          ],
-          ip: 0,
-          op: 60,
-          st: 0,
-          bm: 0,
-        },
-      ],
-    },
+    animationData: Tight,
   },
   "recipe-adherence": {
-    animationData: {
-      v: "5.5.7",
-      fr: 30,
-      ip: 0,
-      op: 60,
-      w: 400,
-      h: 400,
-      assets: [],
-      layers: [
-        {
-          ddd: 0,
-          ind: 1,
-          ty: 4,
-          nm: "Shape Layer 1",
-          sr: 1,
-          ks: {
-            o: { a: 0, k: 100, ix: 11 },
-            r: { a: 0, k: 0, ix: 10 },
-            p: { a: 0, k: [200, 200, 0], ix: 2 },
-            a: { a: 0, k: [0, 0, 0], ix: 1 },
-            s: { a: 0, k: [100, 100, 100], ix: 6 },
-          },
-          ao: 0,
-          shapes: [
-            {
-              ty: "rc",
-              d: 1,
-              s: { a: 0, k: [100, 100], ix: 2 },
-              p: { a: 0, k: [0, 0], ix: 3 },
-              r: { a: 0, k: 0, ix: 4 },
-              nm: "Rectangle Path 1",
-              mn: "ADBE Vector Shape - Rect",
-              hd: false,
-            },
-            {
-              ty: "fl",
-              c: { a: 0, k: [1, 1, 1, 1], ix: 4 },
-              o: { a: 0, k: 100, ix: 5 },
-              r: 1,
-              bm: 0,
-              nm: "Fill 1",
-              mn: "ADBE Vector Graphic - Fill",
-              hd: false,
-            },
-          ],
-          ip: 0,
-          op: 60,
-          st: 0,
-          bm: 0,
-        },
-      ],
-    },
+    animationData: Recipe,
   },
   "fraud-eliminated": {
-    animationData: {
-      v: "5.5.7",
-      fr: 30,
-      ip: 0,
-      op: 60,
-      w: 400,
-      h: 400,
-      assets: [],
-      layers: [
-        {
-          ddd: 0,
-          ind: 1,
-          ty: 4,
-          nm: "Shape Layer 1",
-          sr: 1,
-          ks: {
-            o: { a: 0, k: 100, ix: 11 },
-            r: { a: 0, k: 0, ix: 10 },
-            p: { a: 0, k: [200, 200, 0], ix: 2 },
-            a: { a: 0, k: [0, 0, 0], ix: 1 },
-            s: { a: 0, k: [100, 100, 100], ix: 6 },
-          },
-          ao: 0,
-          shapes: [
-            {
-              ty: "rc",
-              d: 1,
-              s: { a: 0, k: [100, 100], ix: 2 },
-              p: { a: 0, k: [0, 0], ix: 3 },
-              r: { a: 0, k: 0, ix: 4 },
-              nm: "Rectangle Path 1",
-              mn: "ADBE Vector Shape - Rect",
-              hd: false,
-            },
-            {
-              ty: "fl",
-              c: { a: 0, k: [1, 1, 1, 1], ix: 4 },
-              o: { a: 0, k: 100, ix: 5 },
-              r: 1,
-              bm: 0,
-              nm: "Fill 1",
-              mn: "ADBE Vector Graphic - Fill",
-              hd: false,
-            },
-          ],
-          ip: 0,
-          op: 60,
-          st: 0,
-          bm: 0,
-        },
-      ],
-    },
+    animationData: Fraud,
   },
 };
 
@@ -424,7 +175,7 @@ export default function HowSection() {
                 {STEPS.map((step) => (
                   <div key={step.id} className="flex-[0_0_100%] min-w-0">
                     <div className="aspect-square relative flex items-center justify-center">
-                      <Lottie
+                      {/* <Lottie
                         animationData={
                           placeholderAnimations[step.id]?.animationData ||
                           placeholderAnimations["smooth-onboarding"]
@@ -433,6 +184,15 @@ export default function HowSection() {
                         loop={true}
                         autoplay={true}
                         style={{ width: "100%", height: "100%" }}
+                      /> */}
+                      <Image
+                        src={
+                          placeholderAnimations[step.id]?.animationData ||
+                          placeholderAnimations["smooth-onboarding"]
+                            .animationData
+                        }
+                        alt="placeholder"
+                        className="w-full h-full object-contain"
                       />
                     </div>
                   </div>
