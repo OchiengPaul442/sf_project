@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import FuturisticModal from "../dialog/futuristic-modal";
+import MenuModal from "../dialog/menu-modal";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -86,7 +86,7 @@ export default function HeaderSection() {
       </div>
 
       {/* Futuristic Modal */}
-      <FuturisticModal isOpen={isMenuOpen} onClose={toggleMenu} />
+      <MenuModal isOpen={isMenuOpen} onClose={toggleMenu} />
     </section>
   );
 }

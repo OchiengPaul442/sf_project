@@ -50,7 +50,7 @@ const spaceMono = Space_Mono({
 export default function InvestSection() {
   return (
     <section
-      className={`${spaceMono.variable} min-h-screen bg-white py-16 sm:py-24 px-4 sm:px-6 lg:px-8`}
+      className={`${spaceMono.variable} min-h-screen bg-white text-black py-16 sm:py-24 px-4 sm:px-6 lg:px-8`}
     >
       <div className="max-w-7xl mx-auto">
         <div className="text-center space-y-4">

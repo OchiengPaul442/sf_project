@@ -41,9 +41,15 @@ export default function Home() {
   return (
     <main>
       <HeaderSection />
-      <HowSection />
-      <WorkSection />
-      <InvestSection />
+      <section id="solutions">
+        <HowSection />
+      </section>
+      <section id="contact">
+        <WorkSection />
+      </section>
+      <section id="invest">
+        <InvestSection />
+      </section>
       <FooterSection />
     </main>
   );

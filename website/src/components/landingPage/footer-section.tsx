@@ -3,14 +3,25 @@
 import { Space_Mono } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { PiArrowULeftUp } from "react-icons/pi";
+import { useWindowSize } from "@/hooks/useWindowSize";
+import { useMemo } from "react";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
   weight: ["400", "700"],
   variable: "--font-space-mono",
 });
-
 export default function FooterSection() {
+  const { width } = useWindowSize();
+
+  const fontSize = useMemo(() => {
+    if (!width) return "100px"; // Default size
+    if (width < 640) return `${width / 7}px`; // Smaller screens
+    if (width < 768) return `${width / 7}px`; // Small to medium screens
+    if (width < 1024) return `${width / 6.5}px`; // Medium to large screens
+    return `${width / 9.5}px`; // Large screens
+  }, [width]);
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -35,7 +46,7 @@ export default function FooterSection() {
       </div>
       <div className="pt-16 sm:pt-24 max-w-7xl mx-auto absolute bottom-0 left-0 right-0">
         <div className="space-y-2">
-          <div className="flex items-center ml-6 mr-9 justify-between">
+          <div className="flex items-center lg:ml-6 lg:mr-9 justify-between">
             <p className="text-white/80 text-2xl sm:text-3xl md:text-4xl font-mono">
               We&apos;re
             </p>
@@ -43,7 +54,10 @@ export default function FooterSection() {
               © 2024
             </p>
           </div>
-          <h2 className="text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[200px] font-mono tracking-tight">
+          <h2
+            style={{ fontSize }}
+            className="text-white font-mono tracking-tight whitespace-nowrap overflow-hidden"
+          >
             Saving Food.
           </h2>
         </div>

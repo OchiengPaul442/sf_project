@@ -13,7 +13,7 @@ const RestaurantSustainabilityLoader: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-white text-black p-4 overflow-hidden font-mono">
+    <div className="flex flex-col items-center justify-center min-h-screen w-full bg-black text-white p-4 overflow-hidden font-mono">
       <div className="w-full max-w-4xl flex flex-col items-center">
         <motion.div
           className="relative w-48 h-48 mb-8"
@@ -25,11 +25,11 @@ const RestaurantSustainabilityLoader: React.FC = () => {
           }}
         >
           {/* Circular track */}
-          <div className="absolute inset-0 rounded-full border-4 border-black opacity-10" />
+          <div className="absolute inset-0 rounded-full border-4 border-white opacity-10" />
 
           {/* Center restaurant icon */}
           <motion.div
-            className="absolute inset-0 m-auto w-24 h-24 bg-black rounded-full shadow-lg flex items-center justify-center"
+            className="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{
@@ -38,7 +38,7 @@ const RestaurantSustainabilityLoader: React.FC = () => {
             }}
           >
             <span
-              className="text-4xl text-white"
+              className="text-4xl text-black"
               role="img"
               aria-label="Restaurant"
             >
@@ -76,7 +76,7 @@ const RestaurantSustainabilityLoader: React.FC = () => {
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              className="w-2 h-2 bg-black rounded-full"
+              className="w-2 h-2 bg-white rounded-full"
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [1, 0.6, 1],
