@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { motion } from "framer-motion";
 
@@ -45,50 +46,6 @@ const RestaurantSustainabilityLoader: React.FC = () => {
               sf.
             </span>
           </motion.div>
-        </motion.div>
-
-        {/* Text content */}
-        <motion.div
-          className="text-center space-y-2"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            delay: ANIMATION_CONSTANTS.INITIAL_DELAY,
-            duration: ANIMATION_CONSTANTS.FADE_DURATION,
-          }}
-        >
-          <p className="text-sm opacity-60 font-sans">We&apos;re</p>
-          <h2 className="text-4xl sm:text-5xl font-bold font-sans tracking-tight">
-            Saving Food
-          </h2>
-        </motion.div>
-
-        {/* Loading dots */}
-        <motion.div
-          className="flex space-x-2 mt-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{
-            delay: ANIMATION_CONSTANTS.INITIAL_DELAY,
-            duration: ANIMATION_CONSTANTS.FADE_DURATION,
-          }}
-        >
-          {[0, 1, 2].map((i) => (
-            <motion.div
-              key={i}
-              className="w-2 h-2 bg-white rounded-full"
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [1, 0.6, 1],
-              }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
-                delay: i * 0.1,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
         </motion.div>
       </div>
 

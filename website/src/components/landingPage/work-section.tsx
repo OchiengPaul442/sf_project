@@ -1,17 +1,10 @@
 "use client";
 
-import { Space_Mono } from "next/font/google";
 import { ArrowRight } from "lucide-react";
 // import Lottie from "lottie-react";
 import Link from "next/link";
 import Image from "next/image";
 import Work from "@/public/images/Layer 1.png";
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-space-mono",
-});
 
 // Placeholder animation data
 // const placeholderAnimation = {
@@ -48,9 +41,7 @@ const spaceMono = Space_Mono({
 
 export default function WorkSection() {
   return (
-    <section
-      className={`${spaceMono.variable} min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 sm:py-16 md:py-24`}
-    >
+    <section className="min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 sm:py-16 md:py-24">
       <div className="max-w-7xl mx-auto relative px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">
         <div className="text-center space-y-6 sm:space-y-8 mb-12 sm:mb-16">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-mono">

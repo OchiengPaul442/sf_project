@@ -1,18 +1,11 @@
 "use client";
 
-import { Space_Mono } from "next/font/google";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Work from "@/public/images/Layer 2.png";
 // import Lottie from "lottie-react";
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-space-mono",
-});
 
 // Placeholder animation data for the angel illustration
 // const placeholderAnimation = {
@@ -49,9 +42,7 @@ const spaceMono = Space_Mono({
 
 export default function InvestSection() {
   return (
-    <section
-      className={`${spaceMono.variable} min-h-screen bg-white text-black py-16 sm:py-24 px-4 sm:px-6 lg:px-8`}
-    >
+    <section className="min-h-screen bg-white text-black py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center space-y-4">
           <h2 className="text-[#999999] text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono">
