@@ -9,7 +9,7 @@ import {
   useScroll,
 } from "framer-motion";
 import { Nav } from "../layout/Navs/nav";
-import { useWindowSize } from "@/hooks/use-window-size";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
 export function MaskedText() {
   const containerRef = useRef<HTMLDivElement>(null);
