@@ -10,8 +10,12 @@
   },
   "dependencies": {
     "@radix-ui/react-scroll-area": "^1.2.1",
+    "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "embla-carousel-autoplay": "^8.5.1",
+    "embla-carousel-react": "^8.5.1",
     "framer-motion": "^11.11.17",
     "lottie-react": "^2.4.0",
     "lucide-react": "^0.461.0",

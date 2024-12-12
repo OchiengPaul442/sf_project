@@ -1,31 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MaskedText } from "@/components/landingPage/masked-text";
-import FormSection from "@/components/landingPage/FormSection";
-import FooterSection from "@/components/layout/Footer/FooterSection";
-import { WorkWithUs } from "@/components/landingPage/WorkWithUs";
-import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { ProblemStatement } from "@/components/landingPage/ProblemStatement";
+import HeaderSection from "@/components/landingPage/header-section";
+import HowSection from "@/components/landingPage/how-section";
+import WorkSection from "@/components/landingPage/work-section";
+import InvestSection from "@/components/landingPage/invest-section";
+import FooterSection from "@/components/landingPage/footer-section";
 
 const Loader = dynamic(() => import("@/components/loader"), { ssr: false });
-
-// Animation Variants for Framer Motion
-const sectionVariants = {
-  hidden: {
-    opacity: 0,
-    y: 50,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      ease: "easeInOut",
-    },
-  },
-};
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -56,52 +39,12 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col gap-12 md:gap-20">
-      {/* MaskedText Section */}
-      <MaskedText />
-
-      <motion.section
-        className="h-full md:h-screen flex items-center container mx-auto justify-center"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
-        variants={sectionVariants}
-      >
-        <ProblemStatement />
-      </motion.section>
-
-      {/* WorkWithUs Section */}
-      <motion.section
-        className="h-full md:h-screen flex items-center container mx-auto justify-center"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
-        variants={sectionVariants}
-      >
-        <WorkWithUs />
-      </motion.section>
-
-      {/* FormSection */}
-      <motion.section
-        className="h-full md:h-screen flex items-center container mx-auto justify-center"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.4 }}
-        variants={sectionVariants}
-      >
-        <FormSection />
-      </motion.section>
-
-      {/* FooterSection */}
-      <motion.section
-        className="h-full md:h-screen flex items-center container mx-auto justify-center"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.2 }}
-        variants={sectionVariants}
-      >
-        <FooterSection />
-      </motion.section>
+    <main>
+      <HeaderSection />
+      <HowSection />
+      <WorkSection />
+      <InvestSection />
+      <FooterSection />
     </main>
   );
 }
