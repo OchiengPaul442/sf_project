@@ -18,18 +18,18 @@ export default function HeaderSection() {
 
   const COMMON_INPUT_RANGE = [0, 1];
 
-  const textScale = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [1, 55]);
+  const textScale = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [1, 60]);
   const textOpacity = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [1, 1]);
   const backgroundOpacity = useTransform(scrollYProgress, [0.5, 0.7], [0, 1]);
 
   // x and y move to center on letter F in "Saving Food"
   const xMove = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [
     "0%",
-    "-700%",
+    "-850%",
   ]);
   const yMove = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [
     "0%",
-    "350%",
+    "375%",
   ]);
 
   return (
