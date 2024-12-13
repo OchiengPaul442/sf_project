@@ -1,15 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import MenuModal from "../dialog/menu-modal";
+import { Nav } from "../layout/Navs/nav";
 
 export default function HeaderSection() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
   const containerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -41,30 +36,7 @@ export default function HeaderSection() {
         />
 
         {/* Navigation */}
-        <nav className="absolute top-0 left-0 w-full z-10">
-          <div className="max-w-[1800px] mx-auto flex justify-between items-center p-8">
-            {/* Logo */}
-            <Link
-              href="/"
-              className="text-2xl font-bold tracking-tighter hover:opacity-70 transition-opacity text-black dark:text-white"
-            >
-              sf.
-            </Link>
-
-            {/* Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative w-10 h-10 flex flex-col items-center justify-center gap-1.5 hover:bg-transparent"
-              aria-label="Toggle Menu"
-              onClick={toggleMenu}
-            >
-              <span className="w-6 h-[2px] bg-black dark:bg-white" />
-              <span className="w-6 h-[2px] bg-black dark:bg-white" />
-              <span className="w-6 h-[2px] bg-black dark:bg-white" />
-            </Button>
-          </div>
-        </nav>
+        <Nav />
 
         {/* Main Content */}
         <div className="text-center">
@@ -84,9 +56,6 @@ export default function HeaderSection() {
           </motion.h1>
         </div>
       </div>
-
-      {/* Futuristic Modal */}
-      <MenuModal isOpen={isMenuOpen} onClose={toggleMenu} />
     </motion.section>
   );
 }
