@@ -81,7 +81,7 @@ export const HowSectionCarousel = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start max-w-7xl mx-auto">
       <div className="relative">
         <div className="absolute left-4 top-0 w-[1px] h-full bg-gradient-to-b from-white via-white to-transparent" />
         <div className="space-y-8 sm:space-y-12">

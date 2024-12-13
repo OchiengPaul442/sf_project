@@ -7,6 +7,7 @@ import HowSection from "@/components/landingPage/how-section";
 import WorkSection from "@/components/landingPage/work-section";
 import InvestSection from "@/components/landingPage/invest-section";
 import FooterSection from "@/components/landingPage/footer-section";
+import { HowSectionCarousel } from "@/components/carousels/how-section-carousel";
 
 const Loader = dynamic(() => import("@/components/loader"), { ssr: false });
 
@@ -43,6 +44,9 @@ export default function Home() {
       <HeaderSection />
       <section id="solutions">
         <HowSection />
+      </section>
+      <section className="min-h-screen bg-black flex flex-col justify-center items-center">
+        <HowSectionCarousel />
       </section>
       <section id="contact">
         <WorkSection />
