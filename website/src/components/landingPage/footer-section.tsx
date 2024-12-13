@@ -13,7 +13,7 @@ export default function FooterSection() {
     if (width < 640) return `${width / 7}px`; // Smaller screens
     if (width < 768) return `${width / 7}px`; // Small to medium screens
     if (width < 1024) return `${width / 6.5}px`; // Medium to large screens
-    return `${width / 9.5}px`; // Large screens
+    return `${width / 9.4}px`; // Large screens
   }, [width]);
 
   const scrollToTop = () => {
@@ -37,7 +37,7 @@ export default function FooterSection() {
         {/* Main Text */}
       </div>
       <div className="pt-16 sm:pt-24 max-w-7xl mx-auto absolute bottom-0 left-0 right-0">
-        <div className="space-y-2">
+        <div className="space-y-2 px-2">
           <div className="flex items-center lg:ml-6 lg:mr-9 justify-between">
             <p className="text-white/80 text-2xl sm:text-3xl md:text-4xl font-mono">
               We&apos;re
