@@ -1,61 +1,139 @@
 "use client";
 
 import { GradientSeparator } from "@/components/ui/separator";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 
 export default function HowSection() {
-  const animation = useScrollAnimation();
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end end"],
+  });
+
+  const SCROLL_RANGES = {
+    firstScale: [0, 0.25],
+    secondFade: [0.25, 0.5],
+    thirdFade: [0.5, 0.75],
+  };
+
+  // ---- FIRST SECTION: Scale Down from 1.2 to 1 and move up slightly ----
+  const firstSectionScale = useTransform(
+    scrollYProgress,
+    SCROLL_RANGES.firstScale,
+    [1.2, 1]
+  );
+  const firstSectionY = useTransform(
+    scrollYProgress,
+    SCROLL_RANGES.firstScale,
+    [0, -20]
+  );
+
+  // ---- SECOND SECTION: Fade In and move up ----
+  const secondSectionY = useTransform(
+    scrollYProgress,
+    SCROLL_RANGES.secondFade,
+    [50, 0]
+  );
+  const secondSectionOpacity = useTransform(
+    scrollYProgress,
+    SCROLL_RANGES.secondFade,
+    [0, 1]
+  );
+
+  // ---- SEPARATOR: Scale X from 0 to 1 ----
+  const separatorScaleX = useTransform(
+    scrollYProgress,
+    [0.25, 0.5, 0.75],
+    [0, 1, 0]
+  );
+
+  // ---- THIRD SECTION: Fade In and move up ----
+  const thirdSectionY = useTransform(
+    scrollYProgress,
+    SCROLL_RANGES.thirdFade,
+    [50, 0]
+  );
+  const thirdSectionOpacity = useTransform(
+    scrollYProgress,
+    SCROLL_RANGES.thirdFade,
+    [0, 1]
+  );
+
+  // Common motion transition for a smoother, modern feel
+  const transition = {
+    duration: 0.8,
+    ease: [0.25, 0.8, 0.25, 1], // Smooth cubic-bezier curve
+  };
 
   return (
     <section
-      ref={animation.ref}
-      style={animation.style}
+      ref={sectionRef}
       id="solutions"
-      className="relative py-24 px-4 sm:px-6 lg:px-8 bg-black min-h-screen overflow-hidden transition-colors duration-1000 ease-in-out snap-start"
+      className="relative flex flex-col items-center justify-center py-24 px-4 sm:px-6 lg:px-8 bg-black min-h-[250vh] overflow-hidden snap-start"
     >
-      <div className="container mx-auto space-y-24">
-        <div className="space-y-24">
-          <div className="relative">
-            <div className="relative z-10">
-              {/* first part to animate */}
-              <h2 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold mb-12 origin-left">
-                <span className="text-zinc-500 font-normal">We&apos;re</span>
-                <br />
-                Saving Food.
+      <div className="container mx-auto space-y-36 md:space-y-48 lg:space-y-64">
+        <div className="space-y-36 md:space-y-48 lg:space-y-64">
+          <div className="relative z-10">
+            {/* ---- FIRST SECTION (Scale Down) ---- */}
+            <motion.div
+              style={{
+                scale: firstSectionScale,
+                y: firstSectionY,
+              }}
+              transition={transition}
+              className="origin-top-left"
+            >
+              <h2 className="text-white text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 md:mb-6 lg:mb-8">
+                <span className="text-zinc-500 font-normal block mb-2 md:mb-4">
+                  We&apos;re
+                </span>
+                <span className="inline-block">Saving Food.</span>
               </h2>
+            </motion.div>
 
-              {/* second part to animate */}
-              <div>
-                <p className="text-3xl md:text-4xl lg:text-5xl font-mono tracking-tight leading-relaxed max-w-4xl">
-                  <span className="text-white">
-                    By building a platform that empowers
-                  </span>{" "}
-                  <span className="text-zinc-500">
-                    restaurants to cut food waste, protect their bottom line,
-                    and have a meaningful, cumulative impact on global
-                    sustainability.
-                  </span>
-                </p>
-              </div>
-            </div>
+            {/* ---- SECOND SECTION (Fade In) ---- */}
+            <motion.div
+              style={{ y: secondSectionY, opacity: secondSectionOpacity }}
+              transition={transition}
+            >
+              <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-mono tracking-tight leading-relaxed max-w-4xl mt-8 md:mt-12 lg:mt-16">
+                <span className="text-white">
+                  By building a platform that empowers
+                </span>{" "}
+                <span className="text-zinc-500">
+                  restaurants to cut food waste, protect their bottom line, and
+                  have a meaningful, cumulative impact on global sustainability.
+                </span>
+              </p>
+            </motion.div>
           </div>
 
-          <div className="transform origin-center transition-transform duration-1000 ease-in-out">
+          {/* ---- SEPARATOR: Reveals with Second Section ---- */}
+          <motion.div
+            style={{ scaleX: separatorScaleX }}
+            transition={transition}
+            className="w-full my-12"
+          >
             <GradientSeparator />
-          </div>
+          </motion.div>
 
-          {/* first part to animate */}
-          <div>
-            <p className="text-2xl md:text-3xl lg:text-4xl text-end font-mono leading-relaxed max-w-4xl ml-auto">
+          {/* ---- THIRD SECTION (Fade In) ---- */}
+          <motion.div
+            style={{ y: thirdSectionY, opacity: thirdSectionOpacity }}
+            transition={transition}
+          >
+            <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-end font-mono leading-relaxed max-w-4xl ml-auto">
               <span className="text-white">
                 Our team blends more than a decade of Food and AI
               </span>{" "}
               <span className="text-zinc-500">
                 experience, in a packaged solution that lets you focus on
-                creating while we handle the rest
+                creating while we handle the rest.
               </span>
             </p>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
