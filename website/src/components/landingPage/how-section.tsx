@@ -15,52 +15,52 @@ export default function HowSection() {
 
   // Define scroll progress ranges for each animation stage
   const SCROLL_RANGES = {
-    firstScale: [0, 0.25],
-    secondFade: [0.25, 0.5],
-    thirdFade: [0.5, 0.75],
+    firstScale: [0, 0.25, 0.5],
+    secondFade: [0.25, 0.5, 0.75],
+    thirdFade: [0.5, 0.75, 1],
   };
 
   // ---- FIRST SECTION: Scale Down from 1.2 to 1 and move up slightly ----
   const firstSectionScale = useTransform(
     scrollYProgress,
     SCROLL_RANGES.firstScale,
-    [1.2, 1]
+    [1.2, 1, 1.2]
   );
   const firstSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.firstScale,
-    [0, -20]
+    [0, -20, 0]
   );
 
   // ---- SECOND SECTION: Fade In and move up ----
   const secondSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [120, 0]
+    [120, 0, 120]
   );
   const secondSectionOpacity = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [0, 1]
+    [0, 1, 0]
   );
 
   // ---- SEPARATOR: Scale X from 0 to 1 over secondFade, then Rotate Y over thirdFade ----
   const separatorScaleX = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [0, 1]
+    [0, 1, 0]
   );
 
   // ---- THIRD SECTION: Fade In and move up ----
   const thirdSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.thirdFade,
-    [120, 0]
+    [120, 0, 120]
   );
   const thirdSectionOpacity = useTransform(
     scrollYProgress,
     SCROLL_RANGES.thirdFade,
-    [0, 1]
+    [0, 1, 0]
   );
 
   // Common motion transition for a smoother, modern feel
