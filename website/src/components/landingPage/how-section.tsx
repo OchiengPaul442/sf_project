@@ -16,28 +16,15 @@ export default function HowSection() {
       <div className="container mx-auto space-y-24">
         <div className="space-y-24">
           <div className="relative">
-            <div
-              className="absolute -top-12 right-0 text-white/5 pointer-events-none"
-              aria-hidden="true"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                className="w-64 h-64 md:w-96 md:h-96"
-                stroke="currentColor"
-                strokeWidth="0.5"
-              >
-                <path
-                  d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.01"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-
             <div className="relative z-10">
-              <h2 className="text-white font-mono mb-12 origin-left">How?</h2>
+              {/* first part to animate */}
+              <h2 className="text-white text-3xl md:text-4xl lg:text-5xl font-bold mb-12 origin-left">
+                <span className="text-zinc-500 font-normal">We&apos;re</span>
+                <br />
+                Saving Food.
+              </h2>
 
+              {/* second part to animate */}
               <div>
                 <p className="text-3xl md:text-4xl lg:text-5xl font-mono tracking-tight leading-relaxed max-w-4xl">
                   <span className="text-white">
@@ -57,6 +44,7 @@ export default function HowSection() {
             <GradientSeparator />
           </div>
 
+          {/* first part to animate */}
           <div>
             <p className="text-2xl md:text-3xl lg:text-4xl text-end font-mono leading-relaxed max-w-4xl ml-auto">
               <span className="text-white">
