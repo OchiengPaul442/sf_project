@@ -14,53 +14,42 @@ export default function HeaderSection() {
     offset: ["start start", "end start"],
   });
 
-  // Common input range for multiple transforms
   const COMMON_INPUT_RANGE = [0, 0.3, 0.5, 0.7, 1];
 
-  // Adjusted scale for a more pronounced and modern effect
   const textScale = useTransform(
     scrollYProgress,
     COMMON_INPUT_RANGE,
-    [1, 15, 25, 35, 45] // Increased scale values for dramatic exit
+    [1, 15, 30, 45, 60]
   );
-
-  // Adjusted opacity to synchronize with scaling
   const textOpacity = useTransform(
     scrollYProgress,
     COMMON_INPUT_RANGE,
-    [1, 1, 0.6, 0.3, 0] // Smoother fade-out
+    [1, 1, 0.5, 0, 0]
   );
+  const backgroundOpacity = useTransform(scrollYProgress, [0.2, 0.4], [0, 1]);
 
-  // Extended background opacity transition for a smoother effect
-  const backgroundOpacity = useTransform(
-    scrollYProgress,
-    [0.2, 0.6], // Extended range for smoother transition
-    [0, 1]
-  );
+  // x and y move to center on letter F in "Saving Food"
+  const xMove = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [
+    "0%",
+    "-212.5%",
+    "-425%",
+    "-637.5%",
+    "-850%",
+  ]);
 
-  // Adjusted xMove to shift text to the left more subtly
-  const xMove = useTransform(
-    scrollYProgress,
-    COMMON_INPUT_RANGE,
-    ["0%", "-100%", "-200%", "-300%", "-400%"] // Moved left less for a subtle effect
-  );
-
-  // Adjusted yMove for smoother vertical movement
-  const yMove = useTransform(
-    scrollYProgress,
-    COMMON_INPUT_RANGE,
-    ["0%", "60%", "120%", "180%", "240%"] // Smoother vertical movement
-  );
+  const yMove = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [
+    "0%",
+    "93.75%",
+    "187.5%",
+    "281.25%",
+    "375%",
+  ]);
 
   // Control "We're" text visibility
   const wereTextOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
-  // Extended video opacity transition for longer visibility
-  const videoOpacity = useTransform(
-    scrollYProgress,
-    [0.3, 0.7], // Extended range for smoother fade-in
-    [0, 1]
-  );
+  // Control video section visibility
+  const videoOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1]);
 
   return (
     <section
@@ -76,7 +65,10 @@ export default function HeaderSection() {
         />
 
         {/* Navigation */}
-        <Nav />
+
+        <motion.div style={{ opacity: wereTextOpacity }}>
+          <Nav />
+        </motion.div>
 
         {/* Main Content */}
         <div className="text-center relative z-10">
