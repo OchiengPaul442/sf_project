@@ -7,11 +7,13 @@ import { useRef } from "react";
 export default function HowSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
+  // Hook up scroll to the section
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
 
+  // Define scroll progress ranges for each animation stage
   const SCROLL_RANGES = {
     firstScale: [0, 0.25],
     secondFade: [0.25, 0.5],
@@ -34,7 +36,7 @@ export default function HowSection() {
   const secondSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [50, 0]
+    [120, 0]
   );
   const secondSectionOpacity = useTransform(
     scrollYProgress,
@@ -42,18 +44,18 @@ export default function HowSection() {
     [0, 1]
   );
 
-  // ---- SEPARATOR: Scale X from 0 to 1 ----
+  // ---- SEPARATOR: Scale X from 0 to 1 over secondFade, then Rotate Y over thirdFade ----
   const separatorScaleX = useTransform(
     scrollYProgress,
-    [0.25, 0.5, 0.75],
-    [0, 1, 0]
+    SCROLL_RANGES.secondFade,
+    [0, 1]
   );
 
   // ---- THIRD SECTION: Fade In and move up ----
   const thirdSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.thirdFade,
-    [50, 0]
+    [120, 0]
   );
   const thirdSectionOpacity = useTransform(
     scrollYProgress,
@@ -64,7 +66,7 @@ export default function HowSection() {
   // Common motion transition for a smoother, modern feel
   const transition = {
     duration: 0.8,
-    ease: [0.25, 0.8, 0.25, 1], // Smooth cubic-bezier curve
+    ease: [0.25, 0.8, 0.25, 1],
   };
 
   return (
@@ -110,7 +112,7 @@ export default function HowSection() {
             </motion.div>
           </div>
 
-          {/* ---- SEPARATOR: Reveals with Second Section ---- */}
+          {/* ---- SEPARATOR: Scale X and then Rotate Y ---- */}
           <motion.div
             style={{ scaleX: separatorScaleX }}
             transition={transition}
