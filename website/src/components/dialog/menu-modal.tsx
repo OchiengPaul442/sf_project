@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { smoothScroll } from "@/hooks/smoothScroll";
 
 interface MenuModalProps {
   isOpen: boolean;
@@ -42,7 +41,10 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
     onClose();
     setTimeout(() => {
       if (href.startsWith("#")) {
-        smoothScroll(href.slice(1));
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
       } else if (href === "/") {
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
@@ -190,7 +192,7 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
                     onClick={onClose}
                     className="text-sm hover:text-green-400 transition-colors"
                   >
-                    Twitter
+                    X
                   </a>
                   <a
                     href="#"

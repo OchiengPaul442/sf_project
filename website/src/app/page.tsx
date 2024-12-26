@@ -32,28 +32,16 @@ export default function Home() {
   }, []);
 
   if (!isBrowser || isLoading) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-        <Loader />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
     <main>
       <HeaderSection />
-      <section id="solutions">
-        <HowSection />
-      </section>
-      <section className="min-h-screen bg-black flex flex-col justify-center items-center">
-        <HowSectionCarousel />
-      </section>
-      <section id="contact">
-        <WorkSection />
-      </section>
-      <section id="invest">
-        <InvestSection />
-      </section>
+      <HowSection />
+      <HowSectionCarousel />
+      <WorkSection />
+      <InvestSection />
       <FooterSection />
     </main>
   );

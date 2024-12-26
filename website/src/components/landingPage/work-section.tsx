@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import Work from "@/public/images/Layer 1.png";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 // Placeholder animation data
 // const placeholderAnimation = {
@@ -40,21 +41,28 @@ import Work from "@/public/images/Layer 1.png";
 // };
 
 export default function WorkSection() {
+  const animation = useScrollAnimation();
+
   return (
-    <section className="min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 sm:py-16 md:py-24">
-      <div className="max-w-7xl mx-auto relative px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">
+    <section
+      className="min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 sm:py-16 md:py-24 snap-start"
+      ref={animation.ref}
+      style={animation.style}
+      id="contact"
+    >
+      <div className="container mx-auto relative px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">
         <div className="text-center space-y-6 sm:space-y-8 mb-12 sm:mb-16">
           <h2 className="text-xl sm:text-2xl md:text-3xl font-mono">
             Work with us
           </h2>
-          <h3 className="text-[24px] sm:text-[40px] md:text-[48px] lg:text-[64px] xl:text-[96px] font-mono tracking-[-0.02em] leading-[1.1] max-w-7xl">
-            Are you an engineer who&apos;s excited about our mission?
+          <h3 className="text-[24px] sm:text-[40px] md:text-[48px] lg:text-[64px] xl:text-[96px] font-bold tracking-[-0.02em] leading-[1.1] max-w-7xl">
+            Are you an engineer who&apos;s excited about our <br /> mission?
           </h3>
         </div>
 
         <Link
           href="/contact"
-          className="group inline-flex items-center font-mono relative text-sm sm:text-base"
+          className="group inline-flex items-center font-bold relative text-sm sm:text-base"
         >
           <span className="relative z-10 px-6 font-bold sm:px-8 py-2 sm:py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
             Reach out

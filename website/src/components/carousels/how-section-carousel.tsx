@@ -81,83 +81,88 @@ export const HowSectionCarousel = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start max-w-7xl mx-auto">
-      <div className="relative">
-        <div className="absolute left-4 top-0 w-[1px] h-full bg-gradient-to-b from-white via-white to-transparent" />
-        <div className="space-y-8 sm:space-y-12">
-          {STEPS.map((step) => (
-            <button
-              key={step.id}
-              onClick={() => handleStepClick(step.id)}
-              className={`relative pl-12 block transition-all duration-300 w-full text-left ${
-                selectedStep === step.id
-                  ? "text-white text-lg sm:text-xl md:text-2xl"
-                  : "text-zinc-500 hover:text-zinc-300 text-base sm:text-lg md:text-xl"
-              }`}
-            >
-              <div
-                className={`absolute left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full transition-colors duration-300 ${
-                  selectedStep === step.id ? "bg-white" : "bg-transparent"
-                }`}
-              />
-              {step.title}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="relative min-h-[400px] flex items-center">
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/10 bg-transparent hover:bg-transparent hover:border-white/20 transition-colors z-10"
-          onClick={scrollPrev}
-          disabled={!prevBtnEnabled}
-          aria-label="Previous slide"
-        >
-          <ArrowLeft className="h-5 w-5 text-white/50 hover:text-white/70" />
-        </Button>
-
-        <div className="overflow-hidden mx-16" ref={emblaRef}>
-          <div className="flex">
+    <section
+      className="min-h-screen flex flex-col justify-center items-center snap-start"
+      id="how-section"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start max-w-7xl mx-auto">
+        <div className="relative">
+          <div className="absolute left-4 top-0 w-[1px] h-full bg-gradient-to-b from-white via-white to-transparent" />
+          <div className="space-y-8 sm:space-y-12">
             {STEPS.map((step) => (
-              <div key={step.id} className="flex-[0_0_100%] min-w-0">
-                <div className="aspect-square relative flex items-center justify-center">
-                  {/* <Lottie
-                        animationData={
-                          placeholderAnimations[step.id]?.animationData ||
-                          placeholderAnimations["smooth-onboarding"]
-                            .animationData
-                        }
-                        loop={true}
-                        autoplay={true}
-                        style={{ width: "100%", height: "100%" }}
-                      /> */}
-                  <Image
-                    src={
-                      placeholderAnimations[step.id]?.animationData ||
-                      placeholderAnimations["smooth-onboarding"].animationData
-                    }
-                    alt="placeholder"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </div>
+              <button
+                key={step.id}
+                onClick={() => handleStepClick(step.id)}
+                className={`relative pl-12 block transition-all duration-300 w-full text-left ${
+                  selectedStep === step.id
+                    ? "text-white text-lg sm:text-xl md:text-2xl"
+                    : "text-zinc-500 hover:text-zinc-300 text-base sm:text-lg md:text-xl"
+                }`}
+              >
+                <div
+                  className={`absolute left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full transition-colors duration-300 ${
+                    selectedStep === step.id ? "bg-white" : "bg-transparent"
+                  }`}
+                />
+                {step.title}
+              </button>
             ))}
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/10 bg-transparent hover:bg-transparent hover:border-white/20 transition-colors z-10"
-          onClick={scrollNext}
-          disabled={!nextBtnEnabled}
-          aria-label="Next slide"
-        >
-          <ArrowRight className="h-5 w-5 text-white/50 hover:text-white/70" />
-        </Button>
+        <div className="relative min-h-[400px] flex items-center">
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/10 bg-transparent hover:bg-transparent hover:border-white/20 transition-colors z-10"
+            onClick={scrollPrev}
+            disabled={!prevBtnEnabled}
+            aria-label="Previous slide"
+          >
+            <ArrowLeft className="h-5 w-5 text-white/50 hover:text-white/70" />
+          </Button>
+
+          <div className="overflow-hidden mx-16" ref={emblaRef}>
+            <div className="flex">
+              {STEPS.map((step) => (
+                <div key={step.id} className="flex-[0_0_100%] min-w-0">
+                  <div className="aspect-square relative flex items-center justify-center">
+                    {/* <Lottie
+                          animationData={
+                            placeholderAnimations[step.id]?.animationData ||
+                            placeholderAnimations["smooth-onboarding"]
+                              .animationData
+                          }
+                          loop={true}
+                          autoplay={true}
+                          style={{ width: "100%", height: "100%" }}
+                        /> */}
+                    <Image
+                      src={
+                        placeholderAnimations[step.id]?.animationData ||
+                        placeholderAnimations["smooth-onboarding"].animationData
+                      }
+                      alt="placeholder"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/10 bg-transparent hover:bg-transparent hover:border-white/20 transition-colors z-10"
+            onClick={scrollNext}
+            disabled={!nextBtnEnabled}
+            aria-label="Next slide"
+          >
+            <ArrowRight className="h-5 w-5 text-white/50 hover:text-white/70" />
+          </Button>
+        </div>
       </div>
-    </div>
+    </section>
   );
 };
