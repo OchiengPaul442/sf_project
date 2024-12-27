@@ -14,7 +14,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${heming.variable} font-sans`}>
+    <html
+      lang="en"
+      className={`${heming.variable} font-sans h-[calc(100vh*5)] overflow-y-scroll snap-y snap-mandatory`}
+    >
       <body>{children}</body>
     </html>
   );

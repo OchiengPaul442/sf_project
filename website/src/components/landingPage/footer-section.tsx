@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { PiArrowULeftUp } from "react-icons/pi";
 import { useWindowSize } from "@/hooks/useWindowSize";
 import { useMemo } from "react";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 export default function FooterSection() {
+  const animation = useScrollAnimation();
   const { width } = useWindowSize();
 
   const fontSize = useMemo(() => {
@@ -21,7 +23,11 @@ export default function FooterSection() {
   };
 
   return (
-    <footer className="bg-black min-h-screen flex flex-col items-center justify-center text-white relative">
+    <footer
+      className="min-h-screen flex flex-col items-center justify-center text-white relative snap-start"
+      ref={animation.ref}
+      style={animation.style}
+    >
       <div className="max-w-7xl mx-auto relative px-6 py-24 sm:p-24 sm:mx-6 lg:mx-8 mb-4 sm:mb-6 lg:mb-8">
         {/* Back to Top Button */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">

@@ -1,10 +1,9 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Work from "@/public/images/Layer 2.png";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import InvestForm from "../forms/InvestForm";
 // import Lottie from "lottie-react";
 
 // Placeholder animation data for the angel illustration
@@ -41,9 +40,17 @@ import Work from "@/public/images/Layer 2.png";
 // };
 
 export default function InvestSection() {
+  const animation = useScrollAnimation();
+
   return (
-    <section className="min-h-screen bg-white text-black py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <section
+      id="invest"
+      ref={animation.ref}
+      style={animation.style}
+      className="h-screen bg-white text-black flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 snap-start"
+    >
+      <div className="container mx-auto flex flex-col items-center space-y-6 sm:space-y-8">
+        {/* Header Section */}
         <div className="text-center space-y-4">
           <h2 className="text-[#999999] text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono">
             Participate in our seed round
@@ -53,9 +60,11 @@ export default function InvestSection() {
           </h3>
         </div>
 
-        <div className="mt-12 sm:mt-16 mb-16 sm:mb-20 flex justify-center">
-          <div className="w-[200px] h-[200px] sm:w-[280px] sm:h-[280px]">
-            {/* <Lottie
+        {/* Image Section */}
+        <div className="mt-8 sm:mt-12 mb-8 sm:mb-10 flex justify-center">
+          <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[250px] md:h-[250px]">
+            {/* 
+            <Lottie
               animationData={placeholderAnimation}
               loop={true}
               autoplay={true}
@@ -63,7 +72,8 @@ export default function InvestSection() {
                 width: "100%",
                 height: "100%",
               }}
-            /> */}
+            /> 
+            */}
             <Image
               src={Work}
               alt="Work"
@@ -72,49 +82,8 @@ export default function InvestSection() {
           </div>
         </div>
 
-        <form className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm sm:text-base font-mono">
-                Name
-              </label>
-              <Input
-                id="name"
-                placeholder="Enter Full name"
-                className="h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-[#f5f5f5] border-0 font-mono placeholder:text-[#999] text-sm sm:text-base"
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm sm:text-base font-mono">
-                Email address
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Email address"
-                className="h-12 sm:h-14 rounded-xl sm:rounded-2xl bg-[#f5f5f5] border-0 font-mono placeholder:text-[#999] text-sm sm:text-base"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="message" className="text-sm sm:text-base font-mono">
-              Message
-            </label>
-            <Textarea
-              id="message"
-              placeholder="Message"
-              className="min-h-[120px] sm:min-h-[160px] rounded-xl sm:rounded-2xl bg-[#f5f5f5] border-0 font-mono placeholder:text-[#999] text-sm sm:text-base"
-            />
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full h-12 sm:h-14 rounded-full bg-black hover:bg-black/90 font-mono text-sm sm:text-base"
-          >
-            Send
-          </Button>
-        </form>
+        {/* Form Section */}
+        <InvestForm />
       </div>
     </section>
   );

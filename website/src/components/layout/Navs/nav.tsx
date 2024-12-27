@@ -11,8 +11,8 @@ export function Nav() {
 
   return (
     <>
-      <nav className="absolute top-0 left-0 w-full z-10">
-        <div className="max-w-7xl mx-auto flex justify-between items-center p-8">
+      <nav className="absolute top-0 left-0 w-full z-50">
+        <div className="container mx-auto flex justify-between items-center p-8">
           {/* Logo */}
           <Link
             href="/"
