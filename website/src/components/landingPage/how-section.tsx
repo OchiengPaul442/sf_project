@@ -1,66 +1,66 @@
 "use client";
 
 import { GradientSeparator } from "@/components/ui/separator";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
 
 export default function HowSection() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const animation = useScrollAnimation();
 
   // Hook up scroll to the section
   const { scrollYProgress } = useScroll({
-    target: sectionRef,
+    target: animation.ref,
     offset: ["start start", "end end"],
   });
 
   // Define scroll progress ranges for each animation stage
   const SCROLL_RANGES = {
-    firstScale: [0, 0.25, 0.5],
-    secondFade: [0.25, 0.5, 0.75],
-    thirdFade: [0.5, 0.75, 1],
+    firstScale: [0, 0.25],
+    secondFade: [0.25, 0.5],
+    thirdFade: [0.5, 0.75],
   };
 
   // ---- FIRST SECTION: Scale Down from 1.2 to 1 and move up slightly ----
   const firstSectionScale = useTransform(
     scrollYProgress,
     SCROLL_RANGES.firstScale,
-    [1.2, 1, 1.2]
+    [1.2, 1]
   );
   const firstSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.firstScale,
-    [0, -20, 0]
+    [0, -20]
   );
 
   // ---- SECOND SECTION: Fade In and move up ----
   const secondSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [120, 0, 120]
+    [120, 0]
   );
   const secondSectionOpacity = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [0, 1, 0]
+    [0, 1]
   );
 
   // ---- SEPARATOR: Scale X from 0 to 1 over secondFade, then Rotate Y over thirdFade ----
   const separatorScaleX = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [0, 1, 0]
+    [0, 1]
   );
 
   // ---- THIRD SECTION: Fade In and move up ----
   const thirdSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.thirdFade,
-    [120, 0, 120]
+    [120, 0]
   );
   const thirdSectionOpacity = useTransform(
     scrollYProgress,
     SCROLL_RANGES.thirdFade,
-    [0, 1, 0]
+    [0, 1]
   );
 
   // Common motion transition for a smoother, modern feel
@@ -71,9 +71,9 @@ export default function HowSection() {
 
   return (
     <section
-      ref={sectionRef}
+      ref={animation.ref}
       id="solutions"
-      className="relative flex flex-col items-center justify-center py-24 px-4 sm:px-6 lg:px-8 bg-black min-h-[250vh] overflow-hidden snap-start"
+      className="relative flex flex-col items-center justify-center py-24 px-4 sm:px-6 lg:px-8 bg-black h-[250vh] overflow-hidden snap-start"
     >
       <div className="container mx-auto space-y-36 md:space-y-48 lg:space-y-64">
         <div className="space-y-36 md:space-y-48 lg:space-y-64">
