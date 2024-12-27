@@ -1,13 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  AnimatePresence,
-  useSpring,
-} from "framer-motion";
+import { motion, useScroll, AnimatePresence, useSpring } from "framer-motion";
 import Image, { StaticImageData } from "next/image";
 import Ship from "@/public/images/Ship.png";
 import Integrity from "@/public/images/Group 2.png";
@@ -81,13 +75,6 @@ export const HowSectionCarousel = () => {
 
     return () => unsubscribe();
   }, [smoothScrollProgress]);
-
-  // Background opacity based on scroll progress for a fade effect
-  const backgroundOpacity = useTransform(
-    smoothScrollProgress,
-    [0, 0.5, 1],
-    ["rgba(0,0,0,0)", "rgba(0,0,0,0.5)", "rgba(0,0,0,0)"]
-  );
 
   // Handle fixing the content position based on scroll
   useEffect(() => {
@@ -207,14 +194,6 @@ export const HowSectionCarousel = () => {
           </AnimatePresence>
         </div>
       </motion.div>
-
-      {/* Background Overlay */}
-      <motion.div
-        className="fixed top-0 left-0 w-full h-full pointer-events-none"
-        style={{
-          background: backgroundOpacity,
-        }}
-      />
     </section>
   );
 };
