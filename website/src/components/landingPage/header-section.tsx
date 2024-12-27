@@ -51,6 +51,12 @@ export default function HeaderSection() {
   // Control video section visibility
   const videoOpacity = useTransform(scrollYProgress, [0.3, 0.5], [0, 1]);
 
+  const navOpacity = useTransform(
+    scrollYProgress,
+    COMMON_INPUT_RANGE,
+    [1, 1, 0.5, 0, 0]
+  );
+
   return (
     <section
       ref={animation.ref}
@@ -65,8 +71,7 @@ export default function HeaderSection() {
         />
 
         {/* Navigation */}
-
-        <motion.div style={{ opacity: wereTextOpacity }}>
+        <motion.div style={{ opacity: navOpacity }}>
           <Nav />
         </motion.div>
 
