@@ -1,43 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import Work from "@/public/images/Layer 2.png";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import InvestForm from "../../components/forms/InvestForm";
-// import Lottie from "lottie-react";
-
-// Placeholder animation data for the angel illustration
-// const placeholderAnimation = {
-//   v: "5.5.7",
-//   fr: 30,
-//   ip: 0,
-//   op: 60,
-//   w: 400,
-//   h: 400,
-//   assets: [],
-//   layers: [
-//     {
-//       ddd: 0,
-//       ind: 1,
-//       ty: 4,
-//       nm: "Angel",
-//       sr: 1,
-//       ks: {
-//         o: { a: 0, k: 100 },
-//         r: { a: 0, k: 0 },
-//         p: { a: 0, k: [200, 200, 0] },
-//         a: { a: 0, k: [0, 0, 0] },
-//         s: { a: 0, k: [100, 100, 100] },
-//       },
-//       ao: 0,
-//       shapes: [],
-//       ip: 0,
-//       op: 60,
-//       st: 0,
-//       bm: 0,
-//     },
-//   ],
-// };
+import Lottie from "lottie-react";
+import AngelAnimation from "@/lib/lottie/angel.json";
 
 export default function InvestSection() {
   const animation = useScrollAnimation();
@@ -63,21 +29,15 @@ export default function InvestSection() {
         {/* Image Section */}
         <div className="mt-8 sm:mt-12 mb-8 sm:mb-10 flex justify-center">
           <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[250px] md:h-[250px]">
-            {/* 
             <Lottie
-              animationData={placeholderAnimation}
+              animationData={AngelAnimation}
               loop={true}
               autoplay={true}
               style={{
                 width: "100%",
                 height: "100%",
+                objectFit: "contain",
               }}
-            /> 
-            */}
-            <Image
-              src={Work}
-              alt="Work"
-              className="w-full h-full object-contain"
             />
           </div>
         </div>
