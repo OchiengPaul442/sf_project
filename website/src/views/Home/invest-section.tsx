@@ -27,8 +27,8 @@ export default function InvestSection() {
         </div>
 
         {/* Image Section */}
-        <div className="mt-8 sm:mt-12 mb-8 sm:mb-10 flex justify-center">
-          <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[250px] md:h-[250px]">
+        <div className="mt-8 mb-8 flex justify-center">
+          <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[350px] md:h-[350px]">
             <Lottie
               animationData={AngelAnimation}
               loop={true}

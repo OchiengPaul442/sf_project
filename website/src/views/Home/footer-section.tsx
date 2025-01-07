@@ -9,7 +9,10 @@ export default function FooterSection() {
   const animation = useScrollAnimation();
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const headerSection = document.getElementById("header-section");
+    if (headerSection) {
+      headerSection.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
