@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Loader from "@/views/loader";
+import ReduxProvider from "@/redux-store/ReduxProvider";
 
 /**
  * Provider component that preloads images/videos (and optionally JSON)
@@ -46,7 +47,11 @@ export const Provider: React.FC<{ children: React.ReactNode }> = ({
     return <Loader />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <ReduxProvider>{children}</ReduxProvider>
+    </>
+  );
 };
 
 /* -------------------------------------------------------------------------- */

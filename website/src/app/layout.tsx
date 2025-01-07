@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${qanelasSoft.variable} font-sans h-[calc(100vh*5)] overflow-y-scroll snap-y snap-mandatory`}
+      className={`${qanelasSoft.variable} font-sans h-[calc(100vh*5)] snap-y snap-mandatory`}
     >
       <body>
         <Provider>{children}</Provider>

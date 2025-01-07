@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import MenuModal from "@/components/dialog/menu-modal";
+import { useDispatch } from "react-redux";
+import { toggleMenu } from "@/redux-store/slices/menuSlice";
 
 export function Nav() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const dispatch = useDispatch();
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const handleToggle = () => dispatch(toggleMenu());
 
   return (
-    <>
+    <div>
       <nav className="fixed top-0 left-0 w-full z-50 bg-white">
         <div className="container mx-auto flex justify-between items-center py-6 px-4">
           {/* Logo */}
@@ -36,7 +36,7 @@ export function Nav() {
             size="icon"
             className="relative w-10 h-10 flex flex-col items-center justify-center gap-1.5 hover:bg-transparent"
             aria-label="Toggle Menu"
-            onClick={toggleMenu}
+            onClick={handleToggle}
           >
             <span className="w-6 h-[2px] bg-black" />
             <span className="w-6 h-[2px] bg-black" />
@@ -44,9 +44,6 @@ export function Nav() {
           </Button>
         </div>
       </nav>
-
-      {/* Menu Modal */}
-      <MenuModal isOpen={isMenuOpen} onClose={toggleMenu} />
-    </>
+    </div>
   );
 }
