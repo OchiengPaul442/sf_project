@@ -28,7 +28,7 @@ export default function FooterSection() {
           left: "50%",
         }}
       >
-        <PiArrowULeftUp className="w-6 h-6 sm:w-8 sm:h-8 text-black -rotate-45" />
+        <PiArrowULeftUp className="w-6 h-6 sm:w-8 sm:h-8 text-black font-bold" />
       </Button>
 
       {/* Footer Content */}
