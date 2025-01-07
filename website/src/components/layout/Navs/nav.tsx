@@ -1,8 +1,10 @@
 "use client";
+
 import { useState } from "react";
-import MenuModal from "@/components/dialog/menu-modal";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import MenuModal from "@/components/dialog/menu-modal";
 
 export function Nav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -11,14 +13,20 @@ export function Nav() {
 
   return (
     <>
-      <nav className="absolute top-0 left-0 w-full z-50">
-        <div className="container mx-auto flex justify-between items-center p-8">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white">
+        <div className="container mx-auto flex justify-between items-center py-6 px-4">
           {/* Logo */}
           <Link
-            href="/"
-            className="text-2xl font-bold tracking-tighter hover:opacity-70 transition-opacity text-black dark:text-white"
+            href="/home"
+            className="hover:opacity-70 transition-opacity top-6 relative"
           >
-            sf.
+            <Image
+              src="/images/logo.png"
+              alt="We're Saving Food"
+              width={85.13}
+              height={90}
+              className="w-auto h-auto"
+            />
           </Link>
 
           {/* Menu Button */}
@@ -29,14 +37,14 @@ export function Nav() {
             aria-label="Toggle Menu"
             onClick={toggleMenu}
           >
-            <span className="w-6 h-[2px] bg-black dark:bg-white" />
-            <span className="w-6 h-[2px] bg-black dark:bg-white" />
-            <span className="w-6 h-[2px] bg-black dark:bg-white" />
+            <span className="w-6 h-[2px] bg-black" />
+            <span className="w-6 h-[2px] bg-black" />
+            <span className="w-6 h-[2px] bg-black" />
           </Button>
         </div>
       </nav>
 
-      {/* Futuristic Modal */}
+      {/* Menu Modal */}
       <MenuModal isOpen={isMenuOpen} onClose={toggleMenu} />
     </>
   );

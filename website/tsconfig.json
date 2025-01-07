@@ -22,9 +22,9 @@
       "@/components/*": ["./src/components/*"],
       "@/public/*": ["./public/*"],
       "@/utils/*": ["./src/utils/*"],
-      "@/lottie/*": ["./src/lottie/*"],
-      "@/styles/*": ["./src/styles/*"],
-      "@/hooks/*": ["./src/hooks/*"]
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/views/*": ["./src/views/*"],
+      "@/lib/*": ["./src/lib/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

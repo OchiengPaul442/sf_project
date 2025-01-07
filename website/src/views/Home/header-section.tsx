@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { Nav } from "../layout/Navs/nav";
+import { Nav } from "@/components/layout/Navs/nav";
 import VideoSection from "./VideoSection";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
@@ -28,21 +28,21 @@ export default function HeaderSection() {
   );
   const backgroundOpacity = useTransform(scrollYProgress, [0.2, 0.4], [0, 1]);
 
-  // x and y move to center on letter F in "Saving Food"
+  // Adjusted x and y move for a slight shift back to the left
   const xMove = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [
-    "0%",
-    "-212.5%",
-    "-425%",
-    "-637.5%",
-    "-850%",
+    "0%", // Initial position
+    "-150%", // Slightly less than before
+    "-350%",
+    "-550%",
+    "-750%", // Slightly less extreme than original
   ]);
 
   const yMove = useTransform(scrollYProgress, COMMON_INPUT_RANGE, [
-    "0%",
-    "93.75%",
-    "187.5%",
-    "281.25%",
-    "375%",
+    "0%", // Initial position
+    "-50%", // Slightly less vertical movement
+    "-50%",
+    "-50%",
+    "-50%", // Slightly less extreme than original
   ]);
 
   // Control "We're" text visibility
@@ -78,7 +78,7 @@ export default function HeaderSection() {
         {/* Main Content */}
         <div className="text-center relative z-10">
           <motion.h2
-            className="text-[#A8A8A8] text-2xl mb-2 font-mono"
+            className="text-[#A8A8A8] text-4xl mb-2 font-normal"
             style={{ opacity: wereTextOpacity }}
           >
             We&apos;re

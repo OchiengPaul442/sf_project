@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Work from "@/public/images/Layer 2.png";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import InvestForm from "../forms/InvestForm";
+import InvestForm from "../../components/forms/InvestForm";
 // import Lottie from "lottie-react";
 
 // Placeholder animation data for the angel illustration

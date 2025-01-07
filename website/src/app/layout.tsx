@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import "../styles/globals.css";
-import { heming } from "@/public/fonts/fonts";
+import "./globals.css";
+import { qanelasSoft } from "@/lib/fonts/fonts";
 
 export const metadata: Metadata = {
   title: "Saving Food",
@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${heming.variable} font-sans h-[calc(100vh*5)] overflow-y-scroll snap-y snap-mandatory`}
+      className={`${qanelasSoft.variable} font-sans h-[calc(100vh*5)] overflow-y-scroll snap-y snap-mandatory`}
     >
       <body>{children}</body>
     </html>
