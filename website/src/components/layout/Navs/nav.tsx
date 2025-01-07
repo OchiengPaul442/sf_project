@@ -25,6 +25,7 @@ export function Nav() {
               alt="We're Saving Food"
               width={85.13}
               height={90}
+              loading="eager"
               className="w-auto h-auto"
             />
           </Link>

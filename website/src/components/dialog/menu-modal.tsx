@@ -79,6 +79,7 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
                     alt="We're Saving Food"
                     width={85.13}
                     height={100}
+                    loading="eager"
                     className="w-auto h-auto"
                   />
                 </Link>
