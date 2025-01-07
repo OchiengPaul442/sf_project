@@ -61,6 +61,7 @@ export default function HeaderSection() {
     <section
       ref={animation.ref}
       style={animation.style}
+      id="header-section"
       className="relative min-h-[400vh] snap-start"
     >
       <div className="sticky top-0 h-screen bg-white flex items-center justify-center overflow-hidden">

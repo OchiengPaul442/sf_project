@@ -1,44 +1,12 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-// import Lottie from "lottie-react";
 import Link from "next/link";
 import Image from "next/image";
 import Work from "@/public/images/Layer 1.png";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-
-// Placeholder animation data
-// const placeholderAnimation = {
-//   v: "5.5.7",
-//   fr: 30,
-//   ip: 0,
-//   op: 60,
-//   w: 500,
-//   h: 500,
-//   assets: [],
-//   layers: [
-//     {
-//       ddd: 0,
-//       ind: 1,
-//       ty: 4,
-//       nm: "Tools",
-//       sr: 1,
-//       ks: {
-//         o: { a: 0, k: 100 },
-//         r: { a: 0, k: 0 },
-//         p: { a: 0, k: [200, 200, 0] },
-//         a: { a: 0, k: [0, 0, 0] },
-//         s: { a: 0, k: [100, 100, 100] },
-//       },
-//       ao: 0,
-//       shapes: [],
-//       ip: 0,
-//       op: 60,
-//       st: 0,
-//       bm: 0,
-//     },
-//   ],
-// };
+// import Lottie from "lottie-react";
+// import MarkerAnimation from "@/lib/lottie/maker.json";
 
 export default function WorkSection() {
   const animation = useScrollAnimation();
@@ -74,7 +42,7 @@ export default function WorkSection() {
 
         <div className="absolute bottom-0 right-0 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] pointer-events-none">
           {/* <Lottie
-            animationData={placeholderAnimation}
+            animationData={MarkerAnimation}
             loop={true}
             autoplay={true}
             style={{
