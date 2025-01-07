@@ -16,11 +16,12 @@ export default function HowSection() {
   // Define scroll progress ranges for each animation stage
   const SCROLL_RANGES = {
     firstScale: [0, 0.25],
-    secondFade: [0.25, 0.5],
-    thirdFade: [0.5, 0.75],
+    secondFade: [0.3, 0.5], // Start slightly after the first section
+    separatorRotate: [0.35, 0.65], // Start after the second section starts
+    thirdFade: [0.55, 0.8], // Start after the separator begins rotating
   };
 
-  // ---- FIRST SECTION: Scale Down from 1.2 to 1 and move up slightly ----
+  // ---- FIRST SECTION: Scale Down and Move Up Slightly ----
   const firstSectionScale = useTransform(
     scrollYProgress,
     SCROLL_RANGES.firstScale,
@@ -32,11 +33,11 @@ export default function HowSection() {
     [0, -20]
   );
 
-  // ---- SECOND SECTION: Fade In and move up ----
+  // ---- SECOND SECTION: Smooth Fade In from Bottom ----
   const secondSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.secondFade,
-    [120, 0]
+    [60, 0]
   );
   const secondSectionOpacity = useTransform(
     scrollYProgress,
@@ -44,18 +45,23 @@ export default function HowSection() {
     [0, 1]
   );
 
-  // ---- SEPARATOR: Scale X from 0 to 1 over secondFade, then Rotate Y over thirdFade ----
+  // ---- SEPARATOR: Scale X and Rotate X ----
   const separatorScaleX = useTransform(
     scrollYProgress,
-    SCROLL_RANGES.secondFade,
+    SCROLL_RANGES.separatorRotate,
     [0, 1]
   );
+  const separatorRotateX = useTransform(
+    scrollYProgress,
+    SCROLL_RANGES.separatorRotate,
+    [0, 360] // Full 360-degree rotation
+  );
 
-  // ---- THIRD SECTION: Fade In and move up ----
+  // ---- THIRD SECTION: Smooth Fade In from Bottom ----
   const thirdSectionY = useTransform(
     scrollYProgress,
     SCROLL_RANGES.thirdFade,
-    [120, 0]
+    [60, 0]
   );
   const thirdSectionOpacity = useTransform(
     scrollYProgress,
@@ -95,12 +101,12 @@ export default function HowSection() {
               </h2>
             </motion.div>
 
-            {/* ---- SECOND SECTION (Fade In) ---- */}
+            {/* ---- SECOND SECTION (Fade In from Bottom) ---- */}
             <motion.div
               style={{ y: secondSectionY, opacity: secondSectionOpacity }}
               transition={transition}
             >
-              <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-mono tracking-tight leading-relaxed max-w-4xl mt-8 md:mt-12 lg:mt-16">
+              <p className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-normal tracking-tight leading-relaxed mt-8 md:mt-12 lg:mt-16">
                 <span className="text-white">
                   By building a platform that empowers
                 </span>{" "}
@@ -112,21 +118,24 @@ export default function HowSection() {
             </motion.div>
           </div>
 
-          {/* ---- SEPARATOR: Scale X and then Rotate Y ---- */}
+          {/* ---- SEPARATOR: Scale X and Rotate X ---- */}
           <motion.div
-            style={{ scaleX: separatorScaleX }}
+            style={{
+              scaleX: separatorScaleX,
+              rotateX: separatorRotateX,
+            }}
             transition={transition}
             className="w-full my-12"
           >
             <GradientSeparator />
           </motion.div>
 
-          {/* ---- THIRD SECTION (Fade In) ---- */}
+          {/* ---- THIRD SECTION (Fade In from Bottom) ---- */}
           <motion.div
             style={{ y: thirdSectionY, opacity: thirdSectionOpacity }}
             transition={transition}
           >
-            <p className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-end font-mono leading-relaxed max-w-4xl ml-auto">
+            <p className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-end font-normal ml-auto leading-relaxed">
               <span className="text-white">
                 Our team blends more than a decade of Food and AI
               </span>{" "}
