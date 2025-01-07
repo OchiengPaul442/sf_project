@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { qanelasSoft } from "@/lib/fonts/fonts";
+import { Provider } from "@/components/Provider";
 
 export const metadata: Metadata = {
   title: "Saving Food",
@@ -18,7 +19,9 @@ export default function RootLayout({
       lang="en"
       className={`${qanelasSoft.variable} font-sans h-[calc(100vh*5)] overflow-y-scroll snap-y snap-mandatory`}
     >
-      <body>{children}</body>
+      <body>
+        <Provider>{children}</Provider>
+      </body>
     </html>
   );
 }

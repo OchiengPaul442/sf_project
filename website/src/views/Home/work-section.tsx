@@ -61,7 +61,7 @@ export default function WorkSection() {
         </div>
 
         <Link
-          href="/contact"
+          href="mailto:support@example.com"
           className="group inline-flex items-center font-bold relative text-sm sm:text-base"
         >
           <span className="relative z-10 px-6 font-semibold sm:px-8 py-2 sm:py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
