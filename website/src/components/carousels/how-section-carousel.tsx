@@ -221,7 +221,7 @@ export const HowSectionCarousel = () => {
               exit="exit"
               transition={{ duration: 0.5 }}
             >
-              <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[400px] md:h-[400px]">
+              <div className=" w-[250px] h-[250px] md:w-[400px] md:h-[400px]">
                 <Lottie
                   animationData={lottieAnimations[STEPS[selectedStepIndex].id]}
                   loop
