@@ -17,9 +17,11 @@ export default function HomePage() {
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
+  // toggle menu
   const handleToggle = () => {
     dispatch(toggleMenu());
   };
+
   return (
     <main>
       <HeaderSection />
@@ -31,9 +33,7 @@ export default function HomePage() {
       <FooterSection />
 
       {/* Menu Modal */}
-      <div>
-        <MenuModal isOpen={isOpen as boolean} onClose={handleToggle} />
-      </div>
+      <MenuModal isOpen={isOpen as boolean} onClose={handleToggle} />
     </main>
   );
 }
