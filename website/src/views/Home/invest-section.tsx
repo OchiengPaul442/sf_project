@@ -3,7 +3,7 @@
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import InvestForm from "../../components/forms/InvestForm";
 import Lottie from "lottie-react";
-import AngelAnimation from "@/lib/lottie/Angel.json";
+import AngelAnimation from "@/lib/lottie/angel.json";
 
 export default function InvestSection() {
   const animation = useScrollAnimation();

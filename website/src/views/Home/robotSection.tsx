@@ -2,7 +2,7 @@
 
 import React from "react";
 import Lottie from "lottie-react";
-import ConstructionAnimation from "@/lib/lottie/Robot.json";
+import ConstructionAnimation from "@/lib/lottie/robot.json";
 
 const RobotSection = () => {
   return (
