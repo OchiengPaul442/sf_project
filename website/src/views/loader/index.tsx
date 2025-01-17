@@ -26,7 +26,7 @@ const ModernLoader: React.FC = () => {
 
   return (
     <div className="fixed inset-0 flex flex-col items-center justify-center bg-black text-white font-sans z-50">
-      <div className="text-4xl font-bold mb-4">Loading</div>
+      <div className="text-4xl font-bold mb-4">Saving Food</div>
       <div className="flex space-x-2">
         {[0, 1, 2].map((index) => (
           <motion.div
