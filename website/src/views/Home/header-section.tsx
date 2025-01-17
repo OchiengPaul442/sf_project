@@ -11,7 +11,7 @@ export default function HeaderSection() {
   // Check for mobile breakpoint
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint in Tailwind is 768px
+      setIsMobile(window.innerWidth < 768);
     };
 
     // Initial check
