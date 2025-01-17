@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import ConstructionAnimation from "@/lib/lottie/robot.json";
+import RobotAnimation from "../../lib/lottie/robot.json";
 import Lottie from "lottie-react";
 
 const RobotSection = () => {
@@ -19,7 +19,7 @@ const RobotSection = () => {
         {/* Robot Animation Container */}
         <div className="w-full max-w-[400px] bg-black aspect-square relative">
           <Lottie
-            animationData={ConstructionAnimation}
+            animationData={RobotAnimation}
             loop={true}
             autoplay={true}
             style={{
