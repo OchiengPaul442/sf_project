@@ -4,11 +4,11 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useScroll, AnimatePresence, useSpring } from "framer-motion";
 import Lottie from "lottie-react";
 
-import BoatAnimation from "@/lib/lottie/sailing_boat_2.json";
-import PaperAnimation from "@/lib/lottie/paper_flying.json";
-import MarkerAnimation from "@/lib/lottie/mark_json.json";
-import SpagAnimation from "@/lib/lottie/spag_json.json";
-import DataAnimation from "@/lib/lottie/data.json";
+import BoatAnimation from "../../lib/lottie/sailing_boat_2.json";
+import PaperAnimation from "../../lib/lottie/paper_flying.json";
+import MarkerAnimation from "../../lib/lottie/mark_json.json";
+import SpagAnimation from "../../lib/lottie/spag_json.json";
+import DataAnimation from "../../lib/lottie/data.json";
 
 /* ---------------------------------- Data ---------------------------------- */
 interface Step {
