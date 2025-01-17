@@ -4,9 +4,11 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useScroll, AnimatePresence, useSpring } from "framer-motion";
 import Lottie from "lottie-react";
 
-import Boat from "@/lib/lottie/boat.json";
-import Marker from "@/lib/lottie/maker.json";
-import Spaghetti from "@/lib/lottie/spaghetti.json";
+import BoatAnimation from "@/lib/lottie/boat.json";
+import PaperAnimation from "@/lib/lottie/paper_flying.json";
+import MarkerAnimation from "@/lib/lottie/mark_json.json";
+import SpagAnimation from "@/lib/lottie/SPag json.json";
+import DataAnimation from "@/lib/lottie/data.json";
 
 /* ---------------------------------- Data ---------------------------------- */
 interface Step {
@@ -25,11 +27,11 @@ const STEPS: Step[] = [
 
 // Maps each step to its corresponding Lottie animation
 const lottieAnimations: Record<string, object> = {
-  "smooth-onboarding": Boat,
-  "data-integrity": Boat,
-  "managed-consumables": Spaghetti,
-  "recipe-adherence": Marker,
-  "fraud-eliminated": Marker,
+  "smooth-onboarding": BoatAnimation,
+  "data-integrity": PaperAnimation,
+  "managed-consumables": SpagAnimation,
+  "recipe-adherence": MarkerAnimation,
+  "fraud-eliminated": DataAnimation,
 };
 
 /* -------------------------------- Variants -------------------------------- */
@@ -145,7 +147,7 @@ export const HowSectionCarousel = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[250vh] bg-black snap-start overflow-hidden"
+      className="relative h-[280vh] bg-black snap-start overflow-hidden"
       id="how-section"
     >
       {/* Container that becomes pinned in the middle of the viewport */}
@@ -221,7 +223,7 @@ export const HowSectionCarousel = () => {
               exit="exit"
               transition={{ duration: 0.5 }}
             >
-              <div className=" w-[250px] h-[250px] md:w-[400px] md:h-[400px]">
+              <div className=" w-[300px] h-[300px] md:w-[500px] md:h-[500px]">
                 <Lottie
                   animationData={lottieAnimations[STEPS[selectedStepIndex].id]}
                   loop

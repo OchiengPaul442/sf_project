@@ -11,6 +11,7 @@ import MenuModal from "@/components/dialog/menu-modal";
 import { useSelector, useDispatch } from "@/redux-store/hooks";
 
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
+import RobotSection from "./robotSection";
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -22,6 +23,7 @@ export default function HomePage() {
   return (
     <main>
       <HeaderSection />
+      <RobotSection />
       <HowSection />
       <HowSectionCarousel />
       <WorkSection />
