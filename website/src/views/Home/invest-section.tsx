@@ -1,9 +1,9 @@
 "use client";
 
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import InvestForm from "../../components/forms/InvestForm";
+import InvestForm from "@/components/forms/InvestForm";
+import AngelAnimation from "@/lib/lottie/angel.json";
 import Lottie from "lottie-react";
-import AngelAnimation from "../../lib/lottie/angel.json";
 
 export default function InvestSection() {
   const animation = useScrollAnimation();

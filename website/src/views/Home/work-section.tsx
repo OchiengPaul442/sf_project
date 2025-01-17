@@ -3,8 +3,8 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import ConstructionAnimation from "@/lib/lottie/contruction.json";
 import Lottie from "lottie-react";
-import ConstructionAnimation from "../../lib/lottie/contruction.json";
 
 export default function WorkSection() {
   const animation = useScrollAnimation();
