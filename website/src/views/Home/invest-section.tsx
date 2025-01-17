@@ -1,9 +1,9 @@
 "use client";
 
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import InvestForm from "../../components/forms/InvestForm";
+import InvestForm from "@/components/forms/InvestForm";
+import AngelAnimation from "@/public/lottie/angel.json";
 import Lottie from "lottie-react";
-import AngelAnimation from "@/lib/lottie/angel.json";
 
 export default function InvestSection() {
   const animation = useScrollAnimation();
@@ -27,8 +27,8 @@ export default function InvestSection() {
         </div>
 
         {/* Image Section */}
-        <div className="mt-8 mb-8 flex justify-center">
-          <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[350px] md:h-[350px]">
+        <div className="mt-4 mb-4 flex justify-center">
+          <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[350px] md:h-[300px]">
             <Lottie
               animationData={AngelAnimation}
               loop={true}

@@ -11,17 +11,21 @@ import MenuModal from "@/components/dialog/menu-modal";
 import { useSelector, useDispatch } from "@/redux-store/hooks";
 
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
+import RobotSection from "./robotSection";
 
 export default function HomePage() {
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
+  // toggle menu
   const handleToggle = () => {
     dispatch(toggleMenu());
   };
+
   return (
     <main>
       <HeaderSection />
+      <RobotSection />
       <HowSection />
       <HowSectionCarousel />
       <WorkSection />
@@ -29,9 +33,7 @@ export default function HomePage() {
       <FooterSection />
 
       {/* Menu Modal */}
-      <div>
-        <MenuModal isOpen={isOpen as boolean} onClose={handleToggle} />
-      </div>
+      <MenuModal isOpen={isOpen as boolean} onClose={handleToggle} />
     </main>
   );
 }

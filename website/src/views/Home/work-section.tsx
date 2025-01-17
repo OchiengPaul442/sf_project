@@ -2,11 +2,9 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import Work from "@/public/images/Layer 1.png";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-// import Lottie from "lottie-react";
-// import MarkerAnimation from "@/lib/lottie/maker.json";
+import ConstructionAnimation from "@/public/lottie/contruction.json";
+import Lottie from "lottie-react";
 
 export default function WorkSection() {
   const animation = useScrollAnimation();
@@ -41,8 +39,8 @@ export default function WorkSection() {
         </Link>
 
         <div className="absolute bottom-0 right-0 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] pointer-events-none">
-          {/* <Lottie
-            animationData={MarkerAnimation}
+          <Lottie
+            animationData={ConstructionAnimation}
             loop={true}
             autoplay={true}
             style={{
@@ -50,12 +48,6 @@ export default function WorkSection() {
               height: "100%",
               filter: "brightness(0)",
             }}
-          /> */}
-
-          <Image
-            src={Work}
-            alt="Work"
-            className="w-full h-full object-contain"
           />
         </div>
       </div>

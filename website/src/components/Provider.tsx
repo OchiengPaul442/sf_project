@@ -23,12 +23,14 @@ export const Provider: React.FC<{ children: React.ReactNode }> = ({
       await Promise.all([
         loadImage("/images/logo.png"),
         loadImage("/images/logo-white.png"),
-        loadVideo("/video/video.webm"),
-        loadVideo("/video/video.mp4"),
-        loadJSON("/lib/lottie/angel.json"),
-        loadJSON("/lib/lottie/boat.json"),
-        loadJSON("/lib/lottie/maker.json"),
-        loadJSON("/lib/lottie/spaghetti.json"),
+        loadJSON("/lottie/angel.json"),
+        loadJSON("/lottie/robot.json"),
+        loadJSON("/lottie/paper_fly.json"),
+        loadJSON("/lottie/sailing_boat_2.json"),
+        loadJSON("/lottie/mark_json.json"),
+        loadJSON("/lottie/spag_json.json"),
+        loadJSON("/lottie/data.json"),
+        loadJSON("/lottie/construction.json"),
       ]);
 
       setIsLoading(false);
@@ -72,14 +74,14 @@ const loadImage = (src: string): Promise<void> =>
 /**
  * Loads a video from a given src, returning a Promise<void>.
  */
-const loadVideo = (src: string): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const video = document.createElement("video");
-    video.oncanplaythrough = () => resolve();
-    video.onerror = (err) => reject(err);
-    video.src = src;
-    video.load();
-  });
+// const loadVideo = (src: string): Promise<void> =>
+//   new Promise((resolve, reject) => {
+//     const video = document.createElement("video");
+//     video.oncanplaythrough = () => resolve();
+//     video.onerror = (err) => reject(err);
+//     video.src = src;
+//     video.load();
+//   });
 
 /**
  * Fetches and validates a JSON file, returning a Promise<void>.
