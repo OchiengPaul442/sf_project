@@ -30,7 +30,7 @@ export default function WorkSection() {
           href="mailto:support@example.com"
           className="group inline-flex items-center font-bold relative text-sm sm:text-base"
         >
-          <span className="relative z-10 px-6 font-semibold sm:px-8 py-2 sm:py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
+          <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-2 sm:py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
             Reach out
           </span>
           <span className="relative z-20 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full text-white transition-transform group-hover:translate-x-1 -ml-5 sm:-ml-7">
