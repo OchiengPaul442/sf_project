@@ -5,6 +5,8 @@ import { Provider } from "@/components/Provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import ThemeProvider from "@/components/ThemeProvider";
+
 export const metadata: Metadata = {
   title: "Saving Food",
   description:
@@ -22,7 +24,9 @@ export default function RootLayout({
       className={`${qanelasSoft.variable} font-sans h-[calc(100vh*5)] snap-y snap-mandatory`}
     >
       <body>
-        <Provider>{children}</Provider>
+        <Provider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </Provider>
         <ToastContainer position="top-center" autoClose={5000} />
       </body>
     </html>
