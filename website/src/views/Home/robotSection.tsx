@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import RobotAnimation from "../../lib/lottie/robot.json";
+import RobotAnimation from "@/public/lottie/robot.json";
 import Lottie from "lottie-react";
 
 const RobotSection = () => {

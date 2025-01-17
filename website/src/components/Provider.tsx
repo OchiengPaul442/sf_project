@@ -23,14 +23,14 @@ export const Provider: React.FC<{ children: React.ReactNode }> = ({
       await Promise.all([
         loadImage("/images/logo.png"),
         loadImage("/images/logo-white.png"),
-        loadJSON("/lib/lottie/Angel.json"),
-        loadJSON("/lib/lottie/Robot.json"),
-        loadJSON("/lib/lottie/paper_fly.json"),
-        loadJSON("/lib/lottie/Sailing_boat_2.json"),
-        loadJSON("/lib/lottie/mark_json.json"),
-        loadJSON("/lib/lottie/SPag json.json"),
-        loadJSON("/lib/lottie/data.json"),
-        loadJSON("/lib/lottie/construction.json"),
+        loadJSON("/lottie/angel.json"),
+        loadJSON("/lottie/robot.json"),
+        loadJSON("/lottie/paper_fly.json"),
+        loadJSON("/lottie/sailing_boat_2.json"),
+        loadJSON("/lottie/mark_json.json"),
+        loadJSON("/lottie/spag_json.json"),
+        loadJSON("/lottie/data.json"),
+        loadJSON("/lottie/construction.json"),
       ]);
 
       setIsLoading(false);
