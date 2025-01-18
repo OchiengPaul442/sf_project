@@ -4,43 +4,50 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { PiArrowULeftUp } from "react-icons/pi";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { useEffect, useState } from "react";
 
-export default function FooterSection() {
+const FooterSection = () => {
   const animation = useScrollAnimation();
+  const [showButton, setShowButton] = useState(false);
 
   const scrollToTop = () => {
-    const headerSection = document.getElementById("header-section");
-    if (headerSection) {
-      headerSection.scrollIntoView({ behavior: "smooth" });
-    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowButton(true);
+      } else {
+        setShowButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <footer
-      className="h-screen container mx-auto bg-black flex flex-col justify-end relative snap-start p-6 sm:p-8 md:p-12"
+      className="min-h-screen container mx-auto bg-black flex flex-col justify-end relative snap-start p-4 sm:p-6 md:p-8 lg:p-12"
       ref={animation.ref}
       style={animation.style}
     >
-      {/* Back to Top Button */}
-      <Button
-        onClick={scrollToTop}
-        className="absolute -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white hover:bg-white/90 transition-all flex items-center justify-center shadow-lg"
-        aria-label="Back to top"
-        style={{
-          top: "40%",
-          left: "50%",
-        }}
-      >
-        <PiArrowULeftUp className="w-6 h-6 sm:w-8 sm:h-8 text-black font-bold" />
-      </Button>
-
-      {/* Footer Content */}
-      <div
-        className="flex justify-between w-full h-full"
-        style={{ alignItems: "end" }}
-      >
+      {showButton && (
+        <Button
+          onClick={scrollToTop}
+          className="absolute left-1/2 -translate-x-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-white hover:bg-white/90 transition-all flex items-center justify-center shadow-lg"
+          aria-label="Back to top"
+          style={{
+            top: "clamp(20%, 40%, 60%)",
+          }}
+        >
+          <PiArrowULeftUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-black font-bold" />
+        </Button>
+      )}
+      <div className="flex flex-row justify-between items-end w-full h-full gap-4 sm:gap-0">
         {/* Logo Section */}
-        <div className="relative w-[200px] sm:w-[300px] md:w-[350px] lg:w-[400px] h-auto">
+        <div className="relative w-[150px] sm:w-[200px] md:w-[250px] lg:w-[300px] xl:w-[350px] h-auto">
           <Image
             src="/images/logo-white.png"
             alt="We're Saving Food"
@@ -52,10 +59,12 @@ export default function FooterSection() {
         </div>
 
         {/* Copyright Section */}
-        <div className="text-white/80 text-sm sm:text-base font-mono text-right">
-          © 2024
+        <div className="text-white/80 text-xs sm:text-sm md:text-base font-mono text-center sm:text-right">
+          © {new Date().getFullYear()}
         </div>
       </div>
     </footer>
   );
-}
+};
+
+export default FooterSection;

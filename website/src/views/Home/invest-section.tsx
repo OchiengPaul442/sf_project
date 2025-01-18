@@ -13,22 +13,22 @@ export default function InvestSection() {
       id="invest"
       ref={animation.ref}
       style={animation.style}
-      className="h-screen bg-white text-black flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 snap-start"
+      className="min-h-screen bg-white text-black flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 snap-start"
     >
-      <div className="container mx-auto flex flex-col items-center space-y-6 sm:space-y-8">
+      <div className="container mx-auto flex flex-col items-center space-y-6 sm:space-y-8 max-w-4xl">
         {/* Header Section */}
-        <div className="text-center space-y-4">
-          <h2 className="text-[#999999] text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono">
+        <div className="text-center space-y-4 w-full">
+          <h2 className="text-[#999999] text-lg sm:text-xl md:text-2xl lg:text-3xl font-mono">
             Participate in our seed round
           </h2>
-          <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-mono tracking-tight">
+          <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-mono tracking-tight">
             Invitation to potential investors to participate.
           </h3>
         </div>
 
         {/* Image Section */}
-        <div className="mt-4 mb-4 flex justify-center">
-          <div className="w-[150px] h-[150px] sm:w-[200px] sm:h-[200px] md:w-[350px] md:h-[300px]">
+        <div className="mt-4 mb-4 flex justify-center w-full">
+          <div className="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px]">
             <Lottie
               animationData={AngelAnimation}
               loop={true}

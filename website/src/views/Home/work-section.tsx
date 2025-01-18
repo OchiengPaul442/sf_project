@@ -11,18 +11,19 @@ export default function WorkSection() {
 
   return (
     <section
-      className="min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 sm:py-16 md:py-24 snap-start"
+      className="min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 lg:py-24 snap-start"
       ref={animation.ref}
       style={animation.style}
       id="contact"
     >
       <div className="container mx-auto relative px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">
-        <div className="text-center space-y-6 sm:space-y-8 mb-12 sm:mb-16">
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-mono">
+        <div className="text-center space-y-6 lg:space-y-8 mb-12 lg:mb-16 max-w-4xl mx-auto">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-mono">
             Work with us
           </h2>
-          <h3 className="text-[24px] sm:text-[40px] md:text-[48px] lg:text-[64px] xl:text-[96px] font-bold tracking-[-0.02em] leading-[1.1] max-w-7xl">
-            Are you an engineer who&apos;s excited about our <br /> mission?
+          <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-[-0.02em] leading-[1.1]">
+            Are you an engineer who&apos;s excited about our{" "}
+            <br className="hidden md:block" /> mission?
           </h3>
         </div>
 
@@ -30,7 +31,7 @@ export default function WorkSection() {
           href="mailto:support@example.com"
           className="group inline-flex items-center font-bold relative text-sm sm:text-base"
         >
-          <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-2 sm:py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
+          <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
             Reach out
           </span>
           <span className="relative z-20 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full text-white transition-transform group-hover:translate-x-1 -ml-5 sm:-ml-7">
@@ -38,7 +39,7 @@ export default function WorkSection() {
           </span>
         </Link>
 
-        <div className="absolute bottom-0 right-0 w-[200px] h-[200px] sm:w-[300px] sm:h-[300px] md:w-[400px] md:h-[400px] pointer-events-none">
+        <div className="absolute bottom-0 right-0 w-1/2 max-w-[400px] aspect-square pointer-events-none">
           <Lottie
             animationData={ConstructionAnimation}
             loop={true}
