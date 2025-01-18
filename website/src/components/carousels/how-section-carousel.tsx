@@ -1,22 +1,26 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { motion, useScroll, AnimatePresence, useSpring } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  AnimatePresence,
+  useSpring,
+  useInView,
+} from "framer-motion";
+import Lottie from "lottie-react";
 
 import BoatAnimation from "@/public/lottie/sailing_boat_2.json";
 import PaperAnimation from "@/public/lottie/paper_flying.json";
 import MarkerAnimation from "@/public/lottie/mark_json.json";
 import SpagAnimation from "@/public/lottie/spag_json.json";
 import DataAnimation from "@/public/lottie/data.json";
-import Lottie from "lottie-react";
 
-/* ---------------------------------- Data ---------------------------------- */
 interface Step {
   id: string;
   title: string;
 }
 
-// List of steps displayed in the carousel
 const STEPS: Step[] = [
   { id: "smooth-onboarding", title: "Smooth Onboarding" },
   { id: "data-integrity", title: "Data Integrity" },
@@ -25,7 +29,6 @@ const STEPS: Step[] = [
   { id: "fraud-eliminated", title: "Fraud Eliminated" },
 ];
 
-// Maps each step to its corresponding Lottie animation
 const lottieAnimations: Record<string, object> = {
   "smooth-onboarding": BoatAnimation,
   "data-integrity": PaperAnimation,
@@ -34,8 +37,6 @@ const lottieAnimations: Record<string, object> = {
   "fraud-eliminated": DataAnimation,
 };
 
-/* -------------------------------- Variants -------------------------------- */
-// Vertical fade/slide: from below if moving forward, from above if moving backward
 const carouselVariants = {
   enter: (direction: number) => ({
     y: direction > 0 ? 80 : -80,
@@ -58,30 +59,24 @@ export const HowSectionCarousel = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Active step, pinned state, and direction (forward vs. backward)
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
   const [isFixed, setIsFixed] = useState(false);
   const [direction, setDirection] = useState(0);
-
-  // Temporarily disable scroll-based updates when user manually clicks a nav item
   const [isManualScrolling, setIsManualScrolling] = useState(false);
 
-  // Track scroll progress over this section
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
   });
 
-  // Smooth out the scroll progress for smoother transitions
   const smoothScrollProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     mass: 1,
   });
 
-  /* --------------------- Sync step index with scroll position -------------------- */
   useEffect(() => {
-    if (isManualScrolling) return; // Skip updates if user manually navigates
+    if (isManualScrolling) return;
 
     const unsubscribe = smoothScrollProgress.on("change", (latest) => {
       const clampedValue = Math.max(0, Math.min(1, latest));
@@ -97,7 +92,6 @@ export const HowSectionCarousel = () => {
     return () => unsubscribe();
   }, [isManualScrolling, selectedStepIndex, smoothScrollProgress]);
 
-  /* --------------------- Pin/unpin the container while scrolling ------------------ */
   const checkShouldPin = useCallback(() => {
     if (!sectionRef.current || !contentRef.current) return;
 
@@ -116,20 +110,15 @@ export const HowSectionCarousel = () => {
     };
   }, [checkShouldPin]);
 
-  /* --------------------------- Navigation clicks (manual) -------------------------- */
   const handleNavClick = (stepId: string) => {
     const index = STEPS.findIndex((s) => s.id === stepId);
     if (index === -1 || index === selectedStepIndex) return;
 
-    // Animate direction
     setDirection(index > selectedStepIndex ? 1 : -1);
     setSelectedStepIndex(index);
-
-    // Disable scroll-based updates for a moment
     setIsManualScrolling(true);
 
     if (sectionRef.current) {
-      // Calculate how far to scroll within the pinned section (250vh)
       const fraction = index / (STEPS.length - 1);
       const sectionTop = sectionRef.current.offsetTop;
       const totalScrollHeight = window.innerHeight * 2.5;
@@ -137,108 +126,116 @@ export const HowSectionCarousel = () => {
 
       window.scrollTo({ top: targetScrollY, behavior: "smooth" });
 
-      // Re-enable scroll sync after the animation is likely finished
       setTimeout(() => {
         setIsManualScrolling(false);
       }, 700);
     }
   };
 
-  return (
-    <section
-      ref={sectionRef}
-      className="relative h-[280vh] bg-black snap-start overflow-hidden"
-      id="how-section"
-    >
-      {/* Container that becomes pinned in the middle of the viewport */}
-      <motion.div
-        ref={contentRef}
-        className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center absolute left-1/2 transform -translate-x-1/2"
-        style={{
-          position: isFixed ? "fixed" : "absolute",
-          top: isFixed ? "50%" : "0",
-          transform: isFixed ? "translate(-50%, -50%)" : "translate(-50%, 0)",
-        }}
-      >
-        {/* ------ Navigation Steps ------ */}
-        <div className="relative">
-          {/* Vertical line */}
-          <div
-            className="absolute left-5 top-0 w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent"
-            aria-hidden="true"
-          />
-          <nav className="space-y-12 relative" aria-label="Section Navigation">
-            {STEPS.map((step, index) => {
-              const isActive = selectedStepIndex === index;
-              return (
-                <motion.div
-                  key={step.id}
-                  className="relative cursor-pointer"
-                  onClick={() => handleNavClick(step.id)}
-                  initial={false}
-                  animate={{ opacity: isActive ? 1 : 0.5 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <div className="relative pl-12">
-                    {/* Dot */}
-                    <motion.div
-                      className="absolute left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
-                      style={{
-                        backgroundColor: isActive ? "#fff" : "transparent",
-                        border: "1px solid rgba(255,255,255,0.3)",
-                      }}
-                      animate={{
-                        scale: isActive ? 1 : 0.8,
-                        opacity: isActive ? 1 : 0.5,
-                      }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    {/* Title */}
-                    <span
-                      className={`font-light tracking-wide ${
-                        isActive
-                          ? "text-white text-xl md:text-3xl"
-                          : "text-zinc-200 text-lg md:text-xl"
-                      }`}
-                    >
-                      {step.title}
-                    </span>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </nav>
-        </div>
+  const inViewRef = useRef(null);
+  const isInView = useInView(inViewRef, { once: true, amount: 0.1 });
 
-        {/* ------ Carousel Lottie Animation ------ */}
-        <div className="relative h-80 sm:h-96 md:h-[500px] flex items-center justify-center overflow-hidden">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={STEPS[selectedStepIndex].id}
-              className="absolute inset-0 flex items-center justify-center"
-              custom={direction}
-              variants={carouselVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{ duration: 0.5 }}
+  return (
+    <motion.div
+      ref={inViewRef}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: isInView ? 1 : 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <section
+        ref={sectionRef}
+        className="relative h-[280vh] bg-black snap-start overflow-hidden"
+        id="how-section"
+      >
+        <motion.div
+          ref={contentRef}
+          className="container mx-auto px-4 sm:px-6 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-center absolute left-1/2 transform -translate-x-1/2"
+          style={{
+            position: isFixed ? "fixed" : "absolute",
+            top: isFixed ? "50%" : "0",
+            transform: isFixed ? "translate(-50%, -50%)" : "translate(-50%, 0)",
+          }}
+        >
+          <div className="relative w-full lg:w-1/2">
+            <div
+              className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent"
+              aria-hidden="true"
+            />
+            <nav
+              className="space-y-6 sm:space-y-8 lg:space-y-12 relative"
+              aria-label="Section Navigation"
             >
-              <div className=" w-[300px] h-[300px] md:w-[500px] md:h-[500px]">
-                <Lottie
-                  animationData={lottieAnimations[STEPS[selectedStepIndex].id]}
-                  loop
-                  autoplay
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                  }}
-                />
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      </motion.div>
-    </section>
+              {STEPS.map((step, index) => {
+                const isActive = selectedStepIndex === index;
+                return (
+                  <motion.div
+                    key={step.id}
+                    className="relative cursor-pointer"
+                    onClick={() => handleNavClick(step.id)}
+                    initial={false}
+                    animate={{ opacity: isActive ? 1 : 0.5 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <div className="relative pl-6 sm:pl-12">
+                      <motion.div
+                        className="absolute left-1 sm:left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full"
+                        style={{
+                          backgroundColor: isActive ? "#fff" : "transparent",
+                          border: "1px solid rgba(255,255,255,0.3)",
+                        }}
+                        animate={{
+                          scale: isActive ? 1 : 0.8,
+                          opacity: isActive ? 1 : 0.5,
+                        }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <span
+                        className={`font-light tracking-wide ${
+                          isActive
+                            ? "text-white text-base sm:text-xl md:text-2xl lg:text-3xl"
+                            : "text-zinc-200 text-sm sm:text-base md:text-lg lg:text-xl"
+                        }`}
+                      >
+                        {step.title}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="relative w-full lg:w-1/2 h-64 sm:h-80 md:h-96 lg:h-[500px] flex items-center justify-center overflow-hidden">
+            <AnimatePresence mode="wait" custom={direction}>
+              <motion.div
+                key={STEPS[selectedStepIndex].id}
+                className="absolute inset-0 flex items-center justify-center"
+                custom={direction}
+                variants={carouselVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.5 }}
+              >
+                <div className="w-full h-full max-w-[300px] max-h-[300px] sm:max-w-[400px] sm:max-h-[400px] md:max-w-[500px] md:max-h-[500px]">
+                  <Lottie
+                    animationData={
+                      lottieAnimations[STEPS[selectedStepIndex].id]
+                    }
+                    loop
+                    autoplay
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </section>
+    </motion.div>
   );
 };

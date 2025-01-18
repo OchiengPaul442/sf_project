@@ -7,7 +7,7 @@ import React, { useRef, useEffect } from "react";
 interface AnimatedTextProps {
   text: string;
   className: string;
-  align?: "left" | "right";
+  align?: "left" | "right" | "center";
 }
 
 const AnimatedText = ({
@@ -19,7 +19,6 @@ const AnimatedText = ({
   const isInView = useInView(ref, { amount: 0.3 });
   const words = text.split(" ");
 
-  // Reset animation when section leaves viewport
   useEffect(() => {
     if (!isInView) {
       ref.current?.style.setProperty("opacity", "0");
@@ -55,7 +54,13 @@ const AnimatedText = ({
   return (
     <motion.div
       ref={ref}
-      className={className}
+      className={`${className} ${
+        align === "center"
+          ? "text-center"
+          : align === "right"
+          ? "text-right"
+          : "text-left"
+      }`}
       variants={containerVariants}
       initial="hidden"
       animate={isInView ? "visible" : "hidden"}
@@ -63,12 +68,8 @@ const AnimatedText = ({
       {words.map((word, index) => (
         <motion.span
           key={`${word}-${index}`}
-          className="inline-block mr-[0.4em]"
+          className="inline-block mr-[0.4em] last:mr-0"
           variants={wordVariants}
-          style={{
-            display: "inline-block",
-            textAlign: align,
-          }}
         >
           {word}
         </motion.span>
@@ -86,11 +87,9 @@ const HowSection = () => {
     offset: ["start end", "end start"],
   });
 
-  // Smoother parallax effect
   const yFirst = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const ySecond = useTransform(scrollYProgress, [0, 1], [0, -30]);
 
-  // Force re-render of animations when section comes into view
   useEffect(() => {
     if (isEntirelyInView) {
       const timer = setTimeout(() => {
@@ -104,24 +103,48 @@ const HowSection = () => {
     <section
       ref={sectionRef}
       id="solutions"
-      className="relative min-h-screen py-40 flex justify-center items-center bg-black overflow-hidden snap-start"
+      className="relative min-h-screen py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden snap-start"
     >
-      <div className="container mx-auto space-y-32 px-6">
-        <motion.div style={{ y: yFirst }}>
+      <div className="container mx-auto space-y-16 sm:space-y-24 md:space-y-32 px-4 sm:px-6">
+        <motion.div style={{ y: yFirst }} className="relative">
           <AnimatedText
             text="By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability."
-            className="text-white text-[2.75rem] md:text-[3.25rem] font-normal leading-[1.4] tracking-[-0.02em] max-w-[90%]"
+            className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] font-normal leading-tight sm:leading-[1.3] md:leading-[1.4] tracking-[-0.02em] max-w-full sm:max-w-[95%] md:max-w-[90%]"
           />
+          {/* <motion.div
+            className="absolute -top-8 -left-8 w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full opacity-50 blur-xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 90, 0],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          /> */}
         </motion.div>
 
-        <GradientSeparator />
+        <GradientSeparator className="w-full" />
 
-        <motion.div style={{ y: ySecond }}>
+        <motion.div style={{ y: ySecond }} className="relative">
           <AnimatedText
             text="Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest."
-            className="text-white text-[2.75rem] md:text-[3.25rem] font-normal leading-[1.4] tracking-[-0.02em]"
+            className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] font-normal leading-tight sm:leading-[1.3] md:leading-[1.4] tracking-[-0.02em]"
             align="right"
           />
+          {/* <motion.div
+            className="absolute -bottom-8 -right-8 w-24 h-24 bg-gradient-to-tl from-blue-500 to-green-500 rounded-full opacity-50 blur-xl"
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, -90, 0],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          /> */}
         </motion.div>
       </div>
     </section>
