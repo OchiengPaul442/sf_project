@@ -7,13 +7,14 @@ import ConstructionAnimation from "@/public/lottie/contruction.json";
 import Lottie from "lottie-react";
 
 export default function WorkSection() {
-  const animation = useScrollAnimation();
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.5 });
 
   return (
     <section
-      className="min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 lg:py-24 snap-start"
-      ref={animation.ref}
-      style={animation.style}
+      ref={ref}
+      className={`min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 lg:py-24 transition-opacity duration-1000 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
       id="contact"
     >
       <div className="container mx-auto relative px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">

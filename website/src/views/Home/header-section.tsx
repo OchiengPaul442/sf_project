@@ -2,11 +2,11 @@
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
-import { useRef } from "react";
 import { useWindowSize } from "@/hooks/useWindowSize";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 export default function HeaderSection() {
-  const sectionRef = useRef(null);
+  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.1 });
   const { width } = useWindowSize();
   const isMobile = width < 768;
 
@@ -81,7 +81,9 @@ export default function HeaderSection() {
     <section
       ref={sectionRef}
       id="header-section"
-      className="relative snap-start min-h-screen md:min-h-[400vh] md:snap-none"
+      className={`relative min-h-screen md:min-h-[400vh] md:snap-none transition-opacity duration-1000 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
     >
       <div className="sticky top-0 h-screen bg-white flex items-center justify-center overflow-hidden">
         {/* Navigation */}

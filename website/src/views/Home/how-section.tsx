@@ -3,6 +3,7 @@
 import { GradientSeparator } from "@/components/ui/separator";
 import { motion, useScroll, useTransform, useInView } from "framer-motion";
 import React, { useRef, useEffect } from "react";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 interface AnimatedTextProps {
   text: string;
@@ -79,7 +80,7 @@ const AnimatedText = ({
 };
 
 const HowSection = () => {
-  const sectionRef = useRef<HTMLElement>(null);
+  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const isEntirelyInView = useInView(sectionRef, { amount: 0.5 });
 
   const { scrollYProgress } = useScroll({
@@ -97,13 +98,15 @@ const HowSection = () => {
       }, 100);
       return () => clearTimeout(timer);
     }
-  }, [isEntirelyInView]);
+  }, [isEntirelyInView, sectionRef]);
 
   return (
     <section
       ref={sectionRef}
       id="solutions"
-      className="relative min-h-screen py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden snap-start"
+      className={`relative min-h-screen py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden snap-start transition-opacity duration-1000 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
     >
       <div className="container mx-auto space-y-16 sm:space-y-24 md:space-y-32 px-4 sm:px-6">
         <motion.div style={{ y: yFirst }} className="relative">
@@ -111,18 +114,6 @@ const HowSection = () => {
             text="By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability."
             className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] font-normal leading-tight sm:leading-[1.3] md:leading-[1.4] tracking-[-0.02em] max-w-full sm:max-w-[95%] md:max-w-[90%]"
           />
-          {/* <motion.div
-            className="absolute -top-8 -left-8 w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full opacity-50 blur-xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, 90, 0],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          /> */}
         </motion.div>
 
         <GradientSeparator className="w-full" />
@@ -133,18 +124,6 @@ const HowSection = () => {
             className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] font-normal leading-tight sm:leading-[1.3] md:leading-[1.4] tracking-[-0.02em]"
             align="right"
           />
-          {/* <motion.div
-            className="absolute -bottom-8 -right-8 w-24 h-24 bg-gradient-to-tl from-blue-500 to-green-500 rounded-full opacity-50 blur-xl"
-            animate={{
-              scale: [1, 1.2, 1],
-              rotate: [0, -90, 0],
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          /> */}
         </motion.div>
       </div>
     </section>

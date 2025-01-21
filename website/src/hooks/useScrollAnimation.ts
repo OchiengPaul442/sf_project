@@ -1,16 +1,38 @@
-import { useInView } from "framer-motion";
-import { useRef } from "react";
+"use client";
+import { useEffect, useState, useRef } from "react";
 
-export function useScrollAnimation() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
-
-  return {
-    ref,
-    style: {
-      opacity: isInView ? 1 : 0,
-      transform: isInView ? "translateY(0)" : "translateY(20px)",
-      transition: "all 0.5s cubic-bezier(0.17, 0.55, 0.55, 1) 0.1s",
-    },
-  };
+interface ScrollAnimationOptions {
+  threshold?: number;
 }
+
+export const useScrollAnimation = ({
+  threshold = 0.1,
+}: ScrollAnimationOptions = {}) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold }
+    );
+
+    const currentElement = ref.current;
+    if (currentElement) {
+      observer.observe(currentElement);
+    }
+
+    return () => {
+      if (currentElement) {
+        observer.unobserve(currentElement);
+      }
+    };
+  }, [threshold]);
+
+  return { ref, isVisible };
+};

@@ -7,7 +7,7 @@ import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useEffect, useState } from "react";
 
 const FooterSection = () => {
-  const animation = useScrollAnimation();
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.7 });
   const [showButton, setShowButton] = useState(false);
 
   const scrollToTop = () => {
@@ -29,9 +29,10 @@ const FooterSection = () => {
 
   return (
     <footer
-      className="min-h-screen container mx-auto bg-black flex flex-col justify-end relative snap-start p-4 sm:p-6 md:p-8 lg:p-12"
-      ref={animation.ref}
-      style={animation.style}
+      ref={ref}
+      className={`min-h-screen container mx-auto bg-black flex flex-col justify-end relative p-4 sm:p-6 md:p-8 lg:p-12 transition-opacity duration-1000 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
     >
       {showButton && (
         <Button

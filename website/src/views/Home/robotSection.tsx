@@ -3,10 +3,18 @@
 import React from "react";
 import RobotAnimation from "@/public/lottie/robot.json";
 import Lottie from "lottie-react";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 const RobotSection = () => {
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
+
   return (
-    <section className="relative h-screen bg-black flex flex-col overflow-hidden items-center justify-center py-24 snap-start">
+    <section
+      ref={ref}
+      className={`relative h-screen bg-black flex flex-col overflow-hidden items-center justify-center py-24 transition-opacity duration-1000 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
+    >
       <div className="container mx-auto flex flex-col items-center">
         {/* Heading */}
         <h2 className="text-white text-[2.75rem] md:text-[4.4rem] font-extralight tracking-[-0.02em] mb-16">

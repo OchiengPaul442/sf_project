@@ -6,14 +6,15 @@ import AngelAnimation from "@/public/lottie/angel.json";
 import Lottie from "lottie-react";
 
 export default function InvestSection() {
-  const animation = useScrollAnimation();
+  const { ref, isVisible } = useScrollAnimation({ threshold: 0.6 });
 
   return (
     <section
       id="invest"
-      ref={animation.ref}
-      style={animation.style}
-      className="min-h-screen bg-white text-black flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 snap-start"
+      ref={ref}
+      className={`min-h-screen bg-white text-black flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
     >
       <div className="container mx-auto flex flex-col items-center space-y-6 sm:space-y-8 max-w-4xl">
         {/* Header Section */}
