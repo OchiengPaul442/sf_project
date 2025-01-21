@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
@@ -18,16 +17,9 @@ export function Nav() {
           {/* Logo */}
           <Link
             href="/home"
-            className="hover:opacity-70 transition-opacity top-6 relative"
+            className="font-black text-3xl text-black top-6 relative"
           >
-            <Image
-              src="/images/logo.png"
-              alt="We're Saving Food"
-              width={85.13}
-              height={90}
-              loading="eager"
-              className="w-auto h-auto"
-            />
+            sf.
           </Link>
 
           {/* Menu Button */}

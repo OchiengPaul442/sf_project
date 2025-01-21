@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import Image from "next/image";
 
 interface MenuModalProps {
   isOpen: boolean;
@@ -83,16 +82,9 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
                 >
                   <Link
                     href="/home"
-                    className="hover:opacity-70 transition-opacity"
+                    className="font-black text-3xl text-white relative"
                   >
-                    <Image
-                      src="/images/logo-white.png"
-                      alt="We're Saving Food"
-                      width={85.13}
-                      height={100}
-                      loading="eager"
-                      className="w-auto h-auto"
-                    />
+                    sf.
                   </Link>
                 </motion.h1>
 

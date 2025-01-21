@@ -1,95 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import Loader from "@/views/loader";
+import React from "react";
 import ReduxProvider from "@/redux-store/ReduxProvider";
 
 /**
- * Provider component that preloads images/videos (and optionally JSON)
- * before rendering the entire application.
+ * Provider component that wraps the application with ReduxProvider.
  */
 export const Provider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
-
-  /**
-   * Loads all required assets (images, videos, JSON files) in parallel.
-   * Errors are caught and logged, but the application will still render.
-   */
-  const loadAllAssets = useCallback(async () => {
-    try {
-      // Extend this array with any assets you need to preload
-      await Promise.all([
-        loadImage("/images/logo.png"),
-        loadImage("/images/logo-white.png"),
-        loadJSON("/lottie/angel.json"),
-        loadJSON("/lottie/robot.json"),
-        loadJSON("/lottie/paper_fly.json"),
-        loadJSON("/lottie/sailing_boat_2.json"),
-        loadJSON("/lottie/mark_json.json"),
-        loadJSON("/lottie/spag_json.json"),
-        loadJSON("/lottie/data.json"),
-        loadJSON("/lottie/construction.json"),
-      ]);
-
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error loading assets:", error);
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Preload all assets
-    loadAllAssets();
-  }, [loadAllAssets]);
-
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  return (
-    <>
-      <ReduxProvider>{children}</ReduxProvider>
-    </>
-  );
-};
-
-/* -------------------------------------------------------------------------- */
-/*                            Helper Functions                                */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Loads an image from a given src, returning a Promise<void>.
- */
-const loadImage = (src: string): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = (err) => reject(err);
-    img.src = src;
-  });
-
-/**
- * Loads a video from a given src, returning a Promise<void>.
- */
-// const loadVideo = (src: string): Promise<void> =>
-//   new Promise((resolve, reject) => {
-//     const video = document.createElement("video");
-//     video.oncanplaythrough = () => resolve();
-//     video.onerror = (err) => reject(err);
-//     video.src = src;
-//     video.load();
-//   });
-
-/**
- * Fetches and validates a JSON file, returning a Promise<void>.
- */
-const loadJSON = async (url: string): Promise<void> => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to load JSON at ${url}`);
-  }
-  await response.json();
+  return <ReduxProvider>{children}</ReduxProvider>;
 };
