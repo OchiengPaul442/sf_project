@@ -15,14 +15,11 @@ export default function HeaderSection() {
     offset: ["start start", "end start"],
   });
 
-  // Define animation ranges
   const progressRange = [0, 0.25, 0.5, 0.75, 1];
 
-  // Conditional animations based on screen size
   const getAnimationValues = (mobileValues: any, desktopValues: any) =>
     isMobile ? mobileValues : desktopValues;
 
-  // Text animations with mobile considerations
   const textScale = useTransform(
     scrollYProgress,
     progressRange,
@@ -35,7 +32,6 @@ export default function HeaderSection() {
     getAnimationValues([1, 0.8, 0.6, 0.4, 0.2], [1, 0.75, 0.5, 0.25, 0])
   );
 
-  // Movement animations
   const xMove = useTransform(
     scrollYProgress,
     progressRange,
@@ -54,7 +50,6 @@ export default function HeaderSection() {
     )
   );
 
-  // Navigation and intro text animations
   const navOpacity = useTransform(
     scrollYProgress,
     [0, isMobile ? 0.1 : 0.2],
@@ -86,7 +81,6 @@ export default function HeaderSection() {
       }`}
     >
       <div className="sticky top-0 h-screen bg-white flex items-center justify-center overflow-hidden">
-        {/* Navigation */}
         <motion.div
           style={{
             opacity: navOpacity,
@@ -99,7 +93,6 @@ export default function HeaderSection() {
           <Nav />
         </motion.div>
 
-        {/* Content */}
         <div className="text-center relative z-10">
           <motion.h2
             style={{ opacity: introTextOpacity }}
@@ -120,7 +113,6 @@ export default function HeaderSection() {
           </motion.h1>
         </div>
 
-        {/* Gradient Overlay */}
         <motion.div
           className="absolute inset-0 pointer-events-none"
           style={{

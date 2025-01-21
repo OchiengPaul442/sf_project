@@ -38,17 +38,11 @@ const AnimatedText = ({
   };
 
   const wordVariants = {
-    hidden: {
-      y: 20,
-      opacity: 0,
-    },
+    hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: [0.2, 0.65, 0.3, 0.9],
-      },
+      transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] },
     },
   };
 

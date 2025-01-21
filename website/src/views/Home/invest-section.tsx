@@ -17,7 +17,6 @@ export default function InvestSection() {
       }`}
     >
       <div className="container mx-auto flex flex-col items-center justify-between h-full max-w-4xl">
-        {/* Header Section */}
         <div className="text-center space-y-4 w-full mb-8 sm:mb-12">
           <h2 className="text-[#999999] text-lg sm:text-xl md:text-2xl lg:text-3xl font-normal">
             Participate in our seed round
@@ -27,23 +26,17 @@ export default function InvestSection() {
           </h3>
         </div>
 
-        {/* Image Section */}
         <div className="flex justify-center w-full my-12">
           <div className="w-[200px] h-[200px] lg:w-[300px] lg:h-[300px]">
             <Lottie
               animationData={AngelAnimation}
-              loop={true}
-              autoplay={true}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-              }}
+              loop
+              autoplay
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
         </div>
 
-        {/* Form Section */}
         <div className="w-full">
           <InvestForm />
         </div>

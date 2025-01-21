@@ -12,10 +12,10 @@ export default function WorkSection() {
   return (
     <section
       ref={ref}
+      id="contact"
       className={`min-h-dvh bg-[#f5f5f5] text-black relative overflow-hidden flex items-center justify-center transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
-      id="contact"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
         <div className="text-center space-y-6 lg:space-y-8 mb-12 lg:mb-16 max-w-4xl mx-auto">
@@ -43,8 +43,8 @@ export default function WorkSection() {
         <div className="absolute bottom-0 right-0 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] aspect-square pointer-events-none">
           <Lottie
             animationData={ConstructionAnimation}
-            loop={true}
-            autoplay={true}
+            loop
+            autoplay
             style={{
               width: "100%",
               height: "100%",

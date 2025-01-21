@@ -16,20 +16,17 @@ const RobotSection = () => {
       }`}
     >
       <div className="container mx-auto flex flex-col items-center">
-        {/* Heading */}
         <h2 className="text-white text-[2.75rem] md:text-[4.4rem] font-extralight tracking-[-0.02em] mb-16">
           with{" "}
           <span className="inline-block font-extrabold">
             AI<span className="text-white">...</span>
           </span>
         </h2>
-
-        {/* Robot Animation Container */}
         <div className="w-full max-w-[400px] bg-black aspect-square relative">
           <Lottie
             animationData={RobotAnimation}
-            loop={true}
-            autoplay={true}
+            loop
+            autoplay
             style={{
               width: "100%",
               height: "100%",

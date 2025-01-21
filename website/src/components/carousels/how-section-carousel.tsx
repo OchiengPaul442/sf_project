@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { motion, useScroll, AnimatePresence, useSpring } from "framer-motion";
 import Lottie from "lottie-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-
 import BoatAnimation from "@/public/lottie/sailing_boat_2.json";
 import PaperAnimation from "@/public/lottie/paper_flying.json";
 import MarkerAnimation from "@/public/lottie/mark_json.json";
@@ -38,11 +37,7 @@ const carouselVariants = {
     opacity: 0,
     zIndex: 0,
   }),
-  center: {
-    y: 0,
-    opacity: 1,
-    zIndex: 1,
-  },
+  center: { y: 0, opacity: 1, zIndex: 1 },
   exit: (direction: number) => ({
     y: direction < 0 ? 80 : -80,
     opacity: 0,
@@ -51,9 +46,7 @@ const carouselVariants = {
 };
 
 export const HowSectionCarousel = () => {
-  const { ref: sectionRef, isVisible } = useScrollAnimation({
-    threshold: 0.4,
-  });
+  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.4 });
   const contentRef = useRef<HTMLDivElement>(null);
 
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
@@ -74,7 +67,6 @@ export const HowSectionCarousel = () => {
 
   useEffect(() => {
     if (isManualScrolling) return;
-
     const unsubscribe = smoothScrollProgress.on("change", (latest) => {
       const clampedValue = Math.max(0, Math.min(1, latest));
       const stepIndex = Math.floor(clampedValue * STEPS.length);
@@ -85,26 +77,20 @@ export const HowSectionCarousel = () => {
         setSelectedStepIndex(validIndex);
       }
     });
-
     return () => unsubscribe();
   }, [isManualScrolling, selectedStepIndex, smoothScrollProgress]);
 
   const checkShouldPin = useCallback(() => {
-    if (!sectionRef.current || !contentRef.current) return;
-
+    if (!sectionRef.current) return;
     const rect = sectionRef.current.getBoundingClientRect();
     const windowHeight = window.innerHeight;
-    const shouldBeFixed = rect.top <= 0 && rect.bottom >= windowHeight;
-
-    setIsFixed(shouldBeFixed);
+    setIsFixed(rect.top <= 0 && rect.bottom >= windowHeight);
   }, [sectionRef]);
 
   useEffect(() => {
     checkShouldPin();
     window.addEventListener("scroll", checkShouldPin, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", checkShouldPin);
-    };
+    return () => window.removeEventListener("scroll", checkShouldPin);
   }, [checkShouldPin]);
 
   const handleNavClick = (stepId: string) => {
@@ -146,6 +132,7 @@ export const HowSectionCarousel = () => {
           transform: isFixed ? "translate(-50%, -50%)" : "translate(-50%, 0)",
         }}
       >
+        {/* Navigation */}
         <div className="relative w-full lg:w-1/2">
           <div
             className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent"
@@ -195,6 +182,7 @@ export const HowSectionCarousel = () => {
           </nav>
         </div>
 
+        {/* Lottie Animation Carousel */}
         <div className="relative w-full lg:w-1/2 h-64 sm:h-80 md:h-96 lg:h-[500px] flex items-center justify-center overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
