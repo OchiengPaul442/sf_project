@@ -12,19 +12,19 @@ export default function WorkSection() {
   return (
     <section
       ref={ref}
-      className={`min-h-screen bg-[#f5f5f5] text-black relative overflow-hidden py-12 lg:py-24 transition-opacity duration-1000 ${
+      className={`min-h-dvh bg-[#f5f5f5] text-black relative overflow-hidden flex items-center justify-center transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
       id="contact"
     >
-      <div className="container mx-auto relative px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center min-h-[calc(100vh-6rem)]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
         <div className="text-center space-y-6 lg:space-y-8 mb-12 lg:mb-16 max-w-4xl mx-auto">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
             Work with us
           </h2>
           <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-[-0.02em] leading-[1.1]">
             Are you an engineer who&apos;s excited about our{" "}
-            <br className="hidden md:block" /> mission?
+            <span className="block sm:inline">mission?</span>
           </h3>
         </div>
 
@@ -40,7 +40,7 @@ export default function WorkSection() {
           </span>
         </Link>
 
-        <div className="absolute bottom-0 right-0 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[350px] lg:h-[350px] aspect-square pointer-events-none">
+        <div className="absolute bottom-0 right-0 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] aspect-square pointer-events-none">
           <Lottie
             animationData={ConstructionAnimation}
             loop={true}

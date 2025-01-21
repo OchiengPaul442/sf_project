@@ -12,13 +12,13 @@ export default function InvestSection() {
     <section
       id="invest"
       ref={ref}
-      className={`min-h-screen bg-white text-black flex flex-col justify-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${
+      className={`min-h-dvh bg-white text-black flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div className="container mx-auto flex flex-col items-center space-y-6 sm:space-y-8 max-w-4xl">
+      <div className="container mx-auto flex flex-col items-center justify-between h-full max-w-4xl">
         {/* Header Section */}
-        <div className="text-center space-y-4 w-full">
+        <div className="text-center space-y-4 w-full mb-8 sm:mb-12">
           <h2 className="text-[#999999] text-lg sm:text-xl md:text-2xl lg:text-3xl font-normal">
             Participate in our seed round
           </h2>
@@ -28,8 +28,8 @@ export default function InvestSection() {
         </div>
 
         {/* Image Section */}
-        <div className="flex justify-center w-full">
-          <div className="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[400px] lg:h-[400px] -my-16">
+        <div className="flex justify-center w-full my-12">
+          <div className="w-[200px] h-[200px] lg:w-[300px] lg:h-[300px]">
             <Lottie
               animationData={AngelAnimation}
               loop={true}
@@ -44,7 +44,9 @@ export default function InvestSection() {
         </div>
 
         {/* Form Section */}
-        <InvestForm />
+        <div className="w-full">
+          <InvestForm />
+        </div>
       </div>
     </section>
   );

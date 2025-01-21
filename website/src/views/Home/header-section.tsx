@@ -81,7 +81,7 @@ export default function HeaderSection() {
     <section
       ref={sectionRef}
       id="header-section"
-      className={`relative min-h-screen md:min-h-[400vh] md:snap-none transition-opacity duration-1000 ${
+      className={`relative min-h-dvh md:min-h-[400vh] md:snap-none transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

@@ -104,7 +104,7 @@ const HowSection = () => {
     <section
       ref={sectionRef}
       id="solutions"
-      className={`relative min-h-screen py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden snap-start transition-opacity duration-1000 ${
+      className={`relative min-h-dvh py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden snap-start transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

@@ -132,7 +132,7 @@ export const HowSectionCarousel = () => {
   return (
     <section
       ref={sectionRef}
-      className={`relative h-[200vh] bg-black overflow-hidden transition-opacity duration-1000 ${
+      className={`relative h-[190vh] bg-black overflow-hidden ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
       id="how-section"
