@@ -12,7 +12,7 @@ export default function InvestSection() {
     <section
       id="invest"
       ref={ref}
-      className={`min-h-dvh bg-white text-black flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${
+      className={`min-h-dvh bg-white text-black  snap-start flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

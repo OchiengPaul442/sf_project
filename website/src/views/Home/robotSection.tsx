@@ -11,7 +11,7 @@ const RobotSection = () => {
   return (
     <section
       ref={ref}
-      className={`relative min-h-dvh bg-black flex flex-col overflow-hidden items-center justify-center py-24 transition-opacity duration-1000 ${
+      className={`relative min-h-dvh snap-start bg-black flex flex-col overflow-hidden items-center justify-center py-24 transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

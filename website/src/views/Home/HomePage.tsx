@@ -23,17 +23,19 @@ export default function HomePage() {
   };
 
   return (
-    <main>
+    <div>
       <HeaderSection />
       <RobotSection />
       <HowSection />
       <HowSectionCarousel />
-      <WorkSection />
-      <InvestSection />
-      <FooterSection />
+      <main className="overflow-y-auto snap-y snap-mandatory">
+        <WorkSection />
+        <InvestSection />
+        <FooterSection />
+      </main>
 
       {/* Menu Modal */}
       <MenuModal isOpen={isOpen as boolean} onClose={handleToggle} />
-    </main>
+    </div>
   );
 }

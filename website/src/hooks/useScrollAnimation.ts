@@ -1,12 +1,13 @@
-"use client";
 import { useEffect, useState, useRef } from "react";
 
 interface ScrollAnimationOptions {
   threshold?: number | number[];
+  snapAlign?: "start" | "center" | "end";
 }
 
 export const useScrollAnimation = ({
   threshold = 0.1,
+  snapAlign = "start",
 }: ScrollAnimationOptions = {}) => {
   const [isVisible, setIsVisible] = useState(false);
   const [ratio, setRatio] = useState(0);
@@ -15,12 +16,21 @@ export const useScrollAnimation = ({
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Update intersection ratio continuously
         setRatio(entry.intersectionRatio);
-        // Update visibility flag based on intersection
         setIsVisible(entry.isIntersecting);
+
+        // Add smooth scrolling when element comes into view
+        if (entry.isIntersecting) {
+          entry.target.scrollIntoView({
+            behavior: "smooth",
+            block: snapAlign,
+          });
+        }
       },
-      { threshold: Array.isArray(threshold) ? threshold : [threshold] }
+      {
+        threshold: Array.isArray(threshold) ? threshold : [threshold],
+        rootMargin: "0px",
+      }
     );
 
     const currentElement = ref.current;
@@ -34,7 +44,7 @@ export const useScrollAnimation = ({
       }
       observer.disconnect();
     };
-  }, [threshold]);
+  }, [threshold, snapAlign]);
 
   return { ref, isVisible, ratio };
 };

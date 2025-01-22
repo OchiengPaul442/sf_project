@@ -26,7 +26,7 @@ const FooterSection = () => {
   return (
     <footer
       ref={ref}
-      className={`min-h-dvh container mx-auto bg-black flex flex-col justify-end relative p-4 sm:p-6 md:p-8 lg:p-12 transition-opacity duration-1000 ${
+      className={`min-h-dvh container mx-auto bg-black snap-start flex flex-col justify-end relative p-4 sm:p-6 md:p-8 lg:p-12 transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

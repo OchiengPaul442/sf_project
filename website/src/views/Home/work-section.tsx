@@ -13,7 +13,7 @@ export default function WorkSection() {
     <section
       ref={ref}
       id="contact"
-      className={`min-h-dvh bg-[#f5f5f5] text-black relative overflow-hidden flex items-center justify-center transition-opacity duration-1000 ${
+      className={`min-h-dvh bg-[#f5f5f5] snap-start text-black relative overflow-hidden flex items-center justify-center transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

@@ -19,13 +19,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${qanelasSoft.variable} font-sans h-[calc(100vh*5)]`}
-    >
-      <body>
+    <html lang="en" className={`${qanelasSoft.variable} font-sans`}>
+      <body className="h-screen">
         <Provider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <main className="h-[calc(100vh*5)] overscroll-none">
+              {children}
+            </main>
+          </ThemeProvider>
         </Provider>
         <ToastContainer position="top-center" autoClose={5000} />
       </body>
