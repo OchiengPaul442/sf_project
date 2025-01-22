@@ -45,7 +45,7 @@ const carouselVariants = {
   }),
 };
 
-export const HowSectionCarousel = () => {
+const HowSectionCarousel = () => {
   const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.4 });
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -214,3 +214,5 @@ export const HowSectionCarousel = () => {
     </section>
   );
 };
+
+export default HowSectionCarousel;

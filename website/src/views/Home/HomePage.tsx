@@ -13,7 +13,11 @@ const FooterSection = dynamic(() => import("@/views/Home/footer-section"));
 const RobotSection = dynamic(() => import("./robotSection"));
 const MenuModal = dynamic(() => import("@/components/dialog/menu-modal"));
 
-import { HowSectionCarousel } from "@/components/carousels/how-section-carousel";
+// Disable SSR for components that rely on browser APIs
+const HowSectionCarousel = dynamic(
+  () => import("@/components/carousels/how-section-carousel"),
+  { ssr: false } // Disable SSR
+);
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -31,6 +35,7 @@ export default function HomePage() {
         <RobotSection />
         <HowSection />
       </main>
+      {/* Ensure this runs only on the client */}
       <HowSectionCarousel />
       <main className="overflow-y-auto snap-y snap-mandatory">
         <WorkSection />
