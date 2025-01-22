@@ -25,8 +25,10 @@ export default function HomePage() {
   return (
     <div>
       <HeaderSection />
-      <RobotSection />
-      <HowSection />
+      <main className="overflow-y-auto snap-y snap-mandatory">
+        <RobotSection />
+        <HowSection />
+      </main>
       <HowSectionCarousel />
       <main className="overflow-y-auto snap-y snap-mandatory">
         <WorkSection />
