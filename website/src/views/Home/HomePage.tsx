@@ -1,23 +1,25 @@
 "use client";
 
-import HeaderSection from "@/views/Home/header-section";
-import HowSection from "@/views/Home/how-section";
-import WorkSection from "@/views/Home/work-section";
-import InvestSection from "@/views/Home/invest-section";
-import FooterSection from "@/views/Home/footer-section";
-import { HowSectionCarousel } from "@/components/carousels/how-section-carousel";
-import MenuModal from "@/components/dialog/menu-modal";
-
+import dynamic from "next/dynamic";
 import { useSelector, useDispatch } from "@/redux-store/hooks";
-
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
-import RobotSection from "./robotSection";
+
+// Dynamic Imports
+const HeaderSection = dynamic(() => import("@/views/Home/header-section"));
+const HowSection = dynamic(() => import("@/views/Home/how-section"));
+const WorkSection = dynamic(() => import("@/views/Home/work-section"));
+const InvestSection = dynamic(() => import("@/views/Home/invest-section"));
+const FooterSection = dynamic(() => import("@/views/Home/footer-section"));
+const RobotSection = dynamic(() => import("./robotSection"));
+const MenuModal = dynamic(() => import("@/components/dialog/menu-modal"));
+
+import { HowSectionCarousel } from "@/components/carousels/how-section-carousel";
 
 export default function HomePage() {
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
-  // toggle menu
+  // Toggle menu
   const handleToggle = () => {
     dispatch(toggleMenu());
   };
