@@ -5,19 +5,33 @@ import { useSelector, useDispatch } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 
 // Dynamic Imports
-const HeaderSection = dynamic(() => import("@/views/Home/header-section"));
-const HowSection = dynamic(() => import("@/views/Home/how-section"));
-const WorkSection = dynamic(() => import("@/views/Home/work-section"));
-const InvestSection = dynamic(() => import("@/views/Home/invest-section"));
-const FooterSection = dynamic(() => import("@/views/Home/footer-section"));
-const RobotSection = dynamic(() => import("./robotSection"));
-const MenuModal = dynamic(() => import("@/components/dialog/menu-modal"));
-
-// Disable SSR for components that rely on browser APIs
+const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
+  ssr: false,
+}); // Disable SSR if HeaderSection accesses browser APIs
+const HowSection = dynamic(() => import("@/views/Home/how-section"), {
+  ssr: false,
+});
+const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
+  ssr: false,
+});
+const InvestSection = dynamic(() => import("@/views/Home/invest-section"), {
+  ssr: false,
+});
+const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
+  ssr: false,
+});
+const RobotSection = dynamic(() => import("./robotSection"), {
+  ssr: false,
+});
+const MenuModal = dynamic(() => import("@/components/dialog/menu-modal"), {
+  ssr: false,
+});
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
-  { ssr: false } // Disable SSR
-);
+  {
+    ssr: false,
+  }
+); // Ensure this is client-side only
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -35,7 +49,6 @@ export default function HomePage() {
         <RobotSection />
         <HowSection />
       </main>
-      {/* Ensure this runs only on the client */}
       <HowSectionCarousel />
       <main className="overflow-y-auto snap-y snap-mandatory">
         <WorkSection />
