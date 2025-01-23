@@ -38,9 +38,9 @@ export default function HeaderSection() {
 
   // Create a floating animation
   const floating = {
-    y: [0, -10, 0],
+    y: [0, -20, 0],
     transition: {
-      duration: 4,
+      duration: 6,
       repeat: Number.POSITIVE_INFINITY,
       repeatType: "reverse" as const,
       ease: "easeInOut",
