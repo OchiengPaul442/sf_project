@@ -1,3 +1,4 @@
+import React from "react";
 import { motion } from "framer-motion";
 
 interface AnimatedSectionProps {
@@ -43,7 +44,7 @@ export const AnimatedSection: React.FC<AnimatedSectionProps> = ({
 
   return (
     <motion.div
-      className="fixed inset-0 w-full h-screen overflow-hidden"
+      className="fixed inset-0 w-full h-screen overflow-hidden touch-none"
       custom={scrollDirection}
       initial="initial"
       animate={isActive ? "enter" : "exit"}

@@ -56,6 +56,7 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollLockRef = useRef(false);
+  const touchStartRef = useRef<number | null>(null);
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
@@ -109,6 +110,38 @@ export default function HomePage() {
     }
   }, [currentPage, scrollToSection, sections.length]);
 
+  // Mobile touch scroll handling
+  const handleTouchStart = useCallback((event: TouchEvent) => {
+    touchStartRef.current = event.touches[0].clientY;
+  }, []);
+
+  const handleTouchMove = useCallback(
+    (event: TouchEvent) => {
+      if (!touchStartRef.current) return;
+
+      const currentY = event.touches[0].clientY;
+      const deltaY = touchStartRef.current - currentY;
+      const threshold = 50; // Adjust sensitivity as needed
+
+      if (Math.abs(deltaY) > threshold) {
+        if (deltaY > 0 && currentPage < sections.length - 1) {
+          event.preventDefault();
+          scrollToSection(currentPage + 1);
+        } else if (deltaY < 0 && currentPage > 0) {
+          event.preventDefault();
+          scrollToSection(currentPage - 1);
+        }
+
+        touchStartRef.current = null;
+      }
+    },
+    [currentPage, scrollToSection, sections.length]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    touchStartRef.current = null;
+  }, []);
+
   const handleWheel = useCallback(
     (event: WheelEvent) => {
       const deltaY = event.deltaY;
@@ -148,21 +181,40 @@ export default function HomePage() {
 
   useEffect(() => {
     const wheelOptions = { passive: false };
+    const touchOptions = { passive: false };
+
     window.addEventListener("wheel", handleWheel, wheelOptions);
     window.addEventListener("keydown", handleKeyDown);
+
+    // Mobile touch events
+    window.addEventListener("touchstart", handleTouchStart, touchOptions);
+    window.addEventListener("touchmove", handleTouchMove, touchOptions);
+    window.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [handleWheel, handleKeyDown]);
+  }, [
+    handleWheel,
+    handleKeyDown,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  ]);
 
   const handleToggle = () => dispatch(toggleMenu());
 
   return (
     <>
-      <div className="relative w-full" style={{ height: totalHeight }}>
-        <div className="relative">
+      <div
+        className="relative w-full overflow-hidden"
+        style={{ height: totalHeight }}
+      >
+        <div className="relative h-full">
           <AnimatePresence initial={false} mode="wait">
             {sections.map(({ Component, id }, index) => (
               <AnimatedSection
