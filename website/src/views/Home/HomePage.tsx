@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
-import { AnimatedSection } from "@/utils/AnimatedSection";
+import { AnimatedSection } from "@/components/AnimatedSection";
 import { isMobile } from "@/utils/isMobile";
 import { useRef, type RefObject } from "react";
 

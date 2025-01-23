@@ -14,12 +14,40 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick, isVisible }) => {
           className="hidden fixed lg:block bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 bg-white text-black border border-black rounded-full p-2 sm:p-3 shadow-lg z-50 transition-colors hover:bg-black hover:text-white"
           onClick={onClick}
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            transition: {
+              y: {
+                duration: 0.6,
+                repeat: Number.POSITIVE_INFINITY,
+                repeatType: "reverse",
+                ease: "easeInOut",
+              },
+            },
+          }}
           exit={{ opacity: 0, y: 20 }}
-          whileHover={{ scale: 1.1 }}
+          whileHover={{
+            scale: 1.1,
+            transition: { duration: 0.2 },
+          }}
           whileTap={{ scale: 0.9 }}
         >
-          <ChevronDown size={20} />
+          <motion.div
+            animate={{
+              y: [0, -4, 0],
+              transition: {
+                y: {
+                  duration: 0.6,
+                  repeat: Number.POSITIVE_INFINITY,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                },
+              },
+            }}
+          >
+            <ChevronDown size={20} />
+          </motion.div>
         </motion.button>
       )}
     </AnimatePresence>
