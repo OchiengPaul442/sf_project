@@ -11,7 +11,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 interface MenuModalProps {
   isOpen: boolean;
@@ -70,7 +69,7 @@ export default function MenuModal({
             <div className="container mx-auto px-6 py-12 min-h-screen">
               {/* Header: Logo + Close Button */}
               <div className="flex justify-between items-start">
-                <motion.h1
+                {/* <motion.h1
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="text-2xl font-bold"
@@ -81,7 +80,8 @@ export default function MenuModal({
                   >
                     sf.
                   </Link>
-                </motion.h1>
+                </motion.h1> */}
+                <div></div>
 
                 <Button
                   variant="ghost"

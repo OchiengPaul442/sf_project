@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
@@ -15,12 +14,13 @@ export function Nav() {
       <nav className="fixed top-0 left-0 w-full z-50 bg-transparent">
         <div className="container mx-auto flex justify-between items-center py-6 px-4">
           {/* Logo */}
-          <Link
+          {/* <Link
             href="/home"
             className="font-black text-3xl text-black top-6 relative"
           >
             sf.
-          </Link>
+          </Link> */}
+          <div></div>
 
           {/* Menu Button */}
           <Button

@@ -2,10 +2,27 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import Lottie from "lottie-react";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
+import { useEffect, useRef } from "react";
+import lottie from "lottie-web";
 
 export default function WorkSection() {
+  const animationContainer = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (animationContainer.current) {
+      const anim = lottie.loadAnimation({
+        container: animationContainer.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: ConstructionAnimation,
+      });
+
+      return () => anim.destroy();
+    }
+  }, []);
+
   return (
     <section
       id="contact"
@@ -13,7 +30,7 @@ export default function WorkSection() {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full relative">
         {/* Main Content */}
-        <div className="text-center space-y-6 lg:space-y-8 max-w-4xl mx-auto">
+        <div className="text-center space-y-6 lg:space-y-8 max-w-3xl mx-auto">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
             Work with us
           </h2>
@@ -38,19 +55,11 @@ export default function WorkSection() {
           </Link>
         </div>
 
-        {/* Lottie Animation */}
-        <div className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none">
-          <Lottie
-            animationData={ConstructionAnimation}
-            loop
-            autoplay
-            style={{
-              width: "100%",
-              height: "100%",
-              filter: "brightness(0)",
-            }}
-          />
-        </div>
+        {/* Lottie Animation with Floating Effect */}
+        <div
+          ref={animationContainer}
+          className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none animate-float"
+        />
       </div>
     </section>
   );
