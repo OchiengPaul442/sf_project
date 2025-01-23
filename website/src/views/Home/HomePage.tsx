@@ -52,6 +52,7 @@ export default function HomePage() {
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const sections: Section[] = [
     { Component: HeaderSection, id: "home", ref: useRef<HTMLDivElement>(null) },
     {
@@ -224,7 +225,7 @@ export default function HomePage() {
         >
           <div className="relative">
             <AnimatePresence initial={false} mode="wait">
-              {sections.map(({ Component, id, ref }, index) => (
+              {sections.map(({ Component, id }, index) => (
                 <AnimatedSection
                   key={`animated-${id}`}
                   index={index}
@@ -232,9 +233,7 @@ export default function HomePage() {
                   total={sections.length}
                   scrollDirection={scrollDirection}
                 >
-                  <div ref={ref}>
-                    <Component />
-                  </div>
+                  <Component />
                 </AnimatedSection>
               ))}
             </AnimatePresence>
