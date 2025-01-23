@@ -11,7 +11,7 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick, isVisible }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.button
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 bg-white text-black border border-black rounded-full p-2 sm:p-3 shadow-lg z-50 transition-colors hover:bg-black hover:text-white"
+          className="hidden md:fixed bottom-4 right-4 sm:bottom-6 sm:right-6 md:bottom-8 md:right-8 bg-white text-black border border-black rounded-full p-2 sm:p-3 shadow-lg z-50 transition-colors hover:bg-black hover:text-white"
           onClick={onClick}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

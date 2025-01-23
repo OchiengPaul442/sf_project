@@ -11,15 +11,8 @@ export function Nav() {
 
   return (
     <div>
-      <nav className="fixed top-0 left-0 w-full z-50 bg-transparent">
+      <nav className="w-full z-50 bg-transparent">
         <div className="container mx-auto flex justify-between items-center py-6 px-4">
-          {/* Logo */}
-          {/* <Link
-            href="/home"
-            className="font-black text-3xl text-black top-6 relative"
-          >
-            sf.
-          </Link> */}
           <div></div>
 
           {/* Menu Button */}

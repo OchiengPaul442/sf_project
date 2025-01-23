@@ -42,7 +42,7 @@ export default function HeaderSection() {
       className="relative min-h-[150vh] bg-white overflow-hidden"
     >
       {/* Navigation */}
-      <div className="fixed top-0 left-0 right-0 p-6 z-50 bg-white/80 backdrop-blur-sm">
+      <div className="absolute top-0 left-0 right-0 z-50">
         <Nav />
       </div>
 

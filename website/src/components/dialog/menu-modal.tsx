@@ -67,20 +67,7 @@ export default function MenuModal({
         >
           <div className="absolute inset-0 overflow-y-auto">
             <div className="container mx-auto px-6 py-12 min-h-screen">
-              {/* Header: Logo + Close Button */}
               <div className="flex justify-between items-start">
-                {/* <motion.h1
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-2xl font-bold"
-                >
-                  <Link
-                    href="/home"
-                    className="font-black text-3xl text-white relative"
-                  >
-                    sf.
-                  </Link>
-                </motion.h1> */}
                 <div></div>
 
                 <Button

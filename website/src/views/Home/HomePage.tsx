@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useState, useRef } from "react";
+import { useEffect, useCallback, useState } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
@@ -8,6 +8,8 @@ import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
 import { AnimatedSection } from "@/utils/AnimatedSection";
+import { isMobile } from "@/utils/isMobile";
+import { useRef, type RefObject } from "react";
 
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
@@ -35,6 +37,7 @@ const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
 interface Section {
   Component: React.ComponentType;
   id: string;
+  ref: RefObject<HTMLDivElement>;
 }
 
 export default function HomePage() {
@@ -44,20 +47,38 @@ export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
   const sections: Section[] = [
-    { Component: HeaderSection, id: "home" },
-    { Component: RobotSection, id: "platform" },
-    { Component: HowSection, id: "solutions" },
-    { Component: HowSectionCarousel, id: "how-carousel" },
-    { Component: WorkSection, id: "work" },
-    { Component: InvestSection, id: "invest" },
+    { Component: HeaderSection, id: "home", ref: useRef<HTMLDivElement>(null) },
+    {
+      Component: RobotSection,
+      id: "platform",
+      ref: useRef<HTMLDivElement>(null),
+    },
+    {
+      Component: HowSection,
+      id: "solutions",
+      ref: useRef<HTMLDivElement>(null),
+    },
+    {
+      Component: HowSectionCarousel,
+      id: "how-carousel",
+      ref: useRef<HTMLDivElement>(null),
+    },
+    { Component: WorkSection, id: "work", ref: useRef<HTMLDivElement>(null) },
+    {
+      Component: InvestSection,
+      id: "invest",
+      ref: useRef<HTMLDivElement>(null),
+    },
     {
       Component: () => <FooterSection scrollToTop={scrollToTop} />,
       id: "footer",
+      ref: useRef<HTMLDivElement>(null),
     },
   ];
 
@@ -74,15 +95,28 @@ export default function HomePage() {
     setTimeout(() => setIsScrolling(false), 1000);
   }, []);
 
-  const scrollToSection = useCallback((index: number) => {
-    setIsScrolling(true);
-    setCurrentPage(index);
-    window.scrollTo({
-      top: index * window.innerHeight,
-      behavior: "smooth",
-    });
-    setTimeout(() => setIsScrolling(false), 1000);
-  }, []);
+  const scrollToSection = useCallback(
+    (index: number) => {
+      setIsScrolling(true);
+      setCurrentPage(index);
+
+      const targetSection = sections[index];
+      if (targetSection && targetSection.ref.current) {
+        const offset = isMobileDevice ? 0 : window.innerHeight * index;
+        const elementPosition =
+          targetSection.ref.current.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      }
+
+      setTimeout(() => setIsScrolling(false), 1000);
+    },
+    [sections, isMobileDevice]
+  );
 
   const handleNextSection = useCallback(() => {
     if (currentPage < sections.length - 1) {
@@ -91,6 +125,8 @@ export default function HomePage() {
   }, [currentPage, sections.length, scrollToSection]);
 
   const handleScroll = useCallback(() => {
+    if (isMobileDevice) return; // Skip the custom scrolling logic for mobile devices
+
     const currentScrollY = window.scrollY;
     const windowHeight = window.innerHeight;
     const scrollThreshold = windowHeight / 3; // 33% of the viewport height
@@ -140,7 +176,17 @@ export default function HomePage() {
     scrollDirection,
     scrollToSection,
     sections.length,
+    isMobileDevice,
   ]);
+
+  useEffect(() => {
+    setIsMobileDevice(isMobile());
+    const handleResize = () => {
+      setIsMobileDevice(isMobile());
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -162,27 +208,39 @@ export default function HomePage() {
 
   return (
     <>
-      <div
-        ref={containerRef}
-        className="relative w-full"
-        style={{ height: totalHeight }}
-      >
-        <div className="relative">
-          <AnimatePresence initial={false} mode="wait">
-            {sections.map(({ Component, id }, index) => (
-              <AnimatedSection
-                key={`animated-${id}`}
-                index={index}
-                isActive={index === currentPage}
-                total={sections.length}
-                scrollDirection={scrollDirection}
-              >
-                <Component />
-              </AnimatedSection>
-            ))}
-          </AnimatePresence>
+      {isMobileDevice ? (
+        <div className="w-full">
+          {sections.map(({ Component, id, ref }) => (
+            <div key={`section-${id}`} className="min-h-screen" ref={ref}>
+              <Component />
+            </div>
+          ))}
         </div>
-      </div>
+      ) : (
+        <div
+          ref={containerRef}
+          className="relative w-full"
+          style={{ height: totalHeight }}
+        >
+          <div className="relative">
+            <AnimatePresence initial={false} mode="wait">
+              {sections.map(({ Component, id, ref }, index) => (
+                <AnimatedSection
+                  key={`animated-${id}`}
+                  index={index}
+                  isActive={index === currentPage}
+                  total={sections.length}
+                  scrollDirection={scrollDirection}
+                >
+                  <div ref={ref}>
+                    <Component />
+                  </div>
+                </AnimatedSection>
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
 
       <MenuModal
         isOpen={isOpen as boolean}
