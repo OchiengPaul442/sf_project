@@ -38,7 +38,7 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick, isVisible }) => {
               y: [0, -3, 0],
               transition: {
                 y: {
-                  duration: 0.6,
+                  duration: 0.8,
                   repeat: Number.POSITIVE_INFINITY,
                   repeatType: "reverse",
                   ease: "easeInOut",
