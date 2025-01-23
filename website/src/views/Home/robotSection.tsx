@@ -24,7 +24,7 @@ const RobotSection: React.FC = () => {
   }, []);
 
   return (
-    <section className="relative h-screen snap-start bg-black flex flex-col items-center justify-center py-24 overflow-hidden">
+    <section className="relative h-dvh snap-start bg-black flex flex-col items-center justify-center py-24 overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}

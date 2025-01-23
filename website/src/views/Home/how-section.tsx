@@ -20,7 +20,7 @@ const HowSection: React.FC = () => {
     <section
       ref={sectionRef}
       id="solutions"
-      className="relative h-screen snap-start py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden"
+      className="relative h-dvh snap-start py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden"
     >
       <div className="container mx-auto space-y-16 sm:space-y-24 md:space-y-32 px-4 sm:px-6">
         <motion.div style={{ y: yFirst }} className="relative">
