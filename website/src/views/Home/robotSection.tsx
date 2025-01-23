@@ -1,22 +1,14 @@
 "use client";
 
-import React from "react";
-import RobotAnimation from "@/public/lottie/robot.json";
 import Lottie from "lottie-react";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import RobotAnimation from "@/public/lottie/robot.json";
+import React from "react";
 
-const RobotSection = () => {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
-
+const RobotSection: React.FC = () => {
   return (
-    <section
-      ref={ref}
-      className={`relative min-h-dvh snap-start bg-black flex flex-col overflow-hidden items-center justify-center py-24 transition-opacity duration-1000 ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
-    >
+    <section className="relative min-h-dvh snap-start bg-black flex flex-col items-center justify-center py-24 transition-opacity duration-1000 opacity-100">
       <div className="container mx-auto flex flex-col items-center">
-        <h2 className="text-white text-[2.75rem] md:text-[4.4rem] font-extralight tracking-[-0.02em] mb-16">
+        <h2 className="text-white text-2xl md:text-4xl font-extralight tracking-[-0.02em] mb-16">
           with{" "}
           <span className="inline-block font-extrabold">
             AI<span className="text-white">...</span>

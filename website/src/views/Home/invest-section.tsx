@@ -1,20 +1,14 @@
 "use client";
 
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import InvestForm from "@/components/forms/InvestForm";
-import AngelAnimation from "@/public/lottie/angel.json";
 import Lottie from "lottie-react";
+import AngelAnimation from "@/public/lottie/angel.json";
 
 export default function InvestSection() {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.6 });
-
   return (
     <section
       id="invest"
-      ref={ref}
-      className={`min-h-dvh bg-white text-black  snap-start flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8 transition-opacity duration-1000 ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
+      className="h-screen bg-white text-black flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
     >
       <div className="container mx-auto flex flex-col items-center justify-between h-full max-w-4xl">
         <div className="text-center space-y-4 w-full mb-8 sm:mb-12">

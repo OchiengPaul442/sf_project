@@ -2,20 +2,14 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
-import ConstructionAnimation from "@/public/lottie/contruction.json";
 import Lottie from "lottie-react";
+import ConstructionAnimation from "@/public/lottie/contruction.json";
 
 export default function WorkSection() {
-  const { ref, isVisible } = useScrollAnimation({ threshold: 0.5 });
-
   return (
     <section
-      ref={ref}
       id="contact"
-      className={`min-h-dvh bg-[#f5f5f5] snap-start text-black relative overflow-hidden flex items-center justify-center transition-opacity duration-1000 ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
+      className="h-screen bg-[#f5f5f5] text-black relative overflow-hidden flex items-center justify-center"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
         <div className="text-center space-y-6 lg:space-y-8 mb-12 lg:mb-16 max-w-4xl mx-auto">

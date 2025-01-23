@@ -1,9 +1,9 @@
+// components/carousels/HowSectionCarousel.tsx
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import { motion, useScroll, AnimatePresence, useSpring } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import BoatAnimation from "@/public/lottie/sailing_boat_2.json";
 import PaperAnimation from "@/public/lottie/paper_flying.json";
 import MarkerAnimation from "@/public/lottie/mark_json.json";
@@ -45,53 +45,18 @@ const carouselVariants = {
   }),
 };
 
-const HowSectionCarousel = () => {
-  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.4 });
-  const contentRef = useRef<HTMLDivElement>(null);
-
+const HowSectionCarousel: React.FC = () => {
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
-  const [isFixed, setIsFixed] = useState(false);
   const [direction, setDirection] = useState(0);
-  const [isManualScrolling, setIsManualScrolling] = useState(false);
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"],
-  });
-
-  const smoothScrollProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    mass: 1,
-  });
 
   useEffect(() => {
-    if (isManualScrolling) return;
-    const unsubscribe = smoothScrollProgress.on("change", (latest) => {
-      const clampedValue = Math.max(0, Math.min(1, latest));
-      const stepIndex = Math.floor(clampedValue * STEPS.length);
-      const validIndex = Math.min(stepIndex, STEPS.length - 1);
+    const interval = setInterval(() => {
+      setDirection(1);
+      setSelectedStepIndex((prevIndex) => (prevIndex + 1) % STEPS.length);
+    }, 5000);
 
-      if (validIndex !== selectedStepIndex) {
-        setDirection(validIndex > selectedStepIndex ? 1 : -1);
-        setSelectedStepIndex(validIndex);
-      }
-    });
-    return () => unsubscribe();
-  }, [isManualScrolling, selectedStepIndex, smoothScrollProgress]);
-
-  const checkShouldPin = useCallback(() => {
-    if (!sectionRef.current) return;
-    const rect = sectionRef.current.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
-    setIsFixed(rect.top <= 0 && rect.bottom >= windowHeight);
-  }, [sectionRef]);
-
-  useEffect(() => {
-    checkShouldPin();
-    window.addEventListener("scroll", checkShouldPin, { passive: true });
-    return () => window.removeEventListener("scroll", checkShouldPin);
-  }, [checkShouldPin]);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleNavClick = (stepId: string) => {
     const index = STEPS.findIndex((s) => s.id === stepId);
@@ -99,40 +64,14 @@ const HowSectionCarousel = () => {
 
     setDirection(index > selectedStepIndex ? 1 : -1);
     setSelectedStepIndex(index);
-    setIsManualScrolling(true);
-
-    if (sectionRef.current) {
-      const fraction = index / (STEPS.length - 1);
-      const sectionTop = sectionRef.current.offsetTop;
-      const totalScrollHeight = window.innerHeight * 2.5;
-      const targetScrollY = sectionTop + fraction * totalScrollHeight;
-
-      window.scrollTo({ top: targetScrollY, behavior: "smooth" });
-
-      setTimeout(() => {
-        setIsManualScrolling(false);
-      }, 700);
-    }
   };
 
   return (
     <section
-      ref={sectionRef}
-      className={`relative h-[190vh] snap-start bg-black overflow-hidden ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
+      className="relative h-screen snap-start bg-black flex items-center justify-center overflow-hidden"
       id="how-section"
     >
-      <motion.div
-        ref={contentRef}
-        className="container mx-auto px-4 sm:px-6 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-center absolute left-1/2 transform -translate-x-1/2"
-        style={{
-          position: isFixed ? "fixed" : "absolute",
-          top: isFixed ? "50%" : "0",
-          transform: isFixed ? "translate(-50%, -50%)" : "translate(-50%, 0)",
-        }}
-      >
-        {/* Navigation */}
+      <motion.div className="container mx-auto px-4 sm:px-6 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-center">
         <div className="relative w-full lg:w-1/2">
           <div
             className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent"
@@ -182,7 +121,6 @@ const HowSectionCarousel = () => {
           </nav>
         </div>
 
-        {/* Lottie Animation Carousel */}
         <div className="relative w-full lg:w-1/2 h-64 sm:h-80 md:h-96 lg:h-[500px] flex items-center justify-center overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div

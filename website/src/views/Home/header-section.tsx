@@ -17,37 +17,32 @@ export default function HeaderSection() {
 
   const progressRange = [0, 0.25, 0.5, 0.75, 1];
 
-  const getAnimationValues = (mobileValues: any, desktopValues: any) =>
-    isMobile ? mobileValues : desktopValues;
-
   const textScale = useTransform(
     scrollYProgress,
     progressRange,
-    getAnimationValues([1, 1.2, 1.4, 1.6, 1.8], [1, 3, 5, 7, 9])
+    isMobile ? [1, 1.2, 1.4, 1.6, 1.8] : [1, 3, 5, 7, 9]
   );
 
   const textOpacity = useTransform(
     scrollYProgress,
     progressRange,
-    getAnimationValues([1, 0.8, 0.6, 0.4, 0.2], [1, 0.75, 0.5, 0.25, 0])
+    isMobile ? [1, 0.8, 0.6, 0.4, 0.2] : [1, 0.75, 0.5, 0.25, 0]
   );
 
   const xMove = useTransform(
     scrollYProgress,
     progressRange,
-    getAnimationValues(
-      ["0%", "-5%", "-10%", "-15%", "-20%"],
-      ["0%", "-12.5%", "-25%", "-37.5%", "-50%"]
-    )
+    isMobile
+      ? ["0%", "-5%", "-10%", "-15%", "-20%"]
+      : ["0%", "-12.5%", "-25%", "-37.5%", "-50%"]
   );
 
   const yMove = useTransform(
     scrollYProgress,
     progressRange,
-    getAnimationValues(
-      ["0%", "-2%", "-4%", "-6%", "-8%"],
-      ["0%", "-6.25%", "-12.5%", "-18.75%", "-25%"]
-    )
+    isMobile
+      ? ["0%", "-2%", "-4%", "-6%", "-8%"]
+      : ["0%", "-6.25%", "-12.5%", "-18.75%", "-25%"]
   );
 
   const navOpacity = useTransform(
@@ -76,7 +71,7 @@ export default function HeaderSection() {
     <section
       ref={sectionRef}
       id="header-section"
-      className={`relative min-h-dvh snap-start md:min-h-[400vh] transition-opacity duration-1000 ${
+      className={`relative min-h-screen snap-start transition-opacity duration-1000 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

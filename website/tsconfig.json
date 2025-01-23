@@ -25,6 +25,7 @@
       "@/hooks/*": ["./src/hooks/*"],
       "@/views/*": ["./src/views/*"],
       "@/lib/*": ["./src/lib/*"],
+      "@/types/*": ["./src/types"],
       "@/redux-store/*": ["./src/redux-store/*"]
     }
   },
