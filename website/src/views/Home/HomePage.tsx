@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+} from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
@@ -9,220 +15,176 @@ import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import { isMobile } from "@/utils/isMobile";
-import { useRef, type RefObject } from "react";
 
+// Dynamic imports with props type
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
-});
+}) as React.ComponentType<{ scrollToTop: () => void }>;
+
 const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
   ssr: false,
-});
+}) as React.ComponentType<{ scrollToTop: () => void }>;
+
 const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
-});
+}) as React.ComponentType<{ scrollToTop: () => void }>;
+
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
-  { ssr: false }
-);
+  {
+    ssr: false,
+  }
+) as React.ComponentType<{ scrollToTop: () => void }>;
+
 const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
   ssr: false,
-});
+}) as React.ComponentType<{ scrollToTop: () => void }>;
+
 const InvestSection = dynamic(() => import("@/views/Home/invest-section"), {
   ssr: false,
-});
+}) as React.ComponentType<{ scrollToTop: () => void }>;
+
 const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
   ssr: false,
-});
+}) as React.ComponentType<{ scrollToTop: () => void }>;
 
-interface Section {
-  Component: React.ComponentType;
+interface SectionConfig {
+  Component: React.ComponentType<{ scrollToTop: () => void }>;
   id: string;
-  ref: RefObject<HTMLDivElement>;
 }
 
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
-  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lastScrollY = useRef(0);
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const scrollLockRef = useRef(false);
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const sections: Section[] = [
-    { Component: HeaderSection, id: "home", ref: useRef<HTMLDivElement>(null) },
-    {
-      Component: RobotSection,
-      id: "platform",
-      ref: useRef<HTMLDivElement>(null),
-    },
-    {
-      Component: HowSection,
-      id: "solutions",
-      ref: useRef<HTMLDivElement>(null),
-    },
-    {
-      Component: HowSectionCarousel,
-      id: "how-carousel",
-      ref: useRef<HTMLDivElement>(null),
-    },
-    { Component: WorkSection, id: "work", ref: useRef<HTMLDivElement>(null) },
-    {
-      Component: InvestSection,
-      id: "invest",
-      ref: useRef<HTMLDivElement>(null),
-    },
-    {
-      Component: () => <FooterSection scrollToTop={scrollToTop} />,
-      id: "footer",
-      ref: useRef<HTMLDivElement>(null),
-    },
-  ];
+  const sections: SectionConfig[] = useMemo(
+    () => [
+      { Component: HeaderSection, id: "home" },
+      { Component: RobotSection, id: "platform" },
+      { Component: HowSection, id: "solutions" },
+      { Component: HowSectionCarousel, id: "how-carousel" },
+      { Component: WorkSection, id: "work" },
+      { Component: InvestSection, id: "invest" },
+      { Component: FooterSection, id: "footer" },
+    ],
+    []
+  );
 
   const totalHeight = `${100 * sections.length}vh`;
 
-  const handleToggle = () => {
-    dispatch(toggleMenu());
-  };
-
-  const scrollToTop = useCallback(() => {
-    setIsScrolling(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    setCurrentPage(0);
-    setTimeout(() => setIsScrolling(false), 1000);
-  }, []);
-
   const scrollToSection = useCallback(
     (index: number) => {
+      if (index < 0 || index >= sections.length || scrollLockRef.current)
+        return;
+
+      scrollLockRef.current = true;
       setIsScrolling(true);
       setCurrentPage(index);
 
-      const targetSection = sections[index];
-      if (targetSection && targetSection.ref.current) {
-        const offset = isMobileDevice ? 0 : window.innerHeight * index;
-        const elementPosition =
-          targetSection.ref.current.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
+      window.scrollTo({
+        top: window.innerHeight * index,
+        behavior: "smooth",
+      });
 
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth",
-        });
-      }
+      const scrollTimer = setTimeout(() => {
+        setIsScrolling(false);
+        scrollLockRef.current = false;
+      }, 1000);
 
-      setTimeout(() => setIsScrolling(false), 1000);
+      return () => clearTimeout(scrollTimer);
     },
-    [sections, isMobileDevice]
+    [sections.length]
   );
+
+  const scrollToTop = useCallback(() => {
+    scrollToSection(0);
+  }, [scrollToSection]);
 
   const handleNextSection = useCallback(() => {
     if (currentPage < sections.length - 1) {
       scrollToSection(currentPage + 1);
     }
-  }, [currentPage, sections.length, scrollToSection]);
+  }, [currentPage, scrollToSection, sections.length]);
 
-  const handleScroll = useCallback(() => {
-    if (isMobileDevice) return; // Skip the custom scrolling logic for mobile devices
+  const handleWheel = useCallback(
+    (event: WheelEvent) => {
+      if (isMobileDevice || scrollLockRef.current) return;
 
-    const currentScrollY = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const scrollThreshold = windowHeight / 3; // 33% of the viewport height
+      const deltaY = event.deltaY;
+      const isScrollingDown = deltaY > 50;
+      const isScrollingUp = deltaY < -50;
 
-    if (currentScrollY < lastScrollY.current) {
-      setScrollDirection("up");
-    } else if (currentScrollY > lastScrollY.current) {
-      setScrollDirection("down");
-    }
-
-    if (scrollTimeout.current) {
-      clearTimeout(scrollTimeout.current);
-    }
-
-    scrollTimeout.current = setTimeout(() => {
-      if (!isScrolling) {
-        const currentSection = Math.floor(currentScrollY / windowHeight);
-        const scrollOffset = currentScrollY % windowHeight;
-
-        let targetSection = currentSection;
-
-        if (scrollDirection === "down" && scrollOffset > scrollThreshold) {
-          targetSection = Math.min(currentSection + 1, sections.length - 1);
-        } else if (
-          scrollDirection === "up" &&
-          scrollOffset < windowHeight - scrollThreshold
-        ) {
-          targetSection = Math.max(currentSection - 1, 0);
-        }
-
-        if (targetSection !== currentPage) {
-          scrollToSection(targetSection);
-        } else {
-          // Snap to the current section if no change
-          window.scrollTo({
-            top: targetSection * windowHeight,
-            behavior: "smooth",
-          });
-        }
+      if (isScrollingDown && currentPage < sections.length - 1) {
+        event.preventDefault();
+        scrollToSection(currentPage + 1);
+      } else if (isScrollingUp && currentPage > 0) {
+        event.preventDefault();
+        scrollToSection(currentPage - 1);
       }
-    }, 100);
+    },
+    [currentPage, isMobileDevice, scrollToSection, sections.length]
+  );
 
-    lastScrollY.current = currentScrollY;
-  }, [
-    currentPage,
-    isScrolling,
-    scrollDirection,
-    scrollToSection,
-    sections.length,
-    isMobileDevice,
-  ]);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (isMobileDevice || scrollLockRef.current) return;
+
+      switch (event.key) {
+        case "ArrowDown":
+          if (currentPage < sections.length - 1) {
+            event.preventDefault();
+            scrollToSection(currentPage + 1);
+          }
+          break;
+        case "ArrowUp":
+          if (currentPage > 0) {
+            event.preventDefault();
+            scrollToSection(currentPage - 1);
+          }
+          break;
+      }
+    },
+    [currentPage, isMobileDevice, scrollToSection, sections.length]
+  );
 
   useEffect(() => {
-    setIsMobileDevice(isMobile());
-    const handleResize = () => {
-      setIsMobileDevice(isMobile());
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const detectMobile = () => setIsMobileDevice(isMobile());
+    detectMobile();
+    window.addEventListener("resize", detectMobile);
+
+    return () => window.removeEventListener("resize", detectMobile);
   }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
+    const wheelOptions = { passive: false };
+    window.addEventListener("wheel", handleWheel, wheelOptions);
+    window.addEventListener("keydown", handleKeyDown);
 
-  useEffect(() => {
-    const handleResize = () => {
-      scrollToTop();
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("keydown", handleKeyDown);
     };
+  }, [handleWheel, handleKeyDown]);
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [scrollToTop]);
-
-  useEffect(() => {
-    scrollToTop();
-  }, [scrollToTop]);
+  const handleToggle = () => dispatch(toggleMenu());
 
   return (
     <>
       {isMobileDevice ? (
         <div className="w-full">
-          {sections.map(({ Component, id, ref }) => (
-            <div key={`section-${id}`} className="min-h-screen" ref={ref}>
-              <Component />
+          {sections.map(({ Component, id }) => (
+            <div key={`section-${id}`} className="min-h-screen">
+              <Component scrollToTop={scrollToTop} />
             </div>
           ))}
         </div>
       ) : (
-        <div
-          ref={containerRef}
-          className="relative w-full"
-          style={{ height: totalHeight }}
-        >
+        <div className="relative w-full" style={{ height: totalHeight }}>
           <div className="relative">
             <AnimatePresence initial={false} mode="wait">
               {sections.map(({ Component, id }, index) => (
@@ -231,9 +193,9 @@ export default function HomePage() {
                   index={index}
                   isActive={index === currentPage}
                   total={sections.length}
-                  scrollDirection={scrollDirection}
+                  scrollDirection={currentPage > index ? "up" : "down"}
                 >
-                  <Component />
+                  <Component scrollToTop={scrollToTop} />
                 </AnimatedSection>
               ))}
             </AnimatePresence>
