@@ -124,9 +124,9 @@ export default function HeaderSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1, duration: 0.8 }}
         style={{ opacity: useTransform(scrollYProgress, [0, 0.2], [1, 0]) }}
-        className="fixed bottom-8 left-1/2 -translate-x-1/2 text-sm text-black/60 z-50"
+        className="fixed bottom-8 w-full text-sm text-black/60 z-50"
       >
-        Scroll to explore
+        <div className="w-full flex justify-center"> Scroll to explore</div>
       </motion.div>
     </section>
   );

@@ -9,7 +9,6 @@ import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
 import { AnimatedSection } from "@/utils/AnimatedSection";
 
-// Dynamically import sections
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
 });
@@ -29,10 +28,9 @@ const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
 const InvestSection = dynamic(() => import("@/views/Home/invest-section"), {
   ssr: false,
 });
-const FooterSectionDynamic = dynamic(
-  () => import("@/views/Home/footer-section"),
-  { ssr: false }
-);
+const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
+  ssr: false,
+});
 
 interface Section {
   Component: React.ComponentType;
@@ -42,7 +40,10 @@ interface Section {
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
@@ -55,7 +56,7 @@ export default function HomePage() {
     { Component: WorkSection, id: "work" },
     { Component: InvestSection, id: "invest" },
     {
-      Component: () => <FooterSectionDynamic scrollToTop={scrollToTop} />,
+      Component: () => <FooterSection scrollToTop={scrollToTop} />,
       id: "footer",
     },
   ];
@@ -90,16 +91,59 @@ export default function HomePage() {
   }, [currentPage, sections.length, scrollToSection]);
 
   const handleScroll = useCallback(() => {
-    if (!isScrolling && containerRef.current) {
-      const scrollPosition = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const newPage = Math.round(scrollPosition / windowHeight);
-      setCurrentPage(newPage);
+    const currentScrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const scrollThreshold = windowHeight / 3; // 33% of the viewport height
+
+    if (currentScrollY < lastScrollY.current) {
+      setScrollDirection("up");
+    } else if (currentScrollY > lastScrollY.current) {
+      setScrollDirection("down");
     }
-  }, [isScrolling]);
+
+    if (scrollTimeout.current) {
+      clearTimeout(scrollTimeout.current);
+    }
+
+    scrollTimeout.current = setTimeout(() => {
+      if (!isScrolling) {
+        const currentSection = Math.floor(currentScrollY / windowHeight);
+        const scrollOffset = currentScrollY % windowHeight;
+
+        let targetSection = currentSection;
+
+        if (scrollDirection === "down" && scrollOffset > scrollThreshold) {
+          targetSection = Math.min(currentSection + 1, sections.length - 1);
+        } else if (
+          scrollDirection === "up" &&
+          scrollOffset < windowHeight - scrollThreshold
+        ) {
+          targetSection = Math.max(currentSection - 1, 0);
+        }
+
+        if (targetSection !== currentPage) {
+          scrollToSection(targetSection);
+        } else {
+          // Snap to the current section if no change
+          window.scrollTo({
+            top: targetSection * windowHeight,
+            behavior: "smooth",
+          });
+        }
+      }
+    }, 100);
+
+    lastScrollY.current = currentScrollY;
+  }, [
+    currentPage,
+    isScrolling,
+    scrollDirection,
+    scrollToSection,
+    sections.length,
+  ]);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
@@ -131,6 +175,7 @@ export default function HomePage() {
                 index={index}
                 isActive={index === currentPage}
                 total={sections.length}
+                scrollDirection={scrollDirection}
               >
                 <Component />
               </AnimatedSection>
