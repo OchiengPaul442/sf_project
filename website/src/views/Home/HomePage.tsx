@@ -14,7 +14,6 @@ import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
 import { AnimatedSection } from "@/components/AnimatedSection";
-import { isMobile } from "@/utils/isMobile";
 
 // Dynamic imports with props type
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
@@ -56,7 +55,6 @@ interface SectionConfig {
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
   const scrollLockRef = useRef(false);
 
   const dispatch = useDispatch();
@@ -113,8 +111,6 @@ export default function HomePage() {
 
   const handleWheel = useCallback(
     (event: WheelEvent) => {
-      if (isMobileDevice || scrollLockRef.current) return;
-
       const deltaY = event.deltaY;
       const isScrollingDown = deltaY > 50;
       const isScrollingUp = deltaY < -50;
@@ -127,13 +123,11 @@ export default function HomePage() {
         scrollToSection(currentPage - 1);
       }
     },
-    [currentPage, isMobileDevice, scrollToSection, sections.length]
+    [currentPage, scrollToSection, sections.length]
   );
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (isMobileDevice || scrollLockRef.current) return;
-
       switch (event.key) {
         case "ArrowDown":
           if (currentPage < sections.length - 1) {
@@ -149,16 +143,8 @@ export default function HomePage() {
           break;
       }
     },
-    [currentPage, isMobileDevice, scrollToSection, sections.length]
+    [currentPage, scrollToSection, sections.length]
   );
-
-  useEffect(() => {
-    const detectMobile = () => setIsMobileDevice(isMobile());
-    detectMobile();
-    window.addEventListener("resize", detectMobile);
-
-    return () => window.removeEventListener("resize", detectMobile);
-  }, []);
 
   useEffect(() => {
     const wheelOptions = { passive: false };
@@ -175,33 +161,23 @@ export default function HomePage() {
 
   return (
     <>
-      {isMobileDevice ? (
-        <div className="w-full">
-          {sections.map(({ Component, id }) => (
-            <div key={`section-${id}`} className="min-h-screen">
-              <Component scrollToTop={scrollToTop} />
-            </div>
-          ))}
+      <div className="relative w-full" style={{ height: totalHeight }}>
+        <div className="relative">
+          <AnimatePresence initial={false} mode="wait">
+            {sections.map(({ Component, id }, index) => (
+              <AnimatedSection
+                key={`animated-${id}`}
+                index={index}
+                isActive={index === currentPage}
+                total={sections.length}
+                scrollDirection={currentPage > index ? "up" : "down"}
+              >
+                <Component scrollToTop={scrollToTop} />
+              </AnimatedSection>
+            ))}
+          </AnimatePresence>
         </div>
-      ) : (
-        <div className="relative w-full" style={{ height: totalHeight }}>
-          <div className="relative">
-            <AnimatePresence initial={false} mode="wait">
-              {sections.map(({ Component, id }, index) => (
-                <AnimatedSection
-                  key={`animated-${id}`}
-                  index={index}
-                  isActive={index === currentPage}
-                  total={sections.length}
-                  scrollDirection={currentPage > index ? "up" : "down"}
-                >
-                  <Component scrollToTop={scrollToTop} />
-                </AnimatedSection>
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-      )}
+      </div>
 
       <MenuModal
         isOpen={isOpen as boolean}
