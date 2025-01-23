@@ -1,15 +1,15 @@
 "use client";
 
+import { useEffect, useCallback, useState, useRef } from "react";
 import dynamic from "next/dynamic";
-import { usePageSlideEffect } from "@/hooks/usePageSlideEffect";
 import { AnimatePresence } from "framer-motion";
-import MenuModal from "@/components/dialog/menu-modal";
-import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
-import { AnimatedSection } from "@/utils/AnimatedSection";
-import { useCallback, useState } from "react";
+import { toggleMenu } from "@/redux-store/slices/menuSlice";
+import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
+import { AnimatedSection } from "@/utils/AnimatedSection";
 
+// Dynamically import sections
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
 });
@@ -40,8 +40,12 @@ interface Section {
 }
 
 export default function HomePage() {
-  const { currentPage, setCurrentPage, containerRef } = usePageSlideEffect();
+  const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const dispatch = useDispatch();
+  const isOpen = useSelector((state) => state.menu.isOpen);
 
   const sections: Section[] = [
     { Component: HeaderSection, id: "home" },
@@ -58,9 +62,6 @@ export default function HomePage() {
 
   const totalHeight = `${100 * sections.length}vh`;
 
-  const dispatch = useDispatch();
-  const isOpen = useSelector((state) => state.menu.isOpen);
-
   const handleToggle = () => {
     dispatch(toggleMenu());
   };
@@ -68,27 +69,52 @@ export default function HomePage() {
   const scrollToTop = useCallback(() => {
     setIsScrolling(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+    setCurrentPage(0);
     setTimeout(() => setIsScrolling(false), 1000);
   }, []);
 
-  const scrollToSection = useCallback(
-    (index: number) => {
-      setIsScrolling(true);
-      setCurrentPage(index);
-      window.scrollTo({
-        top: index * window.innerHeight,
-        behavior: "smooth",
-      });
-      setTimeout(() => setIsScrolling(false), 1000);
-    },
-    [setCurrentPage]
-  );
+  const scrollToSection = useCallback((index: number) => {
+    setIsScrolling(true);
+    setCurrentPage(index);
+    window.scrollTo({
+      top: index * window.innerHeight,
+      behavior: "smooth",
+    });
+    setTimeout(() => setIsScrolling(false), 1000);
+  }, []);
 
   const handleNextSection = useCallback(() => {
     if (currentPage < sections.length - 1) {
       scrollToSection(currentPage + 1);
     }
   }, [currentPage, sections.length, scrollToSection]);
+
+  const handleScroll = useCallback(() => {
+    if (!isScrolling && containerRef.current) {
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const newPage = Math.round(scrollPosition / windowHeight);
+      setCurrentPage(newPage);
+    }
+  }, [isScrolling]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      scrollToTop();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [scrollToTop]);
+
+  useEffect(() => {
+    scrollToTop();
+  }, [scrollToTop]);
 
   return (
     <>

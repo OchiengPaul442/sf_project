@@ -36,17 +36,6 @@ export default function HeaderSection() {
   );
   const gradientOpacity = useTransform(scrollYProgress, [0.3, 0.6], [0, 1]);
 
-  // Create a floating animation
-  const floating = {
-    y: [0, -20, 0],
-    transition: {
-      duration: 6,
-      repeat: Number.POSITIVE_INFINITY,
-      repeatType: "reverse" as const,
-      ease: "easeInOut",
-    },
-  };
-
   return (
     <section
       ref={sectionRef}
@@ -74,13 +63,28 @@ export default function HeaderSection() {
             }}
           />
 
-          {/* Main image with scroll animations */}
+          {/* Main image with scroll animations and floating effect */}
           <motion.div
-            animate={floating}
+            initial="float"
+            animate="float"
+            variants={{
+              float: {
+                y: [-10, 10],
+                transition: {
+                  duration: 4,
+                  repeat: Number.POSITIVE_INFINITY,
+                  repeatType: "reverse",
+                  ease: "easeInOut",
+                },
+              },
+            }}
             style={{
               scale,
               opacity,
-              y,
+              y: useTransform(
+                y,
+                (value) => value + 10 * Math.sin(Date.now() / 2000)
+              ),
             }}
             className="relative z-10"
           >
