@@ -57,15 +57,6 @@ export default function HeaderSection() {
         <Nav />
       </div>
 
-      {/* Scroll Progress Indicator */}
-      <motion.div
-        className="fixed top-0 left-0 w-1 bg-black origin-top z-40"
-        style={{
-          height: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
-          opacity: useTransform(scrollYProgress, [0, 0.2], [0, 1]),
-        }}
-      />
-
       {/* Center Content */}
       <div className="sticky top-0 h-screen flex items-center justify-center px-4">
         <motion.div
