@@ -7,6 +7,8 @@ import MenuModal from "@/components/dialog/menu-modal";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { AnimatedSection } from "@/utils/AnimatedSection";
+import { useCallback, useState } from "react";
+import NextButton from "@/components/NextButton";
 
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
@@ -19,9 +21,7 @@ const HowSection = dynamic(() => import("@/views/Home/how-section"), {
 });
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
   ssr: false,
@@ -29,37 +29,66 @@ const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
 const InvestSection = dynamic(() => import("@/views/Home/invest-section"), {
   ssr: false,
 });
-const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
-  ssr: false,
-});
+const FooterSectionDynamic = dynamic(
+  () => import("@/views/Home/footer-section"),
+  { ssr: false }
+);
 
 interface Section {
   Component: React.ComponentType;
+  id: string;
 }
 
 export default function HomePage() {
-  const { currentPage, containerRef, isScrolling } = usePageSlideEffect();
+  const { currentPage, setCurrentPage, containerRef } = usePageSlideEffect();
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const sections: Section[] = [
-    { Component: HeaderSection },
-    { Component: RobotSection },
-    { Component: HowSection },
-    { Component: HowSectionCarousel },
-    { Component: WorkSection },
-    { Component: InvestSection },
-    { Component: FooterSection },
+    { Component: HeaderSection, id: "home" },
+    { Component: RobotSection, id: "platform" },
+    { Component: HowSection, id: "solutions" },
+    { Component: HowSectionCarousel, id: "how-carousel" },
+    { Component: WorkSection, id: "work" },
+    { Component: InvestSection, id: "invest" },
+    {
+      Component: () => <FooterSectionDynamic scrollToTop={scrollToTop} />,
+      id: "footer",
+    },
   ];
 
-  // Calculate total height based on the number of sections
   const totalHeight = `${100 * sections.length}vh`;
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
-  // Toggle menu
   const handleToggle = () => {
     dispatch(toggleMenu());
   };
+
+  const scrollToTop = useCallback(() => {
+    setIsScrolling(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => setIsScrolling(false), 1000);
+  }, []);
+
+  const scrollToSection = useCallback(
+    (index: number) => {
+      setIsScrolling(true);
+      setCurrentPage(index);
+      window.scrollTo({
+        top: index * window.innerHeight,
+        behavior: "smooth",
+      });
+      setTimeout(() => setIsScrolling(false), 1000);
+    },
+    [setCurrentPage]
+  );
+
+  const handleNextSection = useCallback(() => {
+    if (currentPage < sections.length - 1) {
+      scrollToSection(currentPage + 1);
+    }
+  }, [currentPage, sections.length, scrollToSection]);
 
   return (
     <>
@@ -68,34 +97,33 @@ export default function HomePage() {
         className="relative w-full"
         style={{ height: totalHeight }}
       >
-        {/* All sections (Animated) */}
-        <div
-          className="relative"
-          style={{
-            marginTop: `0vh`,
-            pointerEvents: isScrolling ? "none" : "auto",
-          }}
-        >
+        <div className="relative">
           <AnimatePresence initial={false} mode="wait">
-            {sections.map(({ Component }, index) => {
-              const absoluteIndex = index;
-              return (
-                <AnimatedSection
-                  key={`animated-${absoluteIndex}`}
-                  index={absoluteIndex}
-                  isActive={absoluteIndex === currentPage}
-                  total={sections.length}
-                >
-                  <Component />
-                </AnimatedSection>
-              );
-            })}
+            {sections.map(({ Component, id }, index) => (
+              <AnimatedSection
+                key={`animated-${id}`}
+                index={index}
+                isActive={index === currentPage}
+                total={sections.length}
+              >
+                <Component />
+              </AnimatedSection>
+            ))}
           </AnimatePresence>
         </div>
       </div>
 
-      {/* Menu Modal */}
-      <MenuModal isOpen={isOpen as boolean} onClose={handleToggle} />
+      <MenuModal
+        isOpen={isOpen as boolean}
+        onClose={handleToggle}
+        sections={sections}
+        scrollToSection={scrollToSection}
+      />
+
+      <NextButton
+        onClick={handleNextSection}
+        isVisible={!isScrolling && currentPage < sections.length - 1}
+      />
     </>
   );
 }

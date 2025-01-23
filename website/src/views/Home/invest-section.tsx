@@ -20,7 +20,7 @@ export default function InvestSection() {
           </h3>
         </div>
 
-        <div className="flex justify-center w-full my-12">
+        <div className="flex justify-center w-full -my-16">
           <div className="w-[200px] h-[200px] lg:w-[300px] lg:h-[300px]">
             <Lottie
               animationData={AngelAnimation}

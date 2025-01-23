@@ -11,8 +11,9 @@ export default function WorkSection() {
       id="contact"
       className="h-screen bg-[#f5f5f5] text-black relative overflow-hidden flex items-center justify-center"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-        <div className="text-center space-y-6 lg:space-y-8 mb-12 lg:mb-16 max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full relative">
+        {/* Main Content */}
+        <div className="text-center space-y-6 lg:space-y-8 max-w-4xl mx-auto">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
             Work with us
           </h2>
@@ -22,19 +23,23 @@ export default function WorkSection() {
           </h3>
         </div>
 
-        <Link
-          href="mailto:support@example.com"
-          className="group inline-flex items-center font-bold relative text-sm sm:text-base"
-        >
-          <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
-            Reach out
-          </span>
-          <span className="relative z-20 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full text-white transition-transform group-hover:translate-x-1 -ml-5 sm:-ml-7">
-            <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-          </span>
-        </Link>
+        {/* CTA Button */}
+        <div className="mt-12 lg:mt-16">
+          <Link
+            href="mailto:support@example.com"
+            className="group inline-flex items-center font-bold relative text-sm sm:text-base"
+          >
+            <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
+              Reach out
+            </span>
+            <span className="relative z-20 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full text-white transition-transform group-hover:translate-x-1 -ml-5 sm:-ml-7">
+              <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+            </span>
+          </Link>
+        </div>
 
-        <div className="absolute bottom-0 right-0 w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] md:w-[200px] md:h-[200px] lg:w-[250px] lg:h-[250px] aspect-square pointer-events-none">
+        {/* Lottie Animation */}
+        <div className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none">
           <Lottie
             animationData={ConstructionAnimation}
             loop

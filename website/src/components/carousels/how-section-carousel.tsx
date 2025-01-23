@@ -53,7 +53,7 @@ const HowSectionCarousel: React.FC = () => {
     const interval = setInterval(() => {
       setDirection(1);
       setSelectedStepIndex((prevIndex) => (prevIndex + 1) % STEPS.length);
-    }, 5000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);

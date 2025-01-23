@@ -16,29 +16,29 @@ import Link from "next/link";
 interface MenuModalProps {
   isOpen: boolean;
   onClose: () => void;
+  sections: { id: string }[];
+  scrollToSection: (index: number) => void;
 }
 
 const menuItems = [
-  { title: "HOME", href: "/" },
-  { title: "PLATFORM", href: "#" },
-  { title: "SOLUTIONS", href: "#solutions" },
-  { title: "CONTACT", href: "#contact" },
-  { title: "INVEST", href: "#invest" },
+  { title: "HOME", id: "home" },
+  { title: "PLATFORM", id: "platform" },
+  { title: "SOLUTIONS", id: "solutions" },
+  { title: "WORK", id: "work" },
+  { title: "INVEST", id: "invest" },
 ];
 
 const latestUpdates = [
-  {
-    title: "Reducing Restaurant Food Waste",
-    author: "SUSTAINABILITY TEAM",
-  },
-  {
-    title: "AI in Modern Kitchen Management",
-    author: "TECH INSIGHTS",
-  },
+  { title: "Reducing Restaurant Food Waste", author: "SUSTAINABILITY TEAM" },
+  { title: "AI in Modern Kitchen Management", author: "TECH INSIGHTS" },
 ];
 
-export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
-  // Prevent body scroll when modal is open
+export default function MenuModal({
+  isOpen,
+  onClose,
+  sections,
+  scrollToSection,
+}: MenuModalProps) {
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
@@ -46,16 +46,12 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
     };
   }, [isOpen]);
 
-  const handleLinkClick = (href: string) => {
+  const handleLinkClick = (id: string) => {
     onClose();
     setTimeout(() => {
-      if (href.startsWith("#")) {
-        const element = document.querySelector(href);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
-      } else if (href === "/") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      const index = sections.findIndex((section) => section.id === id);
+      if (index !== -1) {
+        scrollToSection(index);
       }
     }, 500);
   };
@@ -64,13 +60,12 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 bg-black text-white"
+          className="fixed inset-0 z-[1000] bg-black text-white"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* Scrollable content container */}
           <div className="absolute inset-0 overflow-y-auto">
             <div className="container mx-auto px-6 py-12 min-h-screen">
               {/* Header: Logo + Close Button */}
@@ -112,14 +107,13 @@ export default function MenuModal({ isOpen, onClose }: MenuModalProps) {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1 }}
                         >
-                          <Link
-                            href={item.href}
-                            onClick={() => handleLinkClick(item.href)}
+                          <button
+                            onClick={() => handleLinkClick(item.id)}
                             className="text-3xl font-bold hover:text-green-400 transition-colors flex items-center group"
                           >
                             {item.title}
                             <ArrowUpRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </Link>
+                          </button>
                         </motion.li>
                       ))}
                     </ul>
