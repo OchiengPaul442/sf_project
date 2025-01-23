@@ -1,122 +1,138 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import Image from "next/image";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
-import { useWindowSize } from "@/hooks/useWindowSize";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import SVGImage from "@/public/svgs/Vector.svg";
+import { useRef } from "react";
+
+function useParallax(value: MotionValue<number>, distance: number) {
+  return useTransform(value, [0, 1], [0, distance]);
+}
 
 export default function HeaderSection() {
-  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.1 });
-  const { width } = useWindowSize();
-  const isMobile = width < 768;
+  const sectionRef = useRef<HTMLElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  const progressRange = [0, 0.25, 0.5, 0.75, 1];
+  // Create multiple transform effects
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.2]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const y = useParallax(scrollYProgress, 200);
 
-  const textScale = useTransform(
+  // Gradient animation
+  const gradientHeight = useTransform(
     scrollYProgress,
-    progressRange,
-    isMobile ? [1, 1.2, 1.4, 1.6, 1.8] : [1, 3, 5, 7, 9]
+    [0.3, 1],
+    ["0%", "100%"]
   );
+  const gradientOpacity = useTransform(scrollYProgress, [0.3, 0.6], [0, 1]);
 
-  const textOpacity = useTransform(
-    scrollYProgress,
-    progressRange,
-    isMobile ? [1, 0.8, 0.6, 0.4, 0.2] : [1, 0.75, 0.5, 0.25, 0]
-  );
-
-  const xMove = useTransform(
-    scrollYProgress,
-    progressRange,
-    isMobile
-      ? ["0%", "-5%", "-10%", "-15%", "-20%"]
-      : ["0%", "-12.5%", "-25%", "-37.5%", "-50%"]
-  );
-
-  const yMove = useTransform(
-    scrollYProgress,
-    progressRange,
-    isMobile
-      ? ["0%", "-2%", "-4%", "-6%", "-8%"]
-      : ["0%", "-6.25%", "-12.5%", "-18.75%", "-25%"]
-  );
-
-  const navOpacity = useTransform(
-    scrollYProgress,
-    [0, isMobile ? 0.1 : 0.2],
-    [1, 0]
-  );
-
-  const navVisibility = useTransform(scrollYProgress, (value) =>
-    value <= (isMobile ? 0.1 : 0.2) ? "visible" : "hidden"
-  );
-
-  const introTextOpacity = useTransform(
-    scrollYProgress,
-    [0, isMobile ? 0.05 : 0.1],
-    [1, 0]
-  );
-
-  const gradientProgress = useTransform(
-    scrollYProgress,
-    [isMobile ? 0.05 : 0.1, isMobile ? 0.7 : 0.9],
-    [0, 1]
-  );
+  // Create a floating animation
+  const floating = {
+    y: [0, -10, 0],
+    transition: {
+      duration: 4,
+      repeat: Number.POSITIVE_INFINITY,
+      repeatType: "reverse" as const,
+      ease: "easeInOut",
+    },
+  };
 
   return (
     <section
       ref={sectionRef}
-      id="header-section"
-      className={`relative min-h-screen snap-start transition-opacity duration-1000 ${
-        isVisible ? "opacity-100" : "opacity-0"
-      }`}
+      className="relative min-h-[150vh] bg-white overflow-hidden"
     >
-      <div className="sticky top-0 h-screen bg-white flex items-center justify-center overflow-hidden">
-        <motion.div
-          style={{
-            opacity: navOpacity,
-            visibility: navVisibility,
-            position: "relative",
-            zIndex: 20,
-          }}
-          className="transition-opacity duration-300"
-        >
-          <Nav />
-        </motion.div>
-
-        <div className="text-center relative z-10">
-          <motion.h2
-            style={{ opacity: introTextOpacity }}
-            className="text-gray-600 text-2xl md:text-4xl font-normal"
-          >
-            We&apos;re
-          </motion.h2>
-          <motion.h1
-            style={{
-              scale: textScale,
-              opacity: textOpacity,
-              x: xMove,
-              y: yMove,
-            }}
-            className="font-bold tracking-tight text-black text-[8vw] md:text-[10vh]"
-          >
-            Saving Food.
-          </motion.h1>
-        </div>
-
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            opacity: gradientProgress,
-            background:
-              "linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0) 100%)",
-          }}
-        />
+      {/* Navigation */}
+      <div className="fixed top-0 left-0 right-0 p-6 z-50 bg-white/80 backdrop-blur-sm">
+        <Nav />
       </div>
+
+      {/* Scroll Progress Indicator */}
+      <motion.div
+        className="fixed top-0 left-0 w-1 bg-black origin-top z-40"
+        style={{
+          height: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
+          opacity: useTransform(scrollYProgress, [0, 0.2], [0, 1]),
+        }}
+      />
+
+      {/* Center Content */}
+      <div className="sticky top-0 h-screen flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
+        >
+          {/* Background blur effect */}
+          <motion.div
+            className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full"
+            style={{
+              scale: useTransform(scrollYProgress, [0, 0.5], [0.8, 1.1]),
+              opacity: useTransform(scrollYProgress, [0, 0.3], [0, 0.5]),
+            }}
+          />
+
+          {/* Main image with scroll animations */}
+          <motion.div
+            animate={floating}
+            style={{
+              scale,
+              opacity,
+              y,
+            }}
+            className="relative z-10"
+          >
+            <Image
+              src={SVGImage || "/placeholder.svg"}
+              alt="WE'RE SAVING FOOD"
+              width={480}
+              height={480}
+              priority
+              className="w-full h-auto"
+            />
+          </motion.div>
+
+          {/* Decorative elements */}
+          <motion.div
+            className="absolute -inset-4 border border-black/10 rounded-full"
+            style={{
+              scale: useTransform(scrollYProgress, [0, 0.5], [1, 1.3]),
+              opacity: useTransform(scrollYProgress, [0, 0.3], [1, 0]),
+            }}
+          />
+        </motion.div>
+      </div>
+
+      {/* Black Gradient Overlay */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black to-transparent"
+        style={{
+          height: gradientHeight,
+          opacity: gradientOpacity,
+        }}
+      />
+
+      {/* Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1, duration: 0.8 }}
+        style={{ opacity: useTransform(scrollYProgress, [0, 0.2], [1, 0]) }}
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 text-sm text-black/60 z-50"
+      >
+        Scroll to explore
+      </motion.div>
     </section>
   );
 }
