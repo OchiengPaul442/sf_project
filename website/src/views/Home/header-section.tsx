@@ -8,8 +8,8 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
-import SVGImage from "@/public/svgs/Vector.svg";
 import { useRef } from "react";
+import imageUrls from "@/utils/Images_Json_Urls";
 
 function useParallax(value: MotionValue<number>, distance: number) {
   return useTransform(value, [0, 1], [0, distance]);
@@ -89,7 +89,7 @@ export default function HeaderSection() {
             className="relative z-10"
           >
             <Image
-              src={SVGImage || "/placeholder.svg"}
+              src={imageUrls.headerSectionImage || "/placeholder.svg"}
               alt="WE'RE SAVING FOOD"
               width={480}
               height={480}
@@ -117,17 +117,6 @@ export default function HeaderSection() {
           opacity: gradientOpacity,
         }}
       />
-
-      {/* Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.8 }}
-        style={{ opacity: useTransform(scrollYProgress, [0, 0.2], [1, 0]) }}
-        className="fixed bottom-8 w-full text-sm text-black/60 z-50"
-      >
-        <div className="w-full flex justify-center"> Scroll to explore</div>
-      </motion.div>
     </section>
   );
 }

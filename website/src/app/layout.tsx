@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { qanelasSoft } from "@/lib/fonts/fonts";
-import { Provider } from "@/components/Provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import ThemeProvider from "@/components/ThemeProvider";
+import ReduxProvider from "@/components/ReduxProvider";
 
 export const metadata: Metadata = {
   title: "Saving Food",
@@ -21,13 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${qanelasSoft.variable} font-sans`}>
       <body className="h-screen">
-        <Provider>
+        <ReduxProvider>
           <ThemeProvider>
             <main className="h-[calc(100vh*5)] overscroll-none">
               {children}
             </main>
           </ThemeProvider>
-        </Provider>
+        </ReduxProvider>
         <ToastContainer position="top-center" autoClose={5000} />
       </body>
     </html>

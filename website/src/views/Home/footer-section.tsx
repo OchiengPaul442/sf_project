@@ -1,5 +1,6 @@
 "use client";
 
+import imageUrls from "@/utils/Images_Json_Urls";
 import Image from "next/image";
 import { PiArrowULeftUp } from "react-icons/pi";
 
@@ -21,12 +22,15 @@ export default function FooterSection({ scrollToTop }: FooterSectionProps) {
       <div className="flex flex-row justify-between items-end w-full h-full gap-4 sm:gap-0">
         <div className="relative w-[150px] sm:w-[200px] md:w-[250px] lg:w-[300px] xl:w-[350px] h-auto">
           <Image
-            src="/images/logo-white.png"
+            src={imageUrls.footerImage}
             alt="We're Saving Food"
             width={400}
             height={400}
             priority
             className="w-full h-auto"
+            quality={80}
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA"
           />
         </div>
         <div className="text-white/80 text-xs sm:text-sm md:text-base font-mono text-center sm:text-right">
