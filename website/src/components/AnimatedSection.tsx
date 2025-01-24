@@ -1,5 +1,7 @@
+"use client";
+
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 interface AnimatedSectionProps {
   index: number;
@@ -16,36 +18,35 @@ export const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   total,
   scrollDirection,
 }) => {
-  const variants = {
-    initial: (direction: "up" | "down") => ({
-      y: direction === "down" ? "100%" : "-100%",
+  const variants: Variants = {
+    initial: {
+      y: scrollDirection === "down" ? "100%" : "-100%",
       opacity: 0,
       zIndex: index,
-    }),
+    },
     enter: {
       y: "0%",
       opacity: 1,
       zIndex: total - index,
       transition: {
-        duration: 0.5,
-        ease: [0.25, 0.1, 0.25, 1],
+        duration: 0.4, // Faster transition
+        ease: "easeInOut", // Efficient easing
       },
     },
-    exit: (direction: "up" | "down") => ({
-      y: direction === "down" ? "-100%" : "100%",
+    exit: {
+      y: scrollDirection === "down" ? "-100%" : "100%",
       opacity: 0,
       zIndex: index,
       transition: {
-        duration: 0.5,
-        ease: [0.25, 0.1, 0.25, 1],
+        duration: 0.4, // Faster exit
+        ease: "easeInOut",
       },
-    }),
+    },
   };
 
   return (
     <motion.div
       className="fixed inset-0 w-full h-screen overflow-hidden touch-none"
-      custom={scrollDirection}
       initial="initial"
       animate={isActive ? "enter" : "exit"}
       variants={variants}
