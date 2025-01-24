@@ -16,6 +16,7 @@ import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
 import { AnimatedSection } from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
+import { preloadLottieAnimations } from "@/components/carousels/how-section-carousel";
 
 // Dynamic imports with 'scrollToTop' as optional
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
@@ -64,6 +65,10 @@ export default function HomePage() {
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
+
+  useEffect(() => {
+    preloadLottieAnimations();
+  }, []);
 
   // Define all sections in an array with 'useNextAction' flag
   const sections: SectionConfig[] = useMemo(
