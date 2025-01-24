@@ -70,11 +70,11 @@ export default function HomePage() {
   useEffect(() => {
     const loadAnimations = async () => {
       try {
-        await preloadLottieAnimations();
+        preloadLottieAnimations();
         // Small delay to ensure animations are fully loaded and cached
         setTimeout(() => {
           setIsLoading(false);
-        }, 500);
+        }, 1000);
       } catch (error) {
         console.error("Failed to preload Lottie animations:", error);
         setIsLoading(false);
