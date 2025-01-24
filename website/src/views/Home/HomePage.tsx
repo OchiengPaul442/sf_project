@@ -18,76 +18,41 @@ import { AnimatedSection } from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
 import { preloadLottieAnimations } from "@/components/carousels/how-section-carousel";
 
-// Dynamic imports with 'scrollToTop' as optional
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
-}) as React.ComponentType<{ scrollToTop?: () => void }>;
-
+});
 const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
   ssr: false,
-}) as React.ComponentType<{ scrollToTop?: () => void }>;
-
+});
 const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
-}) as React.ComponentType<{ scrollToTop?: () => void }>;
-
+});
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
-  {
-    ssr: false,
-  }
-) as React.ComponentType<{ scrollToTop?: () => void }>;
-
+  { ssr: false }
+);
 const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
   ssr: false,
-}) as React.ComponentType<{ scrollToTop?: () => void }>;
-
+});
 const InvestSection = dynamic(() => import("@/views/Home/invest-section"), {
   ssr: false,
-}) as React.ComponentType<{ scrollToTop?: () => void }>;
-
+});
 const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
   ssr: false,
-}) as React.ComponentType<{ scrollToTop?: () => void }>;
-
-// Updated SectionConfig interface with a flag to determine the scroll behavior
-interface SectionConfig {
-  Component: React.ComponentType<{ scrollToTop?: () => void }>;
-  id: string;
-  useNextAction?: boolean; // Indicates if the section should use 'handleNextSection'
-}
+});
 
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollLockRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
-  const touchStartRef = useRef<number | null>(null);
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
-  useEffect(() => {
-    const loadAnimations = async () => {
-      try {
-        await preloadLottieAnimations();
-        // Small delay to ensure animations are fully loaded and cached
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Failed to preload Lottie animations:", error);
-        setIsLoading(false);
-      }
-    };
-
-    loadAnimations();
-  }, []);
-
-  // Define all sections in an array with 'useNextAction' flag
-  const sections: SectionConfig[] = useMemo(
+  const sections = useMemo(
     () => [
-      { Component: HeaderSection, id: "home", useNextAction: true }, // Use handleNextSection
+      { Component: HeaderSection, id: "home", useNextAction: true },
       { Component: RobotSection, id: "platform", useNextAction: false },
       { Component: HowSection, id: "solutions", useNextAction: false },
       {
@@ -104,12 +69,24 @@ export default function HomePage() {
 
   const totalHeight = `${100 * sections.length}vh`;
 
+  useEffect(() => {
+    const loadAnimations = async () => {
+      try {
+        await preloadLottieAnimations();
+        setTimeout(() => setIsLoading(false), 500);
+      } catch (error) {
+        console.error("Failed to preload Lottie animations:", error);
+        setIsLoading(false);
+      }
+    };
+    loadAnimations();
+  }, []);
+
   const scrollToSection = useCallback(
     (index: number) => {
       if (index < 0 || index >= sections.length || scrollLockRef.current)
         return;
 
-      // Lock scroll to prevent multiple triggers
       scrollLockRef.current = true;
       setIsScrolling(true);
       setCurrentPage(index);
@@ -119,7 +96,6 @@ export default function HomePage() {
         behavior: "smooth",
       });
 
-      // Release scroll lock after ~600ms
       const scrollTimer = setTimeout(() => {
         setIsScrolling(false);
         scrollLockRef.current = false;
@@ -140,40 +116,6 @@ export default function HomePage() {
     }
   }, [currentPage, scrollToSection, sections.length]);
 
-  // Mobile touch scroll handling
-  const handleTouchStart = useCallback((event: TouchEvent) => {
-    touchStartRef.current = event.touches[0].clientY;
-  }, []);
-
-  const handleTouchMove = useCallback(
-    (event: TouchEvent) => {
-      if (!touchStartRef.current) return;
-
-      const currentY = event.touches[0].clientY;
-      const deltaY = touchStartRef.current - currentY;
-      const threshold = 50; // Adjust sensitivity as needed
-
-      if (Math.abs(deltaY) > threshold) {
-        if (deltaY > 0 && currentPage < sections.length - 1) {
-          // Swipe up -> next section
-          event.preventDefault();
-          scrollToSection(currentPage + 1);
-        } else if (deltaY < 0 && currentPage > 0) {
-          // Swipe down -> previous section
-          event.preventDefault();
-          scrollToSection(currentPage - 1);
-        }
-        touchStartRef.current = null;
-      }
-    },
-    [currentPage, scrollToSection, sections.length]
-  );
-
-  const handleTouchEnd = useCallback(() => {
-    touchStartRef.current = null;
-  }, []);
-
-  // Mouse wheel event
   const handleWheel = useCallback(
     (event: WheelEvent) => {
       if (scrollLockRef.current) return;
@@ -193,7 +135,6 @@ export default function HomePage() {
     [currentPage, scrollToSection, sections.length]
   );
 
-  // Keyboard arrow up/down events
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (scrollLockRef.current) return;
@@ -216,59 +157,21 @@ export default function HomePage() {
     [currentPage, scrollToSection, sections.length]
   );
 
-  // Set currentPage based on current scroll position on mount
   useEffect(() => {
-    const handleInitialScroll = () => {
-      const scrollPosition = window.scrollY;
-      const pageIndex = Math.round(scrollPosition / window.innerHeight);
-      setCurrentPage(pageIndex);
-    };
-
-    handleInitialScroll();
-
-    // Optional: update currentPage on window resize
-    window.addEventListener("resize", handleInitialScroll);
-
-    return () => {
-      window.removeEventListener("resize", handleInitialScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    const wheelOptions = { passive: false };
-    const touchOptions = { passive: false };
-
-    window.addEventListener("wheel", handleWheel, wheelOptions);
+    window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("keydown", handleKeyDown);
-
-    // Mobile touch events
-    window.addEventListener("touchstart", handleTouchStart, touchOptions);
-    window.addEventListener("touchmove", handleTouchMove, touchOptions);
-    window.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [
-    handleWheel,
-    handleKeyDown,
-    handleTouchStart,
-    handleTouchMove,
-    handleTouchEnd,
-  ]);
+  }, [handleWheel, handleKeyDown]);
 
   const handleToggle = () => dispatch(toggleMenu());
 
-  // Hide NextButton on the last three sections
   const showNextButton = !isScrolling && currentPage < sections.length - 3;
 
-  if (isLoading) {
-    return <Loader />;
-  }
+  if (isLoading) return <Loader />;
 
   return (
     <>
@@ -284,8 +187,6 @@ export default function HomePage() {
                 index={index}
                 isActive={index === currentPage}
                 total={sections.length}
-                // If you scroll from a lower index to a higher index, direction is "down"
-                // If you're at a higher index and go to a lower index, direction is "up"
                 scrollDirection={currentPage > index ? "up" : "down"}
               >
                 <Suspense fallback={<Loader />}>
