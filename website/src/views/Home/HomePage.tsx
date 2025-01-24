@@ -6,6 +6,7 @@ import React, {
   useState,
   useMemo,
   useRef,
+  Suspense,
 } from "react";
 import dynamic from "next/dynamic";
 import { AnimatePresence } from "framer-motion";
@@ -14,6 +15,7 @@ import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import MenuModal from "@/components/dialog/menu-modal";
 import NextButton from "@/components/NextButton";
 import { AnimatedSection } from "@/components/AnimatedSection";
+import Loader from "@/components/loader";
 
 // Dynamic imports with 'scrollToTop' as optional
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
@@ -263,9 +265,13 @@ export default function HomePage() {
                 // If you're at a higher index and go to a lower index, direction is "up"
                 scrollDirection={currentPage > index ? "up" : "down"}
               >
-                <Component
-                  scrollToTop={useNextAction ? handleNextSection : scrollToTop}
-                />
+                <Suspense fallback={<Loader />}>
+                  <Component
+                    scrollToTop={
+                      useNextAction ? handleNextSection : scrollToTop
+                    }
+                  />
+                </Suspense>
               </AnimatedSection>
             ))}
           </AnimatePresence>
