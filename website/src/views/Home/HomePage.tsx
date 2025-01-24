@@ -46,6 +46,7 @@ export default function HomePage() {
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollLockRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
@@ -116,6 +117,43 @@ export default function HomePage() {
     }
   }, [currentPage, scrollToSection, sections.length]);
 
+  const handleTouchStart = useCallback((event: TouchEvent) => {
+    touchStartRef.current = {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
+  }, []);
+
+  const handleTouchMove = useCallback(
+    (event: TouchEvent) => {
+      if (!touchStartRef.current) return;
+
+      const currentX = event.touches[0].clientX;
+      const currentY = event.touches[0].clientY;
+      const deltaX = touchStartRef.current.x - currentX;
+      const deltaY = touchStartRef.current.y - currentY;
+
+      const threshold = 50;
+      const isVerticalScroll = Math.abs(deltaY) > Math.abs(deltaX);
+
+      if (isVerticalScroll) {
+        if (deltaY > threshold && currentPage < sections.length - 1) {
+          event.preventDefault();
+          scrollToSection(currentPage + 1);
+        } else if (deltaY < -threshold && currentPage > 0) {
+          event.preventDefault();
+          scrollToSection(currentPage - 1);
+        }
+        touchStartRef.current = null;
+      }
+    },
+    [currentPage, scrollToSection, sections.length]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    touchStartRef.current = null;
+  }, []);
+
   const handleWheel = useCallback(
     (event: WheelEvent) => {
       if (scrollLockRef.current) return;
@@ -158,14 +196,29 @@ export default function HomePage() {
   );
 
   useEffect(() => {
-    window.addEventListener("wheel", handleWheel, { passive: false });
+    const wheelOptions = { passive: false };
+    const touchOptions = { passive: false };
+
+    window.addEventListener("wheel", handleWheel, wheelOptions);
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("touchstart", handleTouchStart, touchOptions);
+    window.addEventListener("touchmove", handleTouchMove, touchOptions);
+    window.addEventListener("touchend", handleTouchEnd);
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [handleWheel, handleKeyDown]);
+  }, [
+    handleWheel,
+    handleKeyDown,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+  ]);
 
   const handleToggle = () => dispatch(toggleMenu());
 
