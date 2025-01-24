@@ -61,13 +61,27 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollLockRef = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
   const touchStartRef = useRef<number | null>(null);
 
   const dispatch = useDispatch();
   const isOpen = useSelector((state) => state.menu.isOpen);
 
   useEffect(() => {
-    preloadLottieAnimations();
+    const loadAnimations = async () => {
+      try {
+        await preloadLottieAnimations();
+        // Small delay to ensure animations are fully loaded and cached
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+      } catch (error) {
+        console.error("Failed to preload Lottie animations:", error);
+        setIsLoading(false);
+      }
+    };
+
+    loadAnimations();
   }, []);
 
   // Define all sections in an array with 'useNextAction' flag
@@ -251,6 +265,10 @@ export default function HomePage() {
 
   // Hide NextButton on the last three sections
   const showNextButton = !isScrolling && currentPage < sections.length - 3;
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <>

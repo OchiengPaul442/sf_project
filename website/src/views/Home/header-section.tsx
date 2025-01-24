@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Nav } from "@/components/layout/Navs/nav";
 import imageUrls from "@/utils/Images_Json_Urls";
 
@@ -35,6 +35,11 @@ export default function HeaderSection() {
   const blurOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 0.5]);
   const blurScale = useTransform(scrollYProgress, [0, 0.5], [0.8, 1.1]);
 
+  useEffect(() => {
+    // Reset scroll position to the top when the page is refreshed
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <section
       ref={sectionRef}
@@ -48,9 +53,9 @@ export default function HeaderSection() {
       {/* Sticky center content */}
       <div className="sticky top-0 h-screen flex items-center justify-center px-4">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, scale: 0.8 }} // Initial state for animation
+          animate={{ opacity: 1, scale: 1 }} // Target state for animation
+          transition={{ duration: 0.5 }} // Transition duration
           className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
         >
           {/* Background blur effect */}
@@ -64,11 +69,12 @@ export default function HeaderSection() {
 
           {/* Main image with parallax + float effect */}
           <motion.div
+            initial={{ y: 0 }} // Start at initial state for y-axis
             animate={{
-              y: [-10, 10],
+              y: [-10, 10], // Floating effect
             }}
             transition={{
-              duration: 2, // Faster float animation
+              duration: 2,
               repeat: Infinity,
               repeatType: "reverse",
               ease: "easeInOut",
@@ -93,6 +99,12 @@ export default function HeaderSection() {
           {/* Decorative border ring */}
           <motion.div
             className="absolute -inset-4 border border-black/10 rounded-full pointer-events-none"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{
+              scale: 1.2,
+              opacity: 1,
+            }}
+            transition={{ duration: 0.5 }}
             style={{
               scale: useTransform(scrollYProgress, [0, 0.5], [1, 1.2]),
               opacity: useTransform(scrollYProgress, [0, 0.3], [1, 0]),

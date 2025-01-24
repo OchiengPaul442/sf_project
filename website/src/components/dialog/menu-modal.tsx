@@ -96,7 +96,7 @@ export default function MenuModal({
                         >
                           <button
                             onClick={() => handleLinkClick(item.id)}
-                            className="text-3xl font-bold hover:text-green-400 transition-colors flex items-center group"
+                            className="text-3xl font-bold hover:text-blue-400 transition-colors flex items-center group"
                           >
                             {item.title}
                             <ArrowUpRight className="h-4 w-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -116,7 +116,7 @@ export default function MenuModal({
                       animate={{ opacity: 1, y: 0 }}
                       className="flex gap-4"
                     >
-                      <Leaf className="h-6 w-6 text-green-400 flex-shrink-0" />
+                      <Leaf className="h-6 w-6 text-blue-500 flex-shrink-0" />
                       <p className="text-sm text-gray-300">
                         Building a platform that empowers restaurants to cut
                         food waste, protect their bottom line, and impact global
@@ -129,7 +129,7 @@ export default function MenuModal({
                       transition={{ delay: 0.1 }}
                       className="flex gap-4"
                     >
-                      <ChefHat className="h-6 w-6 text-green-400 flex-shrink-0" />
+                      <ChefHat className="h-6 w-6 text-blue-300 flex-shrink-0" />
                       <p className="text-sm text-gray-300">
                         Our team blends more than a decade of Food and AI
                         experience, letting you focus on creating while we
@@ -151,7 +151,7 @@ export default function MenuModal({
                         transition={{ delay: index * 0.1 + 0.2 }}
                         className="space-y-2"
                       >
-                        <h3 className="text-lg font-medium hover:text-green-400 transition-colors cursor-pointer">
+                        <h3 className="text-lg font-medium hover:text-blue-400 transition-colors cursor-pointer">
                           {update.title}
                         </h3>
                         <p className="text-sm text-gray-400">{update.author}</p>
@@ -182,7 +182,7 @@ export default function MenuModal({
                 <div className="flex flex-row justify-between items-start gap-8">
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <Phone className="h-5 w-5 text-green-400" />
+                      <Phone className="h-5 w-5 text-blue-200" />
                       <span className="text-sm">Get in touch</span>
                     </div>
                   </div>
@@ -190,21 +190,21 @@ export default function MenuModal({
                     <a
                       href="#"
                       onClick={onClose}
-                      className="text-sm hover:text-green-400 transition-colors"
+                      className="text-sm hover:text-blue-400 transition-colors"
                     >
                       X
                     </a>
                     <a
                       href="#"
                       onClick={onClose}
-                      className="text-sm hover:text-green-400 transition-colors"
+                      className="text-sm hover:text-blue-400 transition-colors"
                     >
                       LinkedIn
                     </a>
                     <a
                       href="#"
                       onClick={onClose}
-                      className="text-sm hover:text-green-400 transition-colors"
+                      className="text-sm hover:text-blue-400 transition-colors"
                     >
                       Instagram
                     </a>

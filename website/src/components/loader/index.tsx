@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { motion } from "framer-motion";
+import type React from "react";
+import { useEffect } from "react";
 
 const ModernLoader: React.FC = () => {
   useEffect(() => {
@@ -12,35 +12,12 @@ const ModernLoader: React.FC = () => {
     };
   }, []);
 
-  const dotVariants = {
-    initial: { y: 0 },
-    animate: { y: -10 },
-  };
-
-  const dotTransition = {
-    duration: 0.5,
-    repeat: Infinity,
-    repeatType: "reverse" as const,
-    ease: "easeInOut",
-  };
-
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-black text-white font-sans z-50">
-      <div className="text-4xl font-bold mb-4">Saving Food</div>
-      <div className="flex space-x-2">
-        {[0, 1, 2].map((index) => (
-          <motion.div
-            key={index}
-            className="w-3 h-3 bg-white rounded-full"
-            variants={dotVariants}
-            initial="initial"
-            animate="animate"
-            transition={{
-              ...dotTransition,
-              delay: index * 0.15,
-            }}
-          />
-        ))}
+    <div className="fixed inset-0 flex items-center justify-center bg-black z-50">
+      <div className="relative">
+        <div className="w-24 h-24 rounded-full border-t-4 border-b-4 border-blue-500 animate-spin"></div>
+        <div className="absolute top-0 left-0 w-24 h-24 rounded-full border-t-4 border-b-4 border-blue-300 animate-ping"></div>
+        <div className="absolute top-0 left-0 w-24 h-24 rounded-full border-2 border-blue-200 animate-pulse"></div>
       </div>
       <div className="sr-only" role="status" aria-live="polite">
         Loading, please wait...
