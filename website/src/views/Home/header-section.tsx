@@ -4,7 +4,7 @@ import Image from "next/image";
 import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import { useRef, useEffect } from "react";
 import { Nav } from "@/components/layout/Navs/nav";
-import imageUrls from "@/utils/Images_Json_Urls";
+import VectorImage from "@/public/Vector.svg";
 
 /**
  * A simple parallax hook that maps scroll progress [0..1] to a distance.
@@ -87,7 +87,7 @@ export default function HeaderSection() {
             className="relative z-10"
           >
             <Image
-              src={imageUrls.headerSectionImage || "/placeholder.svg"}
+              src={VectorImage || "/placeholder.svg"}
               alt="WE'RE SAVING FOOD"
               width={480}
               height={480}
