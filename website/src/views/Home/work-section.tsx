@@ -2,24 +2,23 @@
 
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useRef, lazy } from "react";
+import type { LottieRefCurrentProps } from "lottie-react";
+
+// Dynamically import the Lottie component
+const Lottie = lazy(() => import("lottie-react"));
+
+// Import the Lottie animation JSON
 import ConstructionAnimation from "@/public/lottie/contruction.json";
-import { useEffect, useRef } from "react";
-import lottie from "lottie-web";
 
 export default function WorkSection() {
-  const animationContainer = useRef<HTMLDivElement>(null);
+  // Create a ref with the correct type for lottie-react
+  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
 
   useEffect(() => {
-    if (animationContainer.current) {
-      const anim = lottie.loadAnimation({
-        container: animationContainer.current,
-        renderer: "svg",
-        loop: true,
-        autoplay: true,
-        animationData: ConstructionAnimation,
-      });
-
-      return () => anim.destroy();
+    // Once the component mounts, set the animation speed
+    if (lottieRef.current?.animationItem) {
+      lottieRef.current.animationItem.setSpeed(1.2);
     }
   }, []);
 
@@ -57,9 +56,24 @@ export default function WorkSection() {
 
         {/* Lottie Animation with Floating Effect */}
         <div
-          ref={animationContainer}
-          className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none animate-float"
-        />
+          className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 
+                     w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] 
+                     lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] 
+                     pointer-events-none animate-float 
+                     will-change-transform opacity-100"
+        >
+          <Lottie
+            animationData={ConstructionAnimation}
+            loop
+            autoplay
+            lottieRef={lottieRef} // Attach the ref here
+            style={{
+              filter: "brightness(1)", // Adjusted to normal brightness
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </div>
       </div>
     </section>
   );

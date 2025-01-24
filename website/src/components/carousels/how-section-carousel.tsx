@@ -1,22 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Lottie from "lottie-react";
+import { lazy } from "react";
+import type { LottieRefCurrentProps } from "lottie-react";
 
-// We remove the direct JSON imports and will dynamically import them.
-// import BoatAnimation from "@/public/lottie/sailing_boat_2.json";
-// import PaperAnimation from "@/public/lottie/paper_flying.json";
-// import MarkerAnimation from "@/public/lottie/mark_json.json";
-// import SpagAnimation from "@/public/lottie/spag_json.json";
-// import DataAnimation from "@/public/lottie/data.json";
+// Dynamically import the Lottie component
+const Lottie = lazy(() => import("lottie-react"));
 
+// Define the Step interface
 interface Step {
   id: string;
   title: string;
 }
 
-// Keep your steps the same:
+// Steps array
 const STEPS: Step[] = [
   { id: "smooth-onboarding", title: "Smooth Onboarding" },
   { id: "data-integrity", title: "Data Integrity" },
@@ -25,9 +23,7 @@ const STEPS: Step[] = [
   { id: "fraud-eliminated", title: "Fraud Eliminated" },
 ];
 
-// You can store the loaded Lottie data in an object
-// where the key = stepId, value = loaded JSON
-// We’ll fetch them lazily when needed:
+// Lottie cache
 type LottieCache = Record<string, any>;
 
 const carouselVariants = {
@@ -51,10 +47,13 @@ const HowSectionCarousel: React.FC = () => {
   // Cache for loaded Lottie data
   const [lottieCache, setLottieCache] = useState<LottieCache>({});
 
+  // Ref for current Lottie instance
+  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
+
   // Helper to load a JSON file dynamically
   const loadLottieData = useCallback(
     async (stepId: string) => {
-      if (lottieCache[stepId]) return; // already loaded
+      if (lottieCache[stepId]) return;
       try {
         let data: any;
         switch (stepId) {
@@ -109,6 +108,13 @@ const HowSectionCarousel: React.FC = () => {
     const nextIndex = (selectedStepIndex + 1) % STEPS.length;
     loadLottieData(STEPS[nextIndex].id);
   }, [selectedStepIndex, loadLottieData]);
+
+  // After the new animation is loaded, set speed
+  useEffect(() => {
+    if (lottieRef.current?.animationItem) {
+      lottieRef.current.animationItem.setSpeed(1.2); // Adjust speed as needed
+    }
+  }, [selectedStepIndex, lottieCache]);
 
   const handleNavClick = (stepId: string) => {
     const index = STEPS.findIndex((s) => s.id === stepId);
@@ -196,13 +202,12 @@ const HowSectionCarousel: React.FC = () => {
                     animationData={currentAnimationData}
                     loop
                     autoplay
+                    lottieRef={lottieRef}
                     style={{
                       width: "100%",
                       height: "100%",
                       objectFit: "contain",
                     }}
-                    // optionally reduce fps or use custom settings:
-                    // rendererSettings={{ preserveAspectRatio: 'xMidYMid meet' }}
                   />
                 </div>
               ) : (

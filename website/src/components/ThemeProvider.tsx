@@ -1,7 +1,8 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
+import Loader from "./loader";
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -10,7 +11,7 @@ interface ThemeProviderProps {
 const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   return (
     <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
-      {children}
+      <Suspense fallback={<Loader />}>{children}</Suspense>
     </NextThemesProvider>
   );
 };

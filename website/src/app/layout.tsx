@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import ThemeProvider from "@/components/ThemeProvider";
 import ReduxProvider from "@/components/ReduxProvider";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "Saving Food",

@@ -1,10 +1,26 @@
 "use client";
 
 import InvestForm from "@/components/forms/InvestForm";
-import Lottie from "lottie-react";
+import { useEffect, useRef, lazy } from "react";
+import type { LottieRefCurrentProps } from "lottie-react";
+
+// Dynamically import the Lottie component for better performance
+const Lottie = lazy(() => import("lottie-react"));
+
+// Import the Lottie animation JSON
 import AngelAnimation from "@/public/lottie/angel.json";
 
 export default function InvestSection() {
+  // Create a ref with the correct type for lottie-react
+  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
+
+  useEffect(() => {
+    // Once the component mounts, set the animation speed
+    if (lottieRef.current?.animationItem) {
+      lottieRef.current.animationItem.setSpeed(1.2);
+    }
+  }, []);
+
   return (
     <section
       id="invest"
@@ -26,6 +42,7 @@ export default function InvestSection() {
               animationData={AngelAnimation}
               loop
               autoplay
+              lottieRef={lottieRef} // Attach the ref here
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
