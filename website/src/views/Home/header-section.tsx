@@ -16,7 +16,7 @@ function useParallax(scrollProgress: MotionValue<number>, distance: number) {
   return useTransform(scrollProgress, [0, 1], [0, distance]);
 }
 
-export default function HeaderSection() {
+const HeaderSection: React.FC<any> = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -114,4 +114,7 @@ export default function HeaderSection() {
       </div>
     </section>
   );
-}
+};
+
+HeaderSection.displayName = "HeaderSection";
+export default HeaderSection;

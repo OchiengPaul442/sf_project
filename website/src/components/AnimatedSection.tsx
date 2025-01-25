@@ -1,4 +1,5 @@
-// components/AnimatedSection.tsx
+"use client";
+
 import { motion } from "framer-motion";
 import React, { useMemo } from "react";
 
@@ -10,6 +11,7 @@ interface Props {
   children: React.ReactNode;
 }
 
+// Named functional component
 const AnimatedSection: React.FC<Props> = ({
   isActive,
   index,
@@ -30,7 +32,7 @@ const AnimatedSection: React.FC<Props> = ({
         scale: 1,
         transition: {
           type: "tween",
-          duration: 0.3,
+          duration: 0.2, // faster
           ease: "easeOut",
         },
       },
@@ -40,7 +42,7 @@ const AnimatedSection: React.FC<Props> = ({
         scale: 0.95,
         transition: {
           type: "tween",
-          duration: 0.3,
+          duration: 0.2, // faster
           ease: "easeIn",
         },
       },
@@ -63,4 +65,5 @@ const AnimatedSection: React.FC<Props> = ({
   );
 };
 
+AnimatedSection.displayName = "AnimatedSection";
 export default AnimatedSection;

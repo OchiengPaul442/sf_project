@@ -1,26 +1,109 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useCallback, useState, useMemo, useRef } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
+import throttle from "lodash/throttle";
+
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
-import MenuModal from "@/components/dialog/menu-modal";
+import { isMobileDevice } from "@/utils/deviceDetection";
+import type { RootState } from "@/redux-store";
+
+// Components
 import AnimatedSection from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
-import { preloadLottieAnimations } from "@/components/carousels/how-section-carousel";
-import VectorImage from "@/public/Vector.svg";
-import { isMobileDevice } from "@/utils/deviceDetection";
-import throttle from "lodash/throttle";
-import type { RootState } from "@/redux-store";
 import NextButton from "@/components/NextButton";
+import MenuModal from "@/components/dialog/menu-modal";
 
-// Define interfaces
-interface SectionProps {
+// Images / JSON used across sections
+import VectorImage from "@/public/Vector.svg";
+
+/**
+ * JSON animations needed in all sections:
+ *  - RobotSection: /lottie/robot.json
+ *  - WorkSection (construction): /lottie/contruction.json
+ *  - InvestSection (angel): /lottie/angel.json
+ *  - HowSectionCarousel:
+ *     /lottie/sailing_boat_2.json
+ *     /lottie/paper_flying.json
+ *     /lottie/spag_json.json
+ *     /lottie/mark_json.json
+ *     /lottie/data.json
+ */
+const JSON_PATHS = [
+  "/lottie/robot.json",
+  "/lottie/contruction.json",
+  "/lottie/angel.json",
+  "/lottie/sailing_boat_2.json",
+  "/lottie/paper_flying.json",
+  "/lottie/spag_json.json",
+  "/lottie/mark_json.json",
+  "/lottie/data.json",
+];
+
+// ---------- DYNAMIC IMPORTS ----------
+// 1) Import raw component without passing any props
+const HeaderSectionRaw = dynamic(() => import("@/views/Home/header-section"), {
+  ssr: false,
+});
+const RobotSectionRaw = dynamic(() => import("@/views/Home/robotSection"), {
+  ssr: false,
+});
+const HowSectionRaw = dynamic(() => import("@/views/Home/how-section"), {
+  ssr: false,
+});
+const HowSectionCarouselRaw = dynamic(
+  () => import("@/components/carousels/how-section-carousel"),
+  { ssr: false }
+);
+const WorkSectionRaw = dynamic(() => import("@/views/Home/work-section"), {
+  ssr: false,
+});
+const InvestSectionRaw = dynamic(() => import("@/views/Home/invest-section"), {
+  ssr: false,
+});
+const FooterSectionRaw = dynamic(() => import("@/views/Home/footer-section"), {
+  ssr: false,
+});
+
+// ---------- PROPS / HOC ----------
+export interface SectionProps {
   scrollToTop: () => void;
 }
 
+/**
+ * HOC that ensures each section can receive `scrollToTop` prop
+ * without type conflicts.
+ */
+function withScrollProp<T extends object>(
+  Component: React.ComponentType<T & SectionProps>
+): React.FC<T & SectionProps> {
+  const WrappedComponent: React.FC<T & SectionProps> = (props) => {
+    return <Component {...props} />;
+  };
+  WrappedComponent.displayName = `WithScrollProp(${
+    Component.displayName || Component.name || "Component"
+  })`;
+  return WrappedComponent;
+}
+
+// Wrap each dynamic component with the HOC so we can pass `scrollToTop` prop
+const HeaderSection = withScrollProp(HeaderSectionRaw);
+const RobotSection = withScrollProp(RobotSectionRaw);
+const HowSection = withScrollProp(HowSectionRaw);
+const HowSectionCarousel = withScrollProp(HowSectionCarouselRaw);
+const WorkSection = withScrollProp(WorkSectionRaw);
+const InvestSection = withScrollProp(InvestSectionRaw);
+const FooterSection = withScrollProp(FooterSectionRaw);
+
+// ---------- HOME PAGE ----------
 interface SectionConfig {
   Component: React.ComponentType<SectionProps>;
   id: string;
@@ -28,98 +111,23 @@ interface SectionConfig {
   useNextAction?: boolean;
 }
 
-// Higher-Order Component to inject scroll prop
-const withScrollProp = (
-  Component: React.ComponentType<any>
-): React.ComponentType<SectionProps> => {
-  const WrappedComponent = (props: SectionProps): React.JSX.Element => (
-    <Component {...props} />
-  );
-  WrappedComponent.displayName = `WithScrollProp(${
-    Component.displayName || Component.name || "Component"
-  })`;
-  return WrappedComponent;
-};
-
-// Dynamically import sections with SSR disabled
-const HeaderSection = dynamic(
-  () =>
-    import("@/views/Home/header-section").then((mod) =>
-      withScrollProp(mod.default)
-    ),
-  {
-    ssr: false,
-  }
-);
-const RobotSection = dynamic(
-  () =>
-    import("@/views/Home/robotSection").then((mod) =>
-      withScrollProp(mod.default)
-    ),
-  {
-    ssr: false,
-  }
-);
-const HowSection = dynamic(
-  () =>
-    import("@/views/Home/how-section").then((mod) =>
-      withScrollProp(mod.default)
-    ),
-  {
-    ssr: false,
-  }
-);
-const HowSectionCarousel = dynamic(
-  () =>
-    import("@/components/carousels/how-section-carousel").then((mod) =>
-      withScrollProp(mod.default)
-    ),
-  { ssr: false }
-);
-const WorkSection = dynamic(
-  () =>
-    import("@/views/Home/work-section").then((mod) =>
-      withScrollProp(mod.default)
-    ),
-  {
-    ssr: false,
-  }
-);
-const InvestSection = dynamic(
-  () =>
-    import("@/views/Home/invest-section").then((mod) =>
-      withScrollProp(mod.default)
-    ),
-  {
-    ssr: false,
-  }
-);
-const FooterSection = dynamic(
-  () =>
-    import("@/views/Home/footer-section").then((mod) =>
-      withScrollProp(mod.default)
-    ),
-  {
-    ssr: false,
-  }
-);
-
 const HomePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
-  const scrollLockRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const scrollLockRef = useRef(false);
 
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
-  const modalOpen = useSelector((state: RootState) => state.ui.modalOpen); // Select modal state
+  const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
 
-  // Define sections using useMemo to prevent unnecessary recalculations
+  // Define your sections
   const sections: SectionConfig[] = useMemo(
     () => [
       {
         Component: ({ scrollToTop }) => (
           <>
+            {/* Header section with NextButton only here */}
             <HeaderSection scrollToTop={scrollToTop} />
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
               <NextButton onClick={scrollToTop} />
@@ -130,57 +138,69 @@ const HomePage: React.FC = () => {
         preloadPriority: 1,
         useNextAction: true,
       },
-      { Component: RobotSection, id: "platform", preloadPriority: 2 },
-      { Component: HowSection, id: "solutions", preloadPriority: 3 },
-      { Component: HowSectionCarousel, id: "how-carousel", preloadPriority: 4 },
-      { Component: WorkSection, id: "work", preloadPriority: 5 },
-      { Component: InvestSection, id: "invest", preloadPriority: 6 },
-      { Component: FooterSection, id: "footer", preloadPriority: 7 },
+      {
+        Component: RobotSection,
+        id: "platform",
+        preloadPriority: 2,
+      },
+      {
+        Component: HowSection,
+        id: "solutions",
+        preloadPriority: 3,
+      },
+      {
+        Component: HowSectionCarousel,
+        id: "how-carousel",
+        preloadPriority: 4,
+      },
+      {
+        Component: WorkSection,
+        id: "work",
+        preloadPriority: 5,
+      },
+      {
+        Component: InvestSection,
+        id: "invest",
+        preloadPriority: 6,
+      },
+      {
+        Component: FooterSection,
+        id: "footer",
+        preloadPriority: 7,
+      },
     ],
     []
   );
 
-  // Scroll to specific section
-  const scrollToSection = useCallback(
-    (index: number) => {
-      if (index < 0 || index >= sections.length || scrollLockRef.current)
-        return;
-
-      scrollLockRef.current = true;
-      setCurrentPage(index);
-
-      const targetY = window.innerHeight * index;
-
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: targetY,
-          behavior: "smooth",
-        });
-      });
-
-      // Unlock scroll after the animation duration
-      setTimeout(() => {
-        scrollLockRef.current = false;
-      }, 700); // Increased timeout for a slightly slower scroll
-    },
-    [sections.length]
-  );
-
-  // Preload resources
+  /**
+   * Preload all Lottie JSON + Vector image
+   */
   useEffect(() => {
-    const loadAllResources = async () => {
+    const preloadAssets = async () => {
       try {
-        await preloadLottieAnimations();
+        // 1. Parallel fetch all JSON
+        const jsonPromises = JSON_PATHS.map((path) =>
+          fetch(path).then((res) => {
+            if (!res.ok) {
+              throw new Error(`Failed to load ${path}`);
+            }
+            return res.json();
+          })
+        );
 
-        await new Promise<void>((resolve, reject) => {
+        // 2. Preload Vector image
+        const vectorPromise = new Promise<void>((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve();
           img.onerror = reject;
           img.src = VectorImage.src;
         });
 
-        // Simulate minimal loading time for better UX
-        await new Promise((resolve) => setTimeout(resolve, 200));
+        // Wait for everything
+        await Promise.all([...jsonPromises, vectorPromise]);
+
+        // Optional small delay to prevent flicker
+        // await new Promise((r) => setTimeout(r, 100));
 
         setIsLoading(false);
       } catch (error) {
@@ -189,17 +209,55 @@ const HomePage: React.FC = () => {
       }
     };
 
-    loadAllResources();
+    preloadAssets();
   }, []);
 
-  // Optimized scroll handler using throttle
+  /**
+   * Check mobile to decide whether to attach wheel events
+   */
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(isMobileDevice());
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  /**
+   * Scroll to a specific section
+   */
+  const scrollToSection = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= sections.length || scrollLockRef.current) {
+        return;
+      }
+      scrollLockRef.current = true;
+      setCurrentPage(index);
+
+      const targetY = window.innerHeight * index;
+      window.scrollTo({
+        top: targetY,
+        behavior: "smooth",
+      });
+
+      // Release scroll lock after the animation
+      setTimeout(() => {
+        scrollLockRef.current = false;
+      }, 700);
+    },
+    [sections.length]
+  );
+
+  /**
+   * Throttled wheel handler (desktop only)
+   */
   const handleScroll = useCallback(
     throttle((event: WheelEvent) => {
-      // Disable scroll if modal is open or scroll is locked
-      if (scrollLockRef.current || modalOpen) return;
+      // If the modal is open or locked, do nothing
+      if (modalOpen || scrollLockRef.current) return;
 
       const delta = event.deltaY;
-
       if (delta > 50 && currentPage < sections.length - 1) {
         event.preventDefault();
         scrollToSection(currentPage + 1);
@@ -207,48 +265,46 @@ const HomePage: React.FC = () => {
         event.preventDefault();
         scrollToSection(currentPage - 1);
       }
-    }, 500), // Throttling interval
+    }, 200), // short throttle for faster scrolling
     [currentPage, scrollToSection, sections.length, modalOpen]
   );
 
-  // Add event listeners with improved performance
+  /**
+   * Add or remove wheel listener on desktop
+   */
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(isMobileDevice());
-    };
-
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-
     if (!isMobile) {
       window.addEventListener("wheel", handleScroll, { passive: false });
+      return () => window.removeEventListener("wheel", handleScroll);
     }
-
-    return () => {
-      window.removeEventListener("resize", checkMobile);
-      if (!isMobile) {
-        window.removeEventListener("wheel", handleScroll);
-      }
-    };
   }, [handleScroll, isMobile]);
 
-  // Render sections for mobile and desktop
+  /**
+   * Render sections
+   */
   const renderSections = () => {
     if (isMobile) {
+      // Mobile: default vertical scrolling
       return (
         <div className="w-full">
-          {sections.map(({ Component, id }) => (
+          {sections.map(({ Component, id }, idx) => (
             <div key={`section-${id}`} id={id} className="w-full min-h-screen">
               <Component
-                scrollToTop={() =>
-                  window.scrollTo({ top: 0, behavior: "smooth" })
-                }
+                scrollToTop={() => {
+                  // If you want the button in the first section to jump to next on mobile:
+                  if (idx === 0) {
+                    scrollToSection(1);
+                  } else {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
               />
             </div>
           ))}
         </div>
       );
     } else {
+      // Desktop: full viewport transitions
       return (
         <div
           style={{ height: `${100 * sections.length}vh`, position: "relative" }}
@@ -277,28 +333,34 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="relative w-full overflow-hidden">
-      {isLoading ? (
-        <motion.div
-          key="loader"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0, filter: "blur(10px)" }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black"
-        >
-          <Loader />
-        </motion.div>
-      ) : (
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, filter: "blur(10px)" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+          >
+            <Loader />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!isLoading && (
         <motion.div
           key="content"
-          initial={{ opacity: 0, scale: 1.05 }}
+          initial={{ opacity: 0, scale: 1.02 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
           className="relative w-full h-full"
         >
           {renderSections()}
+
+          {/* Slide-in Menu Modal */}
           <MenuModal
-            isOpen={isMenuOpen as boolean}
+            isOpen={isMenuOpen as any}
             onClose={() => dispatch(toggleMenu())}
             sections={sections}
             scrollToSection={scrollToSection}
@@ -309,4 +371,5 @@ const HomePage: React.FC = () => {
   );
 };
 
+HomePage.displayName = "HomePage";
 export default HomePage;

@@ -1,20 +1,25 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  lazy,
+  Suspense,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { lazy, Suspense } from "react";
 import type { LottieRefCurrentProps } from "lottie-react";
 
-// Dynamically import the Lottie component
+// Lazy import for better code splitting
 const Lottie = lazy(() => import("lottie-react"));
 
-// Define the Step interface
+/** Carousel Steps */
 interface Step {
   id: string;
   title: string;
 }
 
-// Steps array (constant)
 const STEPS: Step[] = [
   { id: "smooth-onboarding", title: "Smooth Onboarding" },
   { id: "data-integrity", title: "Data Integrity" },
@@ -23,7 +28,7 @@ const STEPS: Step[] = [
   { id: "fraud-eliminated", title: "Fraud Eliminated" },
 ];
 
-// Mapping of step IDs to their respective Lottie animation paths
+// Mapping step IDs to Lottie JSON paths (already preloaded in HomePage)
 const STEP_ANIMATION_PATHS: Record<string, string> = {
   "smooth-onboarding": "/lottie/sailing_boat_2.json",
   "data-integrity": "/lottie/paper_flying.json",
@@ -32,7 +37,7 @@ const STEP_ANIMATION_PATHS: Record<string, string> = {
   "fraud-eliminated": "/lottie/data.json",
 };
 
-// Animation variants for Framer Motion
+// Basic framer-motion variants
 const carouselVariants = {
   enter: (direction: number) => ({
     y: direction > 0 ? 80 : -80,
@@ -47,111 +52,78 @@ const carouselVariants = {
   }),
 };
 
-// Preload function to be called on initial page load
-export function preloadLottieAnimations() {
-  if (typeof window !== "undefined") {
-    STEPS.forEach((step) => {
-      const link = document.createElement("link");
-      link.rel = "preload";
-      link.as = "fetch";
-      link.href = STEP_ANIMATION_PATHS[step.id];
-      link.crossOrigin = "anonymous";
-      document.head.appendChild(link);
-    });
-  }
-}
-
-// Memoized loading function to prevent duplicate fetches
-const loadLottieAnimation = (() => {
-  const cache: Record<string, Promise<any>> = {};
-
-  return (stepId: string) => {
-    if (!cache[stepId]) {
-      cache[stepId] = fetch(STEP_ANIMATION_PATHS[stepId])
-        .then((response) => response.json())
-        .catch((error) => {
-          console.error(`Failed to load animation for ${stepId}:`, error);
-          return null;
-        });
-    }
-    return cache[stepId];
-  };
-})();
-
-const HowSectionCarousel: React.FC = () => {
+const HowSectionCarousel: React.FC<any> = () => {
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
   const [direction, setDirection] = useState(0);
-  const [lottieCache, setLottieCache] = useState<Record<string, any>>({});
+  const [lottieData, setLottieData] = useState<Record<string, any>>({});
   const lottieRef = useRef<LottieRefCurrentProps | null>(null);
 
-  /**
-   * Preload animations when component mounts
-   */
-  useEffect(() => {
-    const preloadAnimations = async () => {
-      const loadedAnimations: Record<string, any> = {};
+  // Lazy load each JSON from preloaded paths
+  const loadAnimation = useCallback(async (stepId: string) => {
+    if (!STEP_ANIMATION_PATHS[stepId]) return null;
 
-      for (const step of STEPS) {
-        try {
-          const animationData = await loadLottieAnimation(step.id);
-          if (animationData) {
-            loadedAnimations[step.id] = animationData;
-          }
-        } catch (error) {
-          console.error(`Error loading animation for ${step.id}:`, error);
-        }
-      }
-
-      setLottieCache(loadedAnimations);
-    };
-
-    preloadAnimations();
+    try {
+      // Already fetched in HomePage, but let's fetch from local cache:
+      const response = await fetch(STEP_ANIMATION_PATHS[stepId]);
+      if (!response.ok) throw new Error(`Failed to load ${stepId}`);
+      return await response.json();
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }, []);
 
-  /**
-   * Auto-rotate carousel every 3 seconds
-   */
+  // Preload all step animations
+  useEffect(() => {
+    const preloadAll = async () => {
+      const data: Record<string, any> = {};
+      for (const step of STEPS) {
+        const animation = await loadAnimation(step.id);
+        if (animation) {
+          data[step.id] = animation;
+        }
+      }
+      setLottieData(data);
+    };
+    preloadAll();
+  }, [loadAnimation]);
+
+  // Auto-rotate every 3s
   useEffect(() => {
     const interval = setInterval(() => {
       setDirection(1);
-      setSelectedStepIndex((prevIndex) => (prevIndex + 1) % STEPS.length);
+      setSelectedStepIndex((idx) => (idx + 1) % STEPS.length);
     }, 3000);
 
     return () => clearInterval(interval);
   }, []);
 
-  /**
-   * Adjust animation speed when loaded
-   */
+  // Adjust speed
   useEffect(() => {
     if (lottieRef.current?.animationItem) {
       lottieRef.current.animationItem.setSpeed(1.2);
     }
-  }, [selectedStepIndex, lottieCache]);
+  }, [selectedStepIndex, lottieData]);
 
-  /**
-   * Handle navigation clicks
-   */
-  const handleNavClick = useCallback(
-    (stepId: string) => {
-      const index = STEPS.findIndex((s) => s.id === stepId);
-      if (index === -1 || index === selectedStepIndex) return;
-      setDirection(index > selectedStepIndex ? 1 : -1);
-      setSelectedStepIndex(index);
-    },
-    [selectedStepIndex]
-  );
+  // Handle manual nav click
+  const handleNavClick = (stepId: string) => {
+    const newIndex = STEPS.findIndex((s) => s.id === stepId);
+    if (newIndex !== -1 && newIndex !== selectedStepIndex) {
+      setDirection(newIndex > selectedStepIndex ? 1 : -1);
+      setSelectedStepIndex(newIndex);
+    }
+  };
 
   const currentStepId = STEPS[selectedStepIndex].id;
-  const currentAnimationData = lottieCache[currentStepId];
+  const currentAnimationData = lottieData[currentStepId];
 
   return (
     <section
       className="relative h-screen snap-start bg-black flex items-center justify-center overflow-hidden"
-      id="how-section"
+      id="how-section-carousel"
     >
       <motion.div className="container mx-auto px-4 sm:px-6 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-center">
-        {/* Left Side Navigation */}
+        {/* Left Side (Navigation) */}
         <div className="relative w-full lg:w-1/2">
           <div
             className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent"
@@ -201,7 +173,7 @@ const HowSectionCarousel: React.FC = () => {
           </nav>
         </div>
 
-        {/* Right Side Animation */}
+        {/* Right Side (Animation) */}
         <div className="relative w-full lg:w-1/2 h-64 sm:h-80 md:h-96 lg:h-[500px] flex items-center justify-center overflow-hidden">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -218,17 +190,13 @@ const HowSectionCarousel: React.FC = () => {
                 fallback={<p className="text-white text-center">Loading...</p>}
               >
                 {currentAnimationData ? (
-                  <div className="w-full h-full max-w-[300px] max-h-[300px] sm:max-w-[400px] sm:max-h-[400px] md:max-w-[500px] md:max-h-[500px]">
+                  <div className="w-full h-full max-w-[300px] sm:max-w-[400px] md:max-w-[500px]">
                     <Lottie
                       animationData={currentAnimationData}
                       loop
                       autoplay
                       lottieRef={lottieRef}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
+                      style={{ width: "100%", height: "100%" }}
                     />
                   </div>
                 ) : (
@@ -243,9 +211,5 @@ const HowSectionCarousel: React.FC = () => {
   );
 };
 
-// Optionally, call preload on initial page load
-if (typeof window !== "undefined") {
-  preloadLottieAnimations();
-}
-
+HowSectionCarousel.displayName = "HowSectionCarousel";
 export default HowSectionCarousel;

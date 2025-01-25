@@ -2,37 +2,30 @@
 
 import { ArrowRight, X } from "lucide-react";
 import { useEffect, useRef, lazy, useState } from "react";
-import type { LottieRefCurrentProps } from "lottie-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { LottieRefCurrentProps } from "lottie-react";
 import { useDispatch } from "react-redux";
 import { setModalOpen } from "@/redux-store/slices/uiSlice";
 
-const Lottie = lazy(() => import("lottie-react"));
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 import { ContactForm } from "@/components/forms/contact-form";
 
-export default function WorkSection() {
+const Lottie = lazy(() => import("lottie-react"));
+
+const WorkSection: React.FC<any> = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const lottieRef = useRef<LottieRefCurrentProps | null>(null);
-  const dispatch = useDispatch(); // Initialize dispatch
+  const dispatch = useDispatch();
 
-  // Adjust Lottie animation speed
   useEffect(() => {
     if (lottieRef.current?.animationItem) {
       lottieRef.current.animationItem.setSpeed(1.2);
     }
   }, []);
 
-  // Manage body overflow and modal state
   useEffect(() => {
-    // Dispatch modal open state
     dispatch(setModalOpen(isFormOpen));
-
-    if (isFormOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
+    document.body.style.overflow = isFormOpen ? "hidden" : "unset";
 
     return () => {
       document.body.style.overflow = "unset";
@@ -40,14 +33,12 @@ export default function WorkSection() {
     };
   }, [isFormOpen, dispatch]);
 
-  // Handle Esc key to close the form
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isFormOpen) {
         setIsFormOpen(false);
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFormOpen]);
@@ -69,7 +60,6 @@ export default function WorkSection() {
           damping: 30,
         }}
       >
-        {/* Main Content */}
         <div className="text-center space-y-6 lg:space-y-8 max-w-3xl mx-auto">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
             Work with us
@@ -80,7 +70,6 @@ export default function WorkSection() {
           </h3>
         </div>
 
-        {/* CTA Button */}
         <div className="mt-12 lg:mt-16">
           <button
             onClick={() => setIsFormOpen(true)}
@@ -95,8 +84,7 @@ export default function WorkSection() {
           </button>
         </div>
 
-        {/* Lottie Animation with Floating Effect */}
-        <div className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none animate-float will-change-transform opacity-100">
+        <div className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none animate-float">
           <Lottie
             animationData={ConstructionAnimation}
             loop
@@ -139,4 +127,7 @@ export default function WorkSection() {
       </AnimatePresence>
     </section>
   );
-}
+};
+
+WorkSection.displayName = "WorkSection";
+export default WorkSection;

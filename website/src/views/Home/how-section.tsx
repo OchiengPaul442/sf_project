@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import React, { useRef } from "react";
 import AnimatedText from "@/components/AnimatedText";
 
-const HowSection: React.FC = () => {
+const HowSection: React.FC<any> = () => {
   const sectionRef = useRef(null);
 
   const { scrollYProgress } = useScroll({
@@ -44,4 +44,5 @@ const HowSection: React.FC = () => {
   );
 };
 
+HowSection.displayName = "HowSection";
 export default HowSection;
