@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 import { useRef, useEffect, useState } from "react";
 import { Nav } from "@/components/layout/Navs/nav";
 import VectorImage from "@/public/Vector.svg";
@@ -48,7 +53,11 @@ export default function HeaderSection({
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[130vh] bg-white overflow-hidden"
+      className="relative min-h-[130vh] bg-white"
+      style={{
+        height: "calc(100vh + 30vh)",
+        overflow: "hidden",
+      }}
     >
       {/* Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50">
@@ -56,34 +65,15 @@ export default function HeaderSection({
       </div>
 
       {/* Sticky center content */}
-      {isMobile ? (
-        <div className="sticky top-0 h-screen flex items-center justify-center px-4">
-          <div className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]">
-            {/* Background blur effect */}
-            <div className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full" />
-
-            {/* Main image with parallax + float effect */}
-            <div className="relative z-10">
-              <Image
-                src={VectorImage || "/placeholder.svg"}
-                alt="WE'RE SAVING FOOD"
-                width={480}
-                height={480}
-                priority
-                className="w-full h-auto"
-              />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="sticky top-0 h-screen flex items-center justify-center px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
-          >
-            {/* Background blur effect */}
+      <div className="sticky top-0 h-screen flex items-center justify-center px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
+        >
+          {/* Background blur effect */}
+          {!isMobile && (
             <motion.div
               className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full"
               style={{
@@ -91,42 +81,46 @@ export default function HeaderSection({
                 opacity: blurOpacity,
               }}
             />
+          )}
 
-            {/* Main image with parallax + float effect */}
-            <motion.div
-              initial={{ y: 0 }}
-              animate={{
-                y: [-10, 10],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                repeatType: "reverse",
-                ease: "easeInOut",
-              }}
-              style={{
-                y: parallaxY,
-                scale,
-                opacity,
-              }}
-              className="relative z-10"
-            >
-              <Image
-                src={VectorImage || "/placeholder.svg"}
-                alt="WE'RE SAVING FOOD"
-                width={480}
-                height={480}
-                priority
-                className="w-full h-auto"
-              />
-            </motion.div>
+          {/* Main image with parallax + float effect */}
+          <motion.div
+            initial={{ y: 0 }}
+            animate={
+              !isMobile
+                ? {
+                    y: [-10, 10],
+                  }
+                : {}
+            }
+            transition={{
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            }}
+            style={{
+              y: !isMobile ? parallaxY : 0,
+              scale: !isMobile ? scale : 1,
+              opacity: !isMobile ? opacity : 1,
+            }}
+            className="relative z-10"
+          >
+            <Image
+              src={VectorImage || "/placeholder.svg"}
+              alt="WE'RE SAVING FOOD"
+              width={480}
+              height={480}
+              priority
+              className="w-full h-auto"
+            />
           </motion.div>
-        </div>
-      )}
+        </motion.div>
+      </div>
 
-      {/* NextButton at the bottom of the section */}
-      <div>
-        <NextButton onClick={scrollToTop} isVisible />
+      {/* NextButton positioned at the bottom of the section */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 ">
+        <NextButton onClick={scrollToTop} isVisible={true} />
       </div>
     </section>
   );

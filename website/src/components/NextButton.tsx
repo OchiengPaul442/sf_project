@@ -13,7 +13,7 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick, isVisible }) => {
       {isVisible && (
         <button
           onClick={onClick}
-          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 rounded-full border-2 border-black z-10 bg-transparent hover:bg-black/5 transition-colors flex items-center justify-center"
+          className="rounded-full border-2 border-black z-10 bg-transparent hover:bg-black/5 transition-colors flex items-center justify-center"
           style={{ width: "32px", height: "64px" }}
         >
           <motion.div

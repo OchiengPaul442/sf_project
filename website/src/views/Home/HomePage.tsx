@@ -1,4 +1,3 @@
-// pages/HomePage.tsx
 "use client";
 
 import React, {
@@ -19,6 +18,7 @@ import { preloadLottieAnimations } from "@/components/carousels/how-section-caro
 import VectorImage from "@/public/Vector.svg";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import throttle from "lodash/throttle";
+import type { RootState } from "@/redux-store";
 
 // Define interfaces
 interface SectionProps {
@@ -103,7 +103,8 @@ const HomePage: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   const dispatch = useDispatch();
-  const isMenuOpen = useSelector((state) => state.menu.isOpen) as boolean;
+  const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
+  const modalOpen = useSelector((state: RootState) => state.ui.modalOpen); // Select modal state
 
   // Define sections using useMemo to prevent unnecessary recalculations
   const sections: SectionConfig[] = useMemo(
@@ -179,7 +180,8 @@ const HomePage: React.FC = () => {
   // Optimized scroll handler using throttle
   const handleScroll = useCallback(
     throttle((event: WheelEvent) => {
-      if (scrollLockRef.current) return;
+      // Disable scroll if modal is open or scroll is locked
+      if (scrollLockRef.current || modalOpen) return;
 
       const delta = event.deltaY;
 
@@ -190,8 +192,8 @@ const HomePage: React.FC = () => {
         event.preventDefault();
         scrollToSection(currentPage - 1);
       }
-    }, 500), // Throttling slightly increased for slower scroll
-    [currentPage, scrollToSection, sections.length]
+    }, 500), // Throttling interval
+    [currentPage, scrollToSection, sections.length, modalOpen]
   );
 
   // Add event listeners with improved performance
@@ -281,7 +283,7 @@ const HomePage: React.FC = () => {
         >
           {renderSections()}
           <MenuModal
-            isOpen={isMenuOpen}
+            isOpen={isMenuOpen as boolean}
             onClose={() => dispatch(toggleMenu())}
             sections={sections}
             scrollToSection={scrollToSection}

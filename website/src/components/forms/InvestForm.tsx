@@ -55,17 +55,17 @@ const InvestForm = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Name Field */}
         <div className="space-y-2">
-          <label htmlFor="name" className="text-sm font-mono">
+          <label htmlFor="name" className="text-sm font-normal">
             Name
           </label>
           <Input
             id="name"
             placeholder="Enter Full name"
-            className="h-10 sm:h-12 rounded-lg sm:rounded-xl bg-[#f5f5f5] border-0 font-mono placeholder:text-[#999] text-sm"
+            className="h-10 sm:h-12 rounded-lg sm:rounded-xl bg-[#f5f5f5] border-0 font-normal placeholder:text-[#999] text-sm"
             {...register("name")}
           />
           {errors.name && (
-            <p className="text-xs text-red-500 font-mono">
+            <p className="text-xs text-red-500 font-normal">
               {errors.name.message}
             </p>
           )}
@@ -73,18 +73,18 @@ const InvestForm = () => {
 
         {/* Email Field */}
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-mono">
+          <label htmlFor="email" className="text-sm font-normal">
             Email address
           </label>
           <Input
             id="email"
             type="email"
             placeholder="Email address"
-            className="h-10 sm:h-12 rounded-lg sm:rounded-xl bg-[#f5f5f5] border-0 font-mono placeholder:text-[#999] text-sm"
+            className="h-10 sm:h-12 rounded-lg sm:rounded-xl bg-[#f5f5f5] border-0 font-normal placeholder:text-[#999] text-sm"
             {...register("email")}
           />
           {errors.email && (
-            <p className="text-xs text-red-500 font-mono">
+            <p className="text-xs text-red-500 font-normal">
               {errors.email.message}
             </p>
           )}
@@ -93,17 +93,17 @@ const InvestForm = () => {
 
       {/* Message Field */}
       <div className="space-y-2">
-        <label htmlFor="message" className="text-sm font-mono">
+        <label htmlFor="message" className="text-sm font-normal">
           Message
         </label>
         <Textarea
           id="message"
           placeholder="Message"
-          className="min-h-[80px] sm:min-h-[100px] rounded-lg sm:rounded-xl bg-[#f5f5f5] border-0 font-mono placeholder:text-[#999] text-sm"
+          className="min-h-[80px] sm:min-h-[100px] rounded-lg sm:rounded-xl bg-[#f5f5f5] border-0 font-normal placeholder:text-[#999] text-sm"
           {...register("message")}
         />
         {errors.message && (
-          <p className="text-xs text-red-500 font-mono">
+          <p className="text-xs text-red-500 font-normal">
             {errors.message.message}
           </p>
         )}
@@ -113,7 +113,7 @@ const InvestForm = () => {
       <Button
         type="submit"
         disabled={isMutating}
-        className="w-full h-10 sm:h-12 rounded-full bg-black text-white hover:bg-black/90 font-mono text-sm"
+        className="w-full h-10 sm:h-12 rounded-full bg-black text-white hover:bg-black/90 font-normal text-sm"
       >
         {isMutating ? "Sending..." : "Send"}
       </Button>
