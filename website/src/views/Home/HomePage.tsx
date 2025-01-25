@@ -283,12 +283,18 @@ const HomePage: React.FC = () => {
    * Render sections
    */
   const renderSections = () => {
-    if (false) {
+    if (isMobile) {
       // Mobile: default vertical scrolling
       return (
         <div className="w-full">
           {sections.map(({ Component, id }, idx) => (
-            <div key={`section-${id}`} id={id} className="w-full min-h-screen">
+            <AnimatedSection
+              key={`section-${id}`}
+              index={idx}
+              isActive={idx === currentPage}
+              total={sections.length}
+              scrollDirection={currentPage > idx ? "up" : "down"}
+            >
               <Component
                 scrollToTop={() => {
                   // If you want the button in the first section to jump to next on mobile:
@@ -299,7 +305,7 @@ const HomePage: React.FC = () => {
                   }
                 }}
               />
-            </div>
+            </AnimatedSection>
           ))}
         </div>
       );
