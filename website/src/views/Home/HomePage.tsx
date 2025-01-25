@@ -107,6 +107,7 @@ export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
   const scrollLockRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [renderedSections, setRenderedSections] = useState<number[]>([0]);
 
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen) as boolean;
@@ -160,6 +161,7 @@ export default function HomePage() {
 
       scrollLockRef.current = true;
       setCurrentPage(index);
+      setRenderedSections((prev) => Array.from(new Set([...prev, index])));
 
       const scrollHandler = () => {
         window.scrollTo({
@@ -180,18 +182,18 @@ export default function HomePage() {
   useEffect(() => {
     const loadAllResources = async () => {
       try {
-        await preloadLottieAnimations();
-
-        await new Promise<void>((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve();
-          img.onerror = reject;
-          img.src = VectorImage.src;
-        });
-
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        await Promise.all([
+          preloadLottieAnimations(),
+          new Promise<void>((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = reject;
+            img.src = VectorImage.src;
+          }),
+        ]);
 
         setIsLoading(false);
+        setRenderedSections([0]);
       } catch (error) {
         console.error("Preload failed:", error);
         setIsLoading(false);
@@ -250,8 +252,8 @@ export default function HomePage() {
           <motion.div
             key="loader"
             initial={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: "blur(10px)" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black"
           >
             <Loader />
@@ -259,29 +261,32 @@ export default function HomePage() {
         ) : (
           <motion.div
             key="content"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
             className="relative w-full h-full"
           >
             <AnimatePresence initial={false} mode="wait">
-              {sections.map(({ Component, id, useNextAction }, index) => (
-                <HyperOptimizedAnimatedSection
-                  key={`section-${id}`}
-                  index={index}
-                  isActive={index === currentPage}
-                  total={sections.length}
-                  scrollDirection={currentPage > index ? "up" : "down"}
-                >
-                  <Component
-                    scrollToTop={() =>
-                      useNextAction
-                        ? scrollToSection(currentPage + 1)
-                        : scrollToSection(0)
-                    }
-                  />
-                </HyperOptimizedAnimatedSection>
-              ))}
+              {sections.map(
+                ({ Component, id, useNextAction }, index) =>
+                  renderedSections.includes(index) && (
+                    <HyperOptimizedAnimatedSection
+                      key={`section-${id}`}
+                      index={index}
+                      isActive={index === currentPage}
+                      total={sections.length}
+                      scrollDirection={currentPage > index ? "up" : "down"}
+                    >
+                      <Component
+                        scrollToTop={() =>
+                          useNextAction
+                            ? scrollToSection(currentPage + 1)
+                            : scrollToSection(0)
+                        }
+                      />
+                    </HyperOptimizedAnimatedSection>
+                  )
+              )}
             </AnimatePresence>
 
             <MenuModal
