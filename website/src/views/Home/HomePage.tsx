@@ -283,7 +283,7 @@ const HomePage: React.FC = () => {
    * Render sections
    */
   const renderSections = () => {
-    if (isMobile) {
+    if (false) {
       // Mobile: default vertical scrolling
       return (
         <div className="w-full">
