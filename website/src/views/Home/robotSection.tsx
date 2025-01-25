@@ -66,7 +66,7 @@ export default RobotSection;
 // Optional Glow Effect
 const GlowEffect: React.FC = () => {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none hidden md:block">
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500 rounded-full opacity-10 blur-[100px] animate-pulse-slow" />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-purple-500 rounded-full opacity-10 blur-[100px] animate-pulse-slower" />
     </div>
