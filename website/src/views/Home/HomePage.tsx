@@ -288,13 +288,7 @@ const HomePage: React.FC = () => {
       return (
         <div className="w-full">
           {sections.map(({ Component, id }, idx) => (
-            <AnimatedSection
-              key={`section-${id}`}
-              index={idx}
-              isActive={idx === currentPage}
-              total={sections.length}
-              scrollDirection={currentPage > idx ? "up" : "down"}
-            >
+            <div key={`section-${id}`} id={id} className="w-full min-h-screen">
               <Component
                 scrollToTop={() => {
                   // If you want the button in the first section to jump to next on mobile:
@@ -305,7 +299,7 @@ const HomePage: React.FC = () => {
                   }
                 }}
               />
-            </AnimatedSection>
+            </div>
           ))}
         </div>
       );
