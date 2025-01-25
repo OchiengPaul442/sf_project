@@ -19,7 +19,7 @@ const InvestSection: React.FC<any> = () => {
   return (
     <section
       id="invest"
-      className="h-dvh bg-white text-black flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
+      className="h-screen bg-white text-black flex flex-col justify-center items-center py-8 sm:py-12 px-4 sm:px-6 lg:px-8"
     >
       <div className="container mx-auto flex flex-col items-center justify-between h-full max-w-4xl">
         <div className="text-center space-y-4 w-full mb-8 sm:mb-12">

@@ -46,7 +46,7 @@ const WorkSection: React.FC<any> = () => {
   return (
     <section
       id="contact"
-      className="h-dvh bg-[#f5f5f5] text-black relative overflow-hidden flex items-center justify-center"
+      className="h-screen bg-[#f5f5f5] text-black relative overflow-hidden flex items-center justify-center"
     >
       <motion.div
         className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center h-full relative"
