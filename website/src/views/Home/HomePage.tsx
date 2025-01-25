@@ -145,7 +145,7 @@ const HomePage: React.FC = () => {
       // Unlock scroll after the animation duration
       setTimeout(() => {
         scrollLockRef.current = false;
-      }, 500); // Adjusted timeout for faster responsiveness
+      }, 700); // Increased timeout for a slightly slower scroll
     },
     [sections.length]
   );
@@ -190,7 +190,7 @@ const HomePage: React.FC = () => {
         event.preventDefault();
         scrollToSection(currentPage - 1);
       }
-    }, 500), // Throttle to prevent rapid firing
+    }, 500), // Throttling slightly increased for slower scroll
     [currentPage, scrollToSection, sections.length]
   );
 
