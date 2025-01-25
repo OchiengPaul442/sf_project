@@ -125,7 +125,7 @@ export default function HeaderSection({
       )}
 
       {/* NextButton at the bottom of the section */}
-      <div className="hidden md:block">
+      <div>
         <NextButton onClick={scrollToTop} isVisible />
       </div>
     </section>

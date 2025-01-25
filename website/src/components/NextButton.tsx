@@ -1,4 +1,5 @@
-import { ChevronDown } from "lucide-react";
+"use client";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 interface NextButtonProps {
@@ -11,24 +12,21 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick, isVisible }) => {
     <AnimatePresence>
       {isVisible && (
         <button
-          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white text-black border border-black rounded-full p-2 sm:p-3 shadow-lg z-10 transition-colors hover:bg-black hover:text-white"
           onClick={onClick}
+          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 rounded-full border-2 border-black z-10 bg-transparent hover:bg-black/5 transition-colors flex items-center justify-center"
+          style={{ width: "32px", height: "64px" }}
         >
           <motion.div
+            className="w-[3px] h-[10px] bg-black rounded-full -mt-4"
             animate={{
-              y: [0, -3, 0],
+              height: ["10px", "20px", "10px"],
               transition: {
-                y: {
-                  duration: 0.8,
-                  repeat: Number.POSITIVE_INFINITY,
-                  repeatType: "reverse",
-                  ease: "easeInOut",
-                },
+                duration: 1.5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
               },
             }}
-          >
-            <ChevronDown size={20} />
-          </motion.div>
+          />
         </button>
       )}
     </AnimatePresence>
