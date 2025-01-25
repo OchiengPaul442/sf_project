@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import type React from "react";
 import { useEffect } from "react";
 
@@ -13,7 +14,12 @@ const ModernLoader: React.FC = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black z-50">
+    <div
+      className={cn(
+        "fixed inset-0 z-[9999] flex items-center justify-center",
+        "bg-black/50 backdrop-blur-sm transition-all duration-300"
+      )}
+    >
       <div className="relative">
         <div className="w-24 h-24 rounded-full border-t-4 border-b-4 border-blue-500 animate-spin"></div>
         <div className="absolute top-0 left-0 w-24 h-24 rounded-full border-t-4 border-b-4 border-blue-300 animate-ping"></div>
