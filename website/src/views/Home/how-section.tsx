@@ -22,7 +22,7 @@ const HowSection: React.FC = () => {
       id="solutions"
       className="relative h-dvh snap-start py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden"
     >
-      <div className="container mx-auto space-y-16 sm:space-y-24 md:space-y-32 px-4 sm:px-6">
+      <div className="container mx-auto space-y-16 sm:space-y-24 px-4 sm:px-6">
         <motion.div style={{ y: yFirst }} className="relative">
           <AnimatedText
             text="By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability."

@@ -1,17 +1,26 @@
+// pages/HomePage.tsx
 "use client";
 
-import type React from "react";
-import { useEffect, useCallback, useState, useMemo, useRef } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+  useRef,
+} from "react";
 import dynamic from "next/dynamic";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import MenuModal from "@/components/dialog/menu-modal";
-import { HyperOptimizedAnimatedSection } from "@/components/AnimatedSection";
+import AnimatedSection from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
 import { preloadLottieAnimations } from "@/components/carousels/how-section-carousel";
 import VectorImage from "@/public/Vector.svg";
+import { isMobileDevice } from "@/utils/deviceDetection";
+import throttle from "lodash/throttle";
 
+// Define interfaces
 interface SectionProps {
   scrollToTop: () => void;
 }
@@ -23,6 +32,7 @@ interface SectionConfig {
   useNextAction?: boolean;
 }
 
+// Higher-Order Component to inject scroll prop
 const withScrollProp = (
   Component: React.ComponentType<any>
 ): React.ComponentType<SectionProps> => {
@@ -35,36 +45,28 @@ const withScrollProp = (
   return WrappedComponent;
 };
 
+// Dynamically import sections with SSR disabled
 const HeaderSection = dynamic(
   () =>
     import("@/views/Home/header-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
-
 const RobotSection = dynamic(
   () =>
     import("@/views/Home/robotSection").then((mod) =>
       withScrollProp(mod.default)
     ),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
-
 const HowSection = dynamic(
   () =>
     import("@/views/Home/how-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
-
 const HowSectionCarousel = dynamic(
   () =>
     import("@/components/carousels/how-section-carousel").then((mod) =>
@@ -72,45 +74,38 @@ const HowSectionCarousel = dynamic(
     ),
   { ssr: false }
 );
-
 const WorkSection = dynamic(
   () =>
     import("@/views/Home/work-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
-
 const InvestSection = dynamic(
   () =>
     import("@/views/Home/invest-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
-
 const FooterSection = dynamic(
   () =>
     import("@/views/Home/footer-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  {
-    ssr: false,
-  }
+  { ssr: false }
 );
 
-export default function HomePage() {
+const HomePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const scrollLockRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen) as boolean;
 
+  // Define sections using useMemo to prevent unnecessary recalculations
   const sections: SectionConfig[] = useMemo(
     () => [
       {
@@ -119,40 +114,17 @@ export default function HomePage() {
         preloadPriority: 1,
         useNextAction: true,
       },
-      {
-        Component: RobotSection,
-        id: "platform",
-        preloadPriority: 2,
-      },
-      {
-        Component: HowSection,
-        id: "solutions",
-        preloadPriority: 3,
-      },
-      {
-        Component: HowSectionCarousel,
-        id: "how-carousel",
-        preloadPriority: 4,
-      },
-      {
-        Component: WorkSection,
-        id: "work",
-        preloadPriority: 5,
-      },
-      {
-        Component: InvestSection,
-        id: "invest",
-        preloadPriority: 6,
-      },
-      {
-        Component: FooterSection,
-        id: "footer",
-        preloadPriority: 7,
-      },
+      { Component: RobotSection, id: "platform", preloadPriority: 2 },
+      { Component: HowSection, id: "solutions", preloadPriority: 3 },
+      { Component: HowSectionCarousel, id: "how-carousel", preloadPriority: 4 },
+      { Component: WorkSection, id: "work", preloadPriority: 5 },
+      { Component: InvestSection, id: "invest", preloadPriority: 6 },
+      { Component: FooterSection, id: "footer", preloadPriority: 7 },
     ],
     []
   );
 
+  // Scroll to specific section
   const scrollToSection = useCallback(
     (index: number) => {
       if (index < 0 || index >= sections.length || scrollLockRef.current)
@@ -161,22 +133,24 @@ export default function HomePage() {
       scrollLockRef.current = true;
       setCurrentPage(index);
 
-      const scrollHandler = () => {
+      const targetY = window.innerHeight * index;
+
+      requestAnimationFrame(() => {
         window.scrollTo({
-          top: window.innerHeight * index,
+          top: targetY,
           behavior: "smooth",
         });
+      });
 
-        setTimeout(() => {
-          scrollLockRef.current = false;
-        }, 300);
-      };
-
-      requestAnimationFrame(scrollHandler);
+      // Unlock scroll after the animation duration
+      setTimeout(() => {
+        scrollLockRef.current = false;
+      }, 500); // Adjusted timeout for faster responsiveness
     },
     [sections.length]
   );
 
+  // Preload resources
   useEffect(() => {
     const loadAllResources = async () => {
       try {
@@ -189,7 +163,8 @@ export default function HomePage() {
           img.src = VectorImage.src;
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        // Simulate minimal loading time for better UX
+        await new Promise((resolve) => setTimeout(resolve, 200));
 
         setIsLoading(false);
       } catch (error) {
@@ -201,98 +176,120 @@ export default function HomePage() {
     loadAllResources();
   }, []);
 
+  // Optimized scroll handler using throttle
   const handleScroll = useCallback(
-    (event: WheelEvent | TouchEvent) => {
+    throttle((event: WheelEvent) => {
       if (scrollLockRef.current) return;
 
-      const isWheelEvent = event instanceof WheelEvent;
-      const delta = isWheelEvent
-        ? (event as WheelEvent).deltaY
-        : (event as TouchEvent).touches[0].clientY;
+      const delta = event.deltaY;
 
-      const isScrollingDown = isWheelEvent
-        ? delta > 40
-        : delta < window.innerHeight * 0.25;
-
-      const isScrollingUp = isWheelEvent
-        ? delta < -40
-        : delta > window.innerHeight * 0.75;
-
-      if (isScrollingDown && currentPage < sections.length - 1) {
+      if (delta > 50 && currentPage < sections.length - 1) {
         event.preventDefault();
         scrollToSection(currentPage + 1);
-      } else if (isScrollingUp && currentPage > 0) {
+      } else if (delta < -50 && currentPage > 0) {
         event.preventDefault();
         scrollToSection(currentPage - 1);
       }
-    },
+    }, 500), // Throttle to prevent rapid firing
     [currentPage, scrollToSection, sections.length]
   );
 
+  // Add event listeners with improved performance
   useEffect(() => {
-    const options = { passive: false };
-    window.addEventListener("wheel", handleScroll, options);
-    window.addEventListener("touchmove", handleScroll, options);
+    const checkMobile = () => {
+      setIsMobile(isMobileDevice());
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    if (!isMobile) {
+      window.addEventListener("wheel", handleScroll, { passive: false });
+    }
 
     return () => {
-      window.removeEventListener("wheel", handleScroll);
-      window.removeEventListener("touchmove", handleScroll);
+      window.removeEventListener("resize", checkMobile);
+      if (!isMobile) {
+        window.removeEventListener("wheel", handleScroll);
+      }
     };
-  }, [handleScroll]);
+  }, [handleScroll, isMobile]);
+
+  // Render sections for mobile and desktop
+  const renderSections = () => {
+    if (isMobile) {
+      return (
+        <div className="w-full">
+          {sections.map(({ Component, id }) => (
+            <div key={`section-${id}`} id={id} className="w-full min-h-screen">
+              <Component
+                scrollToTop={() =>
+                  window.scrollTo({ top: 0, behavior: "smooth" })
+                }
+              />
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <div
+          style={{ height: `${100 * sections.length}vh`, position: "relative" }}
+        >
+          {sections.map(({ Component, id, useNextAction }, index) => (
+            <AnimatedSection
+              key={`section-${id}`}
+              index={index}
+              isActive={index === currentPage}
+              total={sections.length}
+              scrollDirection={currentPage > index ? "up" : "down"}
+            >
+              <Component
+                scrollToTop={() =>
+                  useNextAction
+                    ? scrollToSection(currentPage + 1)
+                    : scrollToSection(0)
+                }
+              />
+            </AnimatedSection>
+          ))}
+        </div>
+      );
+    }
+  };
 
   return (
-    <div
-      className="relative w-full overflow-hidden"
-      style={{ height: `${100 * sections.length}vh` }}
-    >
-      <AnimatePresence mode="wait">
-        {isLoading ? (
-          <motion.div
-            key="loader"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: "blur(10px)" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
-          >
-            <Loader />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="content"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="relative w-full h-full"
-          >
-            <AnimatePresence initial={false} mode="wait">
-              {sections.map(({ Component, id, useNextAction }, index) => (
-                <HyperOptimizedAnimatedSection
-                  key={`section-${id}`}
-                  index={index}
-                  isActive={index === currentPage}
-                  total={sections.length}
-                  scrollDirection={currentPage > index ? "up" : "down"}
-                >
-                  <Component
-                    scrollToTop={() =>
-                      useNextAction
-                        ? scrollToSection(currentPage + 1)
-                        : scrollToSection(0)
-                    }
-                  />
-                </HyperOptimizedAnimatedSection>
-              ))}
-            </AnimatePresence>
-
-            <MenuModal
-              isOpen={isMenuOpen}
-              onClose={() => dispatch(toggleMenu())}
-              sections={sections}
-              scrollToSection={scrollToSection}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="relative w-full overflow-hidden">
+      {isLoading ? (
+        <motion.div
+          key="loader"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: "blur(10px)" }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black"
+        >
+          <Loader />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="content"
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="relative w-full h-full"
+        >
+          {renderSections()}
+          <MenuModal
+            isOpen={isMenuOpen}
+            onClose={() => dispatch(toggleMenu())}
+            sections={sections}
+            scrollToSection={scrollToSection}
+          />
+        </motion.div>
+      )}
     </div>
   );
-}
+};
+
+export default HomePage;

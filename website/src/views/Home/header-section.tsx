@@ -90,7 +90,7 @@ export default function HeaderSection({
           </motion.div>
 
           {/* Decorative border ring */}
-          <motion.div
+          {/* <motion.div
             className="absolute -inset-4 border border-black/10 rounded-full pointer-events-none"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{
@@ -102,7 +102,7 @@ export default function HeaderSection({
               scale: useTransform(scrollYProgress, [0, 0.5], [1, 1.2]),
               opacity: useTransform(scrollYProgress, [0, 0.3], [1, 0]),
             }}
-          />
+          /> */}
         </motion.div>
       </div>
 
