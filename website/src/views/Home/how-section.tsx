@@ -32,7 +32,7 @@ const HowSection: React.FC<any> = () => {
 
         <GradientSeparator className="w-full" />
 
-        <motion.div style={{ y: ySecond }} className="relative">
+        <motion.div style={{ y: ySecond }} className="relative hidden md:block">
           <AnimatedText
             text="Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest."
             className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] font-normal leading-tight sm:leading-[1.3] md:leading-[1.4] tracking-[-0.02em]"

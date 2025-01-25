@@ -48,11 +48,7 @@ const HeaderSection: React.FC<any> = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[130vh] bg-white"
-      style={{
-        height: "calc(100vh + 30vh)",
-        overflow: "hidden",
-      }}
+      className="relative h-dvh md:min-h-[130vh] bg-white overflow-hidden"
     >
       {/* Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50">
