@@ -1,12 +1,7 @@
 "use client";
 
-import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-  useRef,
-} from "react";
+import type React from "react";
+import { useEffect, useCallback, useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
@@ -19,6 +14,7 @@ import VectorImage from "@/public/Vector.svg";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import throttle from "lodash/throttle";
 import type { RootState } from "@/redux-store";
+import NextButton from "@/components/NextButton";
 
 // Define interfaces
 interface SectionProps {
@@ -51,21 +47,27 @@ const HeaderSection = dynamic(
     import("@/views/Home/header-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 );
 const RobotSection = dynamic(
   () =>
     import("@/views/Home/robotSection").then((mod) =>
       withScrollProp(mod.default)
     ),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 );
 const HowSection = dynamic(
   () =>
     import("@/views/Home/how-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 );
 const HowSectionCarousel = dynamic(
   () =>
@@ -79,21 +81,27 @@ const WorkSection = dynamic(
     import("@/views/Home/work-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 );
 const InvestSection = dynamic(
   () =>
     import("@/views/Home/invest-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 );
 const FooterSection = dynamic(
   () =>
     import("@/views/Home/footer-section").then((mod) =>
       withScrollProp(mod.default)
     ),
-  { ssr: false }
+  {
+    ssr: false,
+  }
 );
 
 const HomePage: React.FC = () => {
@@ -110,7 +118,14 @@ const HomePage: React.FC = () => {
   const sections: SectionConfig[] = useMemo(
     () => [
       {
-        Component: HeaderSection,
+        Component: ({ scrollToTop }) => (
+          <>
+            <HeaderSection scrollToTop={scrollToTop} />
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+              <NextButton onClick={scrollToTop} />
+            </div>
+          </>
+        ),
         id: "home",
         preloadPriority: 1,
         useNextAction: true,

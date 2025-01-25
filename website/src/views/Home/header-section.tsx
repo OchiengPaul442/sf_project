@@ -10,18 +10,13 @@ import {
 import { useRef, useEffect, useState } from "react";
 import { Nav } from "@/components/layout/Navs/nav";
 import VectorImage from "@/public/Vector.svg";
-import NextButton from "@/components/NextButton";
 import { isMobileDevice } from "@/utils/deviceDetection";
 
 function useParallax(scrollProgress: MotionValue<number>, distance: number) {
   return useTransform(scrollProgress, [0, 1], [0, distance]);
 }
 
-export default function HeaderSection({
-  scrollToTop,
-}: {
-  scrollToTop: () => void;
-}) {
+export default function HeaderSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -116,11 +111,6 @@ export default function HeaderSection({
             />
           </motion.div>
         </motion.div>
-      </div>
-
-      {/* NextButton positioned at the bottom of the section */}
-      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 ">
-        <NextButton onClick={scrollToTop} isVisible={true} />
       </div>
     </section>
   );
