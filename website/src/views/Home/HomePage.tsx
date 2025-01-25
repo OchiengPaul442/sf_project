@@ -1,24 +1,17 @@
 "use client";
 
-import React, {
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-  useRef,
-  Suspense,
-} from "react";
+import type React from "react";
+import { useEffect, useCallback, useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import MenuModal from "@/components/dialog/menu-modal";
-import NextButton from "@/components/NextButton";
 import { HyperOptimizedAnimatedSection } from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
 import { preloadLottieAnimations } from "@/components/carousels/how-section-carousel";
+import VectorImage from "@/public/Vector.svg";
 
-// Consistent interface for all section components
 interface SectionProps {
   scrollToTop: () => void;
 }
@@ -30,7 +23,6 @@ interface SectionConfig {
   useNextAction?: boolean;
 }
 
-// Wrapper function to ensure type compatibility
 const withScrollProp = (
   Component: React.ComponentType<any>
 ): React.ComponentType<SectionProps> => {
@@ -43,14 +35,12 @@ const withScrollProp = (
   return WrappedComponent;
 };
 
-// Dynamic imports with proper Next.js dynamic configuration
 const HeaderSection = dynamic(
   () =>
     import("@/views/Home/header-section").then((mod) =>
       withScrollProp(mod.default)
     ),
   {
-    loading: () => <Loader />,
     ssr: false,
   }
 );
@@ -61,7 +51,6 @@ const RobotSection = dynamic(
       withScrollProp(mod.default)
     ),
   {
-    loading: () => <Loader />,
     ssr: false,
   }
 );
@@ -72,7 +61,6 @@ const HowSection = dynamic(
       withScrollProp(mod.default)
     ),
   {
-    loading: () => <Loader />,
     ssr: false,
   }
 );
@@ -82,10 +70,7 @@ const HowSectionCarousel = dynamic(
     import("@/components/carousels/how-section-carousel").then((mod) =>
       withScrollProp(mod.default)
     ),
-  {
-    loading: () => <Loader />,
-    ssr: false,
-  }
+  { ssr: false }
 );
 
 const WorkSection = dynamic(
@@ -94,7 +79,6 @@ const WorkSection = dynamic(
       withScrollProp(mod.default)
     ),
   {
-    loading: () => <Loader />,
     ssr: false,
   }
 );
@@ -105,7 +89,6 @@ const InvestSection = dynamic(
       withScrollProp(mod.default)
     ),
   {
-    loading: () => <Loader />,
     ssr: false,
   }
 );
@@ -116,14 +99,12 @@ const FooterSection = dynamic(
       withScrollProp(mod.default)
     ),
   {
-    loading: () => <Loader />,
     ssr: false,
   }
 );
 
 export default function HomePage() {
   const [currentPage, setCurrentPage] = useState(0);
-  const [isScrolling, setIsScrolling] = useState(false);
   const scrollLockRef = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -178,7 +159,6 @@ export default function HomePage() {
         return;
 
       scrollLockRef.current = true;
-      setIsScrolling(true);
       setCurrentPage(index);
 
       const scrollHandler = () => {
@@ -189,7 +169,6 @@ export default function HomePage() {
 
         setTimeout(() => {
           scrollLockRef.current = false;
-          setIsScrolling(false);
         }, 300);
       };
 
@@ -199,17 +178,27 @@ export default function HomePage() {
   );
 
   useEffect(() => {
-    const loadAnimations = async () => {
+    const loadAllResources = async () => {
       try {
         await preloadLottieAnimations();
-        setTimeout(() => setIsLoading(false), 400);
+
+        await new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve();
+          img.onerror = reject;
+          img.src = VectorImage.src;
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 400));
+
+        setIsLoading(false);
       } catch (error) {
         console.error("Preload failed:", error);
         setIsLoading(false);
       }
     };
 
-    loadAnimations();
+    loadAllResources();
   }, []);
 
   const handleScroll = useCallback(
@@ -251,48 +240,59 @@ export default function HomePage() {
     };
   }, [handleScroll]);
 
-  if (isLoading) return <Loader />;
-
   return (
     <div
       className="relative w-full overflow-hidden"
       style={{ height: `${100 * sections.length}vh` }}
     >
-      <AnimatePresence initial={false} mode="wait">
-        {sections.map(({ Component, id, useNextAction }, index) => (
-          <HyperOptimizedAnimatedSection
-            key={`section-${id}`}
-            index={index}
-            isActive={index === currentPage}
-            total={sections.length}
-            scrollDirection={currentPage > index ? "up" : "down"}
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div
+            key="loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, filter: "blur(10px)" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
           >
-            <Suspense fallback={<Loader />}>
-              <Component
-                scrollToTop={() =>
-                  useNextAction
-                    ? scrollToSection(currentPage + 1)
-                    : scrollToSection(0)
-                }
-              />
-            </Suspense>
-          </HyperOptimizedAnimatedSection>
-        ))}
+            <Loader />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="content"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className="relative w-full h-full"
+          >
+            <AnimatePresence initial={false} mode="wait">
+              {sections.map(({ Component, id, useNextAction }, index) => (
+                <HyperOptimizedAnimatedSection
+                  key={`section-${id}`}
+                  index={index}
+                  isActive={index === currentPage}
+                  total={sections.length}
+                  scrollDirection={currentPage > index ? "up" : "down"}
+                >
+                  <Component
+                    scrollToTop={() =>
+                      useNextAction
+                        ? scrollToSection(currentPage + 1)
+                        : scrollToSection(0)
+                    }
+                  />
+                </HyperOptimizedAnimatedSection>
+              ))}
+            </AnimatePresence>
+
+            <MenuModal
+              isOpen={isMenuOpen}
+              onClose={() => dispatch(toggleMenu())}
+              sections={sections}
+              scrollToSection={scrollToSection}
+            />
+          </motion.div>
+        )}
       </AnimatePresence>
-
-      <MenuModal
-        isOpen={isMenuOpen}
-        onClose={() => dispatch(toggleMenu())}
-        sections={sections}
-        scrollToSection={scrollToSection}
-      />
-
-      {!isScrolling && currentPage < sections.length - 3 && (
-        <NextButton
-          onClick={() => scrollToSection(currentPage + 1)}
-          isVisible
-        />
-      )}
     </div>
   );
 }

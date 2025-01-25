@@ -1,7 +1,5 @@
-"use client";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
 
 interface NextButtonProps {
   onClick: () => void;
@@ -9,21 +7,9 @@ interface NextButtonProps {
 }
 
 const NextButton: React.FC<NextButtonProps> = ({ onClick, isVisible }) => {
-  const [showButton, setShowButton] = useState(false);
-  useEffect(() => {
-    if (isVisible) {
-      const timer = setTimeout(() => {
-        setShowButton(true);
-      }, 600);
-
-      return () => clearTimeout(timer);
-    } else {
-      setShowButton(false);
-    }
-  }, [isVisible]);
   return (
     <AnimatePresence>
-      {showButton && (
+      {isVisible && (
         <motion.button
           className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-white text-black border border-black rounded-full p-2 sm:p-3 shadow-lg z-10 transition-colors hover:bg-black hover:text-white"
           onClick={onClick}
