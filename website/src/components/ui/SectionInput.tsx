@@ -1,4 +1,3 @@
-// components/ui/SectionInput.tsx
 "use client";
 
 import React from "react";
@@ -6,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldError, UseFormRegister } from "react-hook-form";
-import { FileUpload } from "@/components/ui/FileUpload"; // Import the FileUpload component
 
 interface SectionInputProps {
   id: string; // This will act as the field name
@@ -47,15 +45,6 @@ export const SectionInput: React.FC<SectionInputProps> = ({
             error ? "border-red-500 focus:ring-red-500" : ""
           }`}
           {...register(id)}
-        />
-      ) : type === "file" ? (
-        <FileUpload
-          id={id}
-          label={label}
-          accept={accept}
-          required={required}
-          error={error}
-          register={register}
         />
       ) : (
         <Input
