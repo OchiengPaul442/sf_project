@@ -19,7 +19,7 @@ import type { RootState } from "@/redux-store";
 // Components
 import AnimatedSection from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
-// import NextButton from "@/components/NextButton";
+import NextButton from "@/components/NextButton";
 import MenuModal from "@/components/dialog/menu-modal";
 
 // Images / JSON used across sections
@@ -125,7 +125,15 @@ const HomePage: React.FC = () => {
   const sections: SectionConfig[] = useMemo(
     () => [
       {
-        Component: HeaderSection,
+        Component: ({ scrollToTop }) => (
+          <>
+            {/* Header section with NextButton only here */}
+            <HeaderSection scrollToTop={scrollToTop} />
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+              <NextButton onClick={scrollToTop} />
+            </div>
+          </>
+        ),
         id: "home",
         preloadPriority: 1,
         useNextAction: true,
@@ -257,7 +265,7 @@ const HomePage: React.FC = () => {
         event.preventDefault();
         scrollToSection(currentPage - 1);
       }
-    }, 200), // Short throttle for faster scrolling
+    }, 200), // short throttle for faster scrolling
     [currentPage, scrollToSection, sections.length, modalOpen]
   );
 
@@ -272,31 +280,59 @@ const HomePage: React.FC = () => {
   }, [handleScroll, isMobile]);
 
   /**
-   * Render sections wrapped with AnimatedSection
+   * Render sections
    */
   const renderSections = () => {
-    return sections.map(({ Component, id, useNextAction }, index) => (
-      <AnimatedSection
-        key={`section-${id}`}
-        index={index}
-        isActive={index === currentPage}
-        total={sections.length}
-        scrollDirection={currentPage > index ? "up" : "down"}
-      >
-        <Component
-          scrollToTop={() =>
-            useNextAction
-              ? scrollToSection(currentPage + 1)
-              : scrollToSection(0)
-          }
-        />
-      </AnimatedSection>
-    ));
+    if (isMobile) {
+      // Mobile: default vertical scrolling
+      return (
+        <div className="w-full">
+          {sections.map(({ Component, id }, idx) => (
+            <div key={`section-${id}`} id={id} className="w-full min-h-screen">
+              <Component
+                scrollToTop={() => {
+                  // If you want the button in the first section to jump to next on mobile:
+                  if (idx === 0) {
+                    scrollToSection(1);
+                  } else {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      // Desktop: full viewport transitions
+      return (
+        <div
+          style={{ height: `${100 * sections.length}vh`, position: "relative" }}
+        >
+          {sections.map(({ Component, id, useNextAction }, index) => (
+            <AnimatedSection
+              key={`section-${id}`}
+              index={index}
+              isActive={index === currentPage}
+              total={sections.length}
+              scrollDirection={currentPage > index ? "up" : "down"}
+            >
+              <Component
+                scrollToTop={() =>
+                  useNextAction
+                    ? scrollToSection(currentPage + 1)
+                    : scrollToSection(0)
+                }
+              />
+            </AnimatedSection>
+          ))}
+        </div>
+      );
+    }
   };
 
   return (
     <div className="relative w-full overflow-hidden">
-      {/* Loader */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -312,7 +348,6 @@ const HomePage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       {!isLoading && (
         <motion.div
           key="content"
