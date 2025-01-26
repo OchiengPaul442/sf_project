@@ -1,27 +1,29 @@
-// components/forms/InvestorForm.tsx
 "use client";
 
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { SectionInput } from "../ui/SectionInput";
-import { useState } from "react";
+import { useInvestmentSubmission } from "@/hooks/useContactUsSubmission";
+import { toast } from "react-toastify";
 
 /**
  * Define the Yup schema for the Investor form.
  */
 const InvestorSchema = Yup.object({
-  name: Yup.string().required("Full Name is required"),
+  fullName: Yup.string().required("Full Name is required"),
   email: Yup.string()
     .email("Invalid email format")
     .required("Email is required"),
-  organization: Yup.string().required("Organization name is required"),
-  profile: Yup.string()
+  fundOrOrganisationName: Yup.string().required(
+    "Organization name is required"
+  ),
+  websiteOrLinkedInProfile: Yup.string()
     .url("Invalid URL format")
     .required("Profile URL is required"),
-  investmentAmount: Yup.number()
+  investmentInterest: Yup.number()
     .min(50000, "Minimum investment is $50,000")
     .max(1000000000, "Maximum investment is $1,000,000,000")
     .required("Investment amount is required"),
@@ -31,28 +33,36 @@ const InvestorSchema = Yup.object({
 type InvestorFormInputs = Yup.InferType<typeof InvestorSchema>;
 
 export function InvestorForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { trigger, isMutating } = useInvestmentSubmission();
 
   const {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<InvestorFormInputs>({
     resolver: yupResolver(InvestorSchema),
     defaultValues: {
-      investmentAmount: 500000,
+      investmentInterest: 500000,
     },
   });
 
   const onSubmit: SubmitHandler<InvestorFormInputs> = async (data) => {
-    setIsSubmitting(true);
-    console.log("Form Data:", data);
-    // Add your form submission logic here
-
-    // Simulate form submission delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
+    try {
+      const formattedData = {
+        ...data,
+        investmentInterest: `USD ${data.investmentInterest.toLocaleString()}`,
+      };
+      await trigger(formattedData);
+      toast.success("Form submitted successfully!");
+      reset(); // Reset the form after successful submission
+    } catch (err) {
+      toast.error(
+        "An error occurred while submitting the form. Please try again."
+      );
+      console.error("Submission error:", err);
+    }
   };
 
   return (
@@ -68,11 +78,11 @@ export function InvestorForm() {
 
       <div className="space-y-4">
         <SectionInput
-          id="name"
+          id="fullName"
           label="Full Name"
           placeholder="Enter your full name"
           register={register}
-          error={errors.name}
+          error={errors.fullName}
         />
         <SectionInput
           id="email"
@@ -83,32 +93,32 @@ export function InvestorForm() {
           error={errors.email}
         />
         <SectionInput
-          id="organization"
+          id="fundOrOrganisationName"
           label="Fund/Organisation Name"
           placeholder="Enter organization name"
           register={register}
-          error={errors.organization}
+          error={errors.fundOrOrganisationName}
         />
         <SectionInput
-          id="profile"
+          id="websiteOrLinkedInProfile"
           label="Website or LinkedIn Profile"
           type="url"
           placeholder="https://"
           register={register}
-          error={errors.profile}
+          error={errors.websiteOrLinkedInProfile}
         />
 
         {/* Investment Amount Slider */}
         <div>
           <h3 className="text-sm font-medium mb-2">Investment Interest</h3>
-          {errors.investmentAmount && (
+          {errors.investmentInterest && (
             <p className="text-sm text-red-500 mb-1">
-              {errors.investmentAmount.message}
+              {errors.investmentInterest.message}
             </p>
           )}
           <Controller
             control={control}
-            name="investmentAmount"
+            name="investmentInterest"
             render={({ field }) => (
               <>
                 <Slider
@@ -133,9 +143,9 @@ export function InvestorForm() {
       <Button
         type="submit"
         className="w-full h-10 sm:h-12 rounded-full bg-black text-white hover:bg-black/90 font-normal text-sm"
-        disabled={isSubmitting}
+        disabled={isMutating}
       >
-        {isSubmitting ? "Submitting..." : "Submit"}
+        {isMutating ? "Submitting..." : "Submit"}
       </Button>
     </form>
   );

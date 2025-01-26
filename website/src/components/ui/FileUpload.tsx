@@ -1,8 +1,11 @@
 "use client";
 
-import type React from "react";
-import { useState, useRef } from "react";
-import type { FieldError, UseFormRegister } from "react-hook-form";
+import React, { useState, useRef } from "react";
+import type {
+  FieldError,
+  UseFormRegister,
+  UseFormSetValue,
+} from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Upload, X, Check, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,6 +18,7 @@ interface FileUploadProps {
   required?: boolean;
   error?: FieldError;
   register: UseFormRegister<any>;
+  setValue: UseFormSetValue<any>;
   className?: string;
 }
 
@@ -25,6 +29,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   required = false,
   error,
   register,
+  setValue,
   className,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -64,13 +69,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setValue(id, file); // Set the file in react-hook-form
       simulateUpload();
     } else {
-      setSelectedFile(null);
-      setUploadProgress(0);
-      setIsUploading(false);
-      setUploadComplete(false);
+      handleRemoveFile();
     }
   };
 
@@ -79,10 +83,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setUploadProgress(0);
     setIsUploading(false);
     setUploadComplete(false);
+    setValue(id, null); // Clear the file in the form
     if (inputRef.current) {
       inputRef.current.value = "";
     }
   };
+
+  // Destructure ref and onChange to avoid spreading them multiple times
+  const { ref, onChange, ...rest } = register(id, {
+    onChange: handleFileChange,
+  });
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -103,9 +113,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           accept={accept}
           required={required}
           className="hidden"
-          {...register(id)}
-          onChange={handleFileChange}
-          ref={inputRef}
+          onChange={onChange} // Use the onChange from register
+          ref={(e) => {
+            inputRef.current = e;
+            ref(e); // Forward the ref correctly
+          }}
+          {...rest} // Spread the remaining props without onChange
         />
 
         <AnimatePresence mode="wait">

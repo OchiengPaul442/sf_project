@@ -1,7 +1,6 @@
-// components/forms/RestaurantForm.tsx
 "use client";
 
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Label } from "@/components/ui/label";
@@ -10,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { SectionInput } from "../ui/SectionInput";
 import { useState } from "react";
+import { useRestaurantsSubmission } from "@/hooks/useContactUsSubmission";
+import { toast } from "react-toastify";
 
 /** Dummy data sources */
 const SKILLS = [
@@ -21,31 +22,43 @@ const SKILLS = [
   "My system data is not reliable",
 ];
 
-const BUSINESS_TYPES = ["Restaurant", "Bar", "Nightclub", "Other"];
+const BUSINESS_TYPES = [
+  "Restaurant",
+  "Bar",
+  "Nightclub",
+  "Fast Food",
+  "Pizza",
+  "Other",
+];
 
 /**
  * Define the Yup schema.
  * We'll use the full schema but validate parts based on step.
  */
 const RestaurantSchema = Yup.object({
-  restaurant: Yup.string().required("Restaurant Name is required."),
-  contact: Yup.string().required("Contact Person Name is required."),
+  restaurantName: Yup.string().required("Restaurant Name is required."),
+  contactPersonFullName: Yup.string().required(
+    "Contact Person Name is required."
+  ),
   email: Yup.string()
     .email("Invalid email format.")
     .required("Email is required."),
-  phone: Yup.string()
-    .matches(/^(\+\d{1,3}[- ]?)?\d{10}$/, "Phone number is not valid.")
+  phoneNumber: Yup.string()
+    .matches(
+      /^\+\d{1,3}-\d{3}-\d{3}-\d{3}$/,
+      "Phone number must be in the format: +xxx-xxx-xxx-xxx"
+    )
     .required("Phone Number is required."),
   location: Yup.string().required("Location is required."),
-  businessTypes: Yup.array()
+  BusinessType: Yup.array()
     .of(Yup.string().required())
     .min(1, "At least one business type must be selected.")
     .required("Business Type is required."),
-  annualCost: Yup.number()
+  estimatedAnnualCostOfGoodsSold: Yup.number()
     .min(10000, "Minimum annual cost is $10,000.")
-    .max(5000000, "Maximum annual cost is $5,000,000.")
+    .max(5000000000, "Maximum annual cost is $5,000,000,000.")
     .required("Annual cost is required."),
-  currentChallenges: Yup.array()
+  currentChallengesOrReasonForInterest: Yup.array()
     .of(Yup.string().required())
     .min(1, "At least one challenge must be selected.")
     .required("Current Challenges are required."),
@@ -55,44 +68,53 @@ const RestaurantSchema = Yup.object({
 type RestaurantFormInputs = Yup.InferType<typeof RestaurantSchema>;
 
 export function RestaurantForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState(1); // Manage current step
+  const { trigger, isMutating } = useRestaurantsSubmission();
 
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-    trigger, // For manual validation
+    trigger: triggerValidation,
   } = useForm<RestaurantFormInputs>({
     resolver: yupResolver(RestaurantSchema),
     defaultValues: {
-      annualCost: 100000,
-      businessTypes: [],
-      currentChallenges: [],
+      estimatedAnnualCostOfGoodsSold: 100000,
+      BusinessType: [],
+      currentChallengesOrReasonForInterest: [],
     },
   });
 
   const onSubmit: SubmitHandler<RestaurantFormInputs> = async (data) => {
-    setIsSubmitting(true);
-    console.log("Form Data:", data);
-    // Add your form submission logic here
-
-    // Simulate form submission delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSubmitting(false);
+    try {
+      const formattedData = {
+        ...data,
+        BusinessType: data.BusinessType.join(", "),
+        estimatedAnnualCostOfGoodsSold: `USD ${data.estimatedAnnualCostOfGoodsSold.toLocaleString()}`,
+        currentChallengesOrReasonForInterest:
+          data.currentChallengesOrReasonForInterest.join(", "),
+      };
+      await trigger(formattedData);
+      toast.success("Form submitted successfully!");
+    } catch (error) {
+      toast.error(
+        "An error occurred while submitting the form. Please try again."
+      );
+      console.error("Submission error:", error);
+    }
   };
 
   // Handle moving to the next step
   const handleNext = async () => {
     // Trigger validation for Step 1 fields
-    const valid = await trigger([
-      "restaurant",
-      "contact",
+    const valid = await triggerValidation([
+      "restaurantName",
+      "contactPersonFullName",
       "email",
-      "phone",
+      "phoneNumber",
       "location",
-      "businessTypes",
+      "BusinessType",
     ]);
     if (valid) {
       setStep(2);
@@ -105,7 +127,7 @@ export function RestaurantForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight mb-1">
           Restaurant Information
@@ -119,20 +141,20 @@ export function RestaurantForm() {
         {step === 1 && (
           <>
             <SectionInput
-              id="restaurant"
+              id="restaurantName"
               label="Restaurant Name"
               placeholder="Enter restaurant name"
               required
               register={register}
-              error={errors.restaurant}
+              error={errors.restaurantName}
             />
             <SectionInput
-              id="contact"
+              id="contactPersonFullName"
               label="Contact Person Name"
               placeholder="Enter your full name"
               required
               register={register}
-              error={errors.contact}
+              error={errors.contactPersonFullName}
             />
             <SectionInput
               id="email"
@@ -144,13 +166,13 @@ export function RestaurantForm() {
               error={errors.email}
             />
             <SectionInput
-              id="phone"
+              id="phoneNumber"
               label="Phone Number"
-              type="text"
-              placeholder="Enter your phone number"
+              type="tel"
+              placeholder="+xxx-xxx-xxx-xxx"
               required
               register={register}
-              error={errors.phone}
+              error={errors.phoneNumber}
             />
             <SectionInput
               id="location"
@@ -164,9 +186,9 @@ export function RestaurantForm() {
             {/* Business Types (Checkbox Array) */}
             <div>
               <h3 className="text-sm font-medium mb-2">Business Type</h3>
-              {errors.businessTypes && (
+              {errors.BusinessType && (
                 <p className="text-sm text-red-500 mb-1">
-                  {errors.businessTypes.message}
+                  {errors.BusinessType.message}
                 </p>
               )}
               <div className="grid gap-2">
@@ -174,7 +196,7 @@ export function RestaurantForm() {
                   <div key={type} className="flex items-center space-x-2">
                     <Controller
                       control={control}
-                      name="businessTypes"
+                      name="BusinessType"
                       render={({ field }) => {
                         const { value, onChange } = field;
                         return (
@@ -209,26 +231,26 @@ export function RestaurantForm() {
               <h3 className="text-sm font-medium mb-2">
                 Estimated Annual Cost of Goods Sold
               </h3>
-              {errors.annualCost && (
+              {errors.estimatedAnnualCostOfGoodsSold && (
                 <p className="text-sm text-red-500 mb-1">
-                  {errors.annualCost.message}
+                  {errors.estimatedAnnualCostOfGoodsSold.message}
                 </p>
               )}
               <Controller
                 control={control}
-                name="annualCost"
+                name="estimatedAnnualCostOfGoodsSold"
                 render={({ field }) => (
                   <>
                     <Slider
                       value={[field.value]}
                       onValueChange={(val: number[]) => field.onChange(val[0])}
                       min={10000}
-                      max={5000000}
+                      max={5000000000}
                       step={10000}
                       className="mt-2"
                     />
                     <p className="text-sm font-medium text-black mt-2">
-                      ${(field.value / 1000).toFixed(0)}k
+                      ${field.value.toLocaleString()}
                     </p>
                   </>
                 )}
@@ -238,9 +260,9 @@ export function RestaurantForm() {
             {/* Current Challenges (Checkbox Array) */}
             <div>
               <h3 className="text-sm font-medium mb-2">Current Challenges</h3>
-              {errors.currentChallenges && (
+              {errors.currentChallengesOrReasonForInterest && (
                 <p className="text-sm text-red-500 mb-1">
-                  {errors.currentChallenges.message}
+                  {errors.currentChallengesOrReasonForInterest.message}
                 </p>
               )}
               <div className="grid gap-2">
@@ -248,7 +270,7 @@ export function RestaurantForm() {
                   <div key={challenge} className="flex items-start space-x-2">
                     <Controller
                       control={control}
-                      name="currentChallenges"
+                      name="currentChallengesOrReasonForInterest"
                       render={({ field }) => {
                         const { value, onChange } = field;
                         return (
@@ -302,11 +324,12 @@ export function RestaurantForm() {
           </Button>
         ) : (
           <Button
-            type="submit"
-            className="h-10 sm:h-12  rounded-full bg-black text-white hover:bg-black/90 font-normal text-sm"
-            disabled={isSubmitting}
+            onClick={handleSubmit(onSubmit)}
+            type="button"
+            className="h-10 sm:h-12 rounded-full bg-black text-white hover:bg-black/90 font-normal text-sm"
+            disabled={isMutating}
           >
-            {isSubmitting ? "Submitting..." : "Submit"}
+            {isMutating ? "Submitting..." : "Submit"}
           </Button>
         )}
       </div>

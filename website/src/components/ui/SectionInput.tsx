@@ -11,7 +11,7 @@ import { FileUpload } from "@/components/ui/FileUpload"; // Import the FileUploa
 interface SectionInputProps {
   id: string; // This will act as the field name
   label: string;
-  type?: "text" | "email" | "url" | "textarea" | "file";
+  type?: "text" | "email" | "url" | "textarea" | "file" | "tel";
   placeholder?: string;
   required?: boolean;
   className?: string;

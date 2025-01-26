@@ -1,13 +1,14 @@
-// components/forms/EngineerForm.tsx
 "use client";
 
-import { useForm, SubmitHandler, Controller } from "react-hook-form";
+import { useForm, type SubmitHandler, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { SectionInput } from "@/components/ui/SectionInput";
-import { useState } from "react";
+import { FileUpload } from "@/components/ui/FileUpload";
+import { useEngineersSubmission } from "@/hooks/useContactUsSubmission";
+import { toast } from "react-toastify";
 
 /** Dummy skill list */
 const SKILLS = [
@@ -22,34 +23,32 @@ const SKILLS = [
   "GraphDB",
 ];
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 /**
  * Define the Yup schema for the Engineer form.
- * Notice how we define `resume` as a mixed file type,
- * and the tests use an optional check for `value[0]`.
  */
 const EngineerSchema = Yup.object({
-  name: Yup.string().required("Full Name is required."),
+  fullName: Yup.string().required("Full Name is required."),
   email: Yup.string()
     .email("Invalid email format.")
     .required("Email is required."),
-  profile: Yup.string()
+  linkedInOrGithubURL: Yup.string()
     .url("Invalid URL format.")
     .required("Profile URL is required."),
-  primarySkills: Yup.array()
+  primarySkillset: Yup.array()
     .of(Yup.string().required())
     .min(1, "At least one skill must be selected.")
     .required("Primary skills are required."),
-  interest: Yup.string().optional(),
-  resume: Yup.mixed<FileList>()
-    .test("fileSize", "File Size is too large (Max 2MB).", (value) => {
-      // If no file is uploaded, it's optional -> pass
-      if (!value || value.length === 0) return true;
-      // Otherwise, check the size of the first file
-      return value[0].size <= 2 * 1024 * 1024;
+  reasonForInterest: Yup.string().optional(),
+  resumeURL: Yup.mixed<File>()
+    .test("fileSize", "File Size is too large (Max 10MB).", (value) => {
+      if (!value) return true;
+      return value instanceof File && value.size <= MAX_FILE_SIZE;
     })
     .test("fileType", "Unsupported File Format (Only PDF).", (value) => {
-      if (!value || value.length === 0) return true;
-      return ["application/pdf"].includes(value[0].type);
+      if (!value) return true;
+      return value instanceof File && value.type === "application/pdf";
     })
     .optional(),
 }).required();
@@ -58,49 +57,52 @@ const EngineerSchema = Yup.object({
 type EngineerFormInputs = Yup.InferType<typeof EngineerSchema>;
 
 export function EngineerForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { trigger, isMutating } = useEngineersSubmission();
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<EngineerFormInputs>({
     resolver: yupResolver(EngineerSchema),
     defaultValues: {
-      primarySkills: [],
+      primarySkillset: [],
     },
   });
 
   const onSubmit: SubmitHandler<EngineerFormInputs> = async (data) => {
-    setIsSubmitting(true);
+    try {
+      const formData = new FormData();
 
-    // Handle form data
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("email", data.email);
-    formData.append("profile", data.profile);
-    data.primarySkills.forEach((skill) =>
-      formData.append("primarySkills", skill)
-    );
-    if (data.interest) {
-      formData.append("interest", data.interest);
+      formData.append("fullName", data.fullName);
+      formData.append("email", data.email);
+      formData.append("linkedInOrGithubURL", data.linkedInOrGithubURL);
+      formData.append("primarySkillset", data.primarySkillset.join(", "));
+
+      if (data.reasonForInterest) {
+        formData.append("reasonForInterest", data.reasonForInterest);
+      }
+
+      if (data.resumeURL instanceof File) {
+        formData.append("resumeURL", data.resumeURL, data.resumeURL.name);
+      }
+
+      await trigger(formData);
+      toast.success("Application submitted successfully!");
+    } catch (error) {
+      toast.error("Failed to submit application. Please try again.");
+      console.error("Submission error:", error);
     }
-    if (data.resume && data.resume.length > 0) {
-      formData.append("resume", data.resume[0]);
-    }
-
-    // log
-    console.log(formData.entries());
-
-    // Simulate async form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setIsSubmitting(false);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6"
+      encType="multipart/form-data"
+    >
       <div>
         <h2 className="text-2xl font-bold tracking-tight mb-1">
           Engineer Application
@@ -112,11 +114,11 @@ export function EngineerForm() {
 
       <div className="space-y-4">
         <SectionInput
-          id="name"
+          id="fullName"
           label="Full Name"
           placeholder="Enter your full name"
           register={register}
-          error={errors.name}
+          error={errors.fullName}
         />
 
         <SectionInput
@@ -129,20 +131,20 @@ export function EngineerForm() {
         />
 
         <SectionInput
-          id="profile"
+          id="linkedInOrGithubURL"
           label="LinkedIn Profile or Github Link"
           type="url"
           placeholder="https://"
           register={register}
-          error={errors.profile}
+          error={errors.linkedInOrGithubURL}
         />
 
         {/* Primary Skillset Checkboxes */}
         <div>
           <h3 className="text-sm font-medium mb-2">Primary Skillset</h3>
-          {errors.primarySkills && (
+          {errors.primarySkillset && (
             <p className="text-sm text-red-500 mb-1">
-              {errors.primarySkills.message}
+              {errors.primarySkillset.message}
             </p>
           )}
           <div className="grid grid-cols-2 gap-2">
@@ -150,7 +152,7 @@ export function EngineerForm() {
               <div key={skill} className="flex items-center space-x-2">
                 <Controller
                   control={control}
-                  name="primarySkills"
+                  name="primarySkillset"
                   render={({ field }) => {
                     const { value, onChange } = field;
                     return (
@@ -177,30 +179,33 @@ export function EngineerForm() {
         </div>
 
         <SectionInput
-          id="interest"
+          id="reasonForInterest"
           label="Reason for Interest (Optional)"
           type="textarea"
           placeholder="Tell us why you're interested in joining our team"
           register={register}
-          error={errors.interest}
+          error={errors.reasonForInterest}
         />
 
-        <SectionInput
-          id="resume"
+        <FileUpload
+          id="resumeURL"
           label="Resume (Optional)"
-          type="file"
           accept=".pdf"
           register={register}
-          error={errors.resume}
+          setValue={setValue}
+          error={errors.resumeURL}
         />
+        <p className="text-xs text-gray-500 mt-1">
+          Maximum file size: 10MB (PDF only)
+        </p>
       </div>
 
       <Button
         type="submit"
         className="w-full h-10 sm:h-12 rounded-full bg-black text-white hover:bg-black/90 font-normal text-sm"
-        disabled={isSubmitting}
+        disabled={isMutating}
       >
-        {isSubmitting ? "Submitting..." : "Submit Application"}
+        {isMutating ? "Submitting..." : "Submit Application"}
       </Button>
     </form>
   );

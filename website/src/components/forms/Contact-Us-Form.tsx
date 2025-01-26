@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { useInvestSubmission } from "@/hooks/useInvestSubmission";
+import { useContactUsSubmission } from "@/hooks/useContactUsSubmission";
 import { toast } from "react-toastify";
 
 interface FormData {
@@ -24,7 +24,7 @@ const schema = Yup.object().shape({
   message: Yup.string().required("Message is required."),
 });
 
-const InvestForm = () => {
+const ContactUsForm = () => {
   const {
     register,
     handleSubmit,
@@ -34,7 +34,7 @@ const InvestForm = () => {
     resolver: yupResolver(schema),
   });
 
-  const { trigger, isMutating } = useInvestSubmission();
+  const { trigger, isMutating } = useContactUsSubmission();
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -121,4 +121,4 @@ const InvestForm = () => {
   );
 };
 
-export default InvestForm;
+export default ContactUsForm;

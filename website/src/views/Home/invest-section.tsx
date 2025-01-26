@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, lazy } from "react";
 import type { LottieRefCurrentProps } from "lottie-react";
-import InvestForm from "@/components/forms/InvestForm";
+import ContactUsForm from "@/components/forms/Contact-Us-Form";
 import AngelAnimation from "@/public/lottie/angel.json";
 
 const Lottie = lazy(() => import("lottie-react"));
@@ -44,7 +44,7 @@ const InvestSection: React.FC<any> = () => {
         </div>
 
         <div className="w-full">
-          <InvestForm />
+          <ContactUsForm />
         </div>
       </div>
     </section>
