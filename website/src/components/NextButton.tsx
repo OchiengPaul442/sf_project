@@ -7,6 +7,18 @@ interface NextButtonProps {
 }
 
 const NextButton: React.FC<NextButtonProps> = ({ onClick }) => {
+  const lineVariants = {
+    initial: { scaleY: 0.3, opacity: 0.3 },
+    animate: {
+      scaleY: [0.3, 0.7, 0.3],
+      opacity: [0.7, 1, 0.7],
+      transition: {
+        duration: 1.5,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: "easeInOut",
+      },
+    },
+  };
   return (
     <AnimatePresence>
       <button
@@ -15,15 +27,10 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick }) => {
         style={{ width: "32px", height: "64px" }}
       >
         <motion.div
-          className="w-[3px] h-[10px] bg-black rounded-full -mt-4"
-          animate={{
-            height: ["10px", "20px", "10px"],
-            transition: {
-              duration: 1.5,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "easeInOut",
-            },
-          }}
+          className="w-[3px] h-6 bg-black rounded-full -mt-4"
+          variants={lineVariants}
+          initial="initial"
+          animate="animate"
         />
       </button>
     </AnimatePresence>
