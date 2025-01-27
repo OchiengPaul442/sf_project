@@ -9,8 +9,10 @@ import { setModalOpen } from "@/redux-store/slices/uiSlice";
 
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 import { ContactForm } from "@/components/forms/contact-form";
+import { isMobileDevice } from "@/utils/deviceDetection";
 
 const WorkSection: React.FC<any> = () => {
+  const isMobile = isMobileDevice();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const lottieContainerRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
@@ -20,8 +22,8 @@ const WorkSection: React.FC<any> = () => {
       const animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
         renderer: "svg",
-        loop: true,
-        autoplay: true,
+        loop: isMobile ? false : true,
+        autoplay: isMobile ? false : true,
         animationData: ConstructionAnimation,
       });
 

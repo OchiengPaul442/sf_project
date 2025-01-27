@@ -93,8 +93,8 @@ const RobotSection: React.FC<any> = memo(function RobotSection() {
           <div className="w-full max-w-[400px] aspect-square relative">
             <Lottie
               animationData={robotAnimation}
-              loop={false}
-              autoplay={false}
+              loop={true}
+              autoplay={true}
               lottieRef={lottieRef}
               style={{
                 filter: "brightness(0) invert(1)",

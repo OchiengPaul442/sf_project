@@ -4,8 +4,10 @@ import React, { useEffect, useRef } from "react";
 import lottie from "lottie-web";
 import ContactUsForm from "@/components/forms/Contact-Us-Form";
 import AngelAnimation from "@/public/lottie/angel.json";
+import { isMobileDevice } from "@/utils/deviceDetection";
 
 const InvestSection: React.FC<any> = () => {
+  const isMobile = isMobileDevice();
   const lottieContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -13,8 +15,8 @@ const InvestSection: React.FC<any> = () => {
       const animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
         renderer: "svg",
-        loop: true,
-        autoplay: true,
+        loop: isMobile ? false : true,
+        autoplay: isMobile ? false : true,
         animationData: AngelAnimation,
       });
 
