@@ -11,13 +11,13 @@ import { useContactUsSubmission } from "@/hooks/useContactUsSubmission";
 import { toast } from "react-toastify";
 
 interface FormData {
-  name: string;
+  fullName: string;
   email: string;
   message: string;
 }
 
 const schema = Yup.object().shape({
-  name: Yup.string().required("Name is required."),
+  fullName: Yup.string().required("Full Name is required."),
   email: Yup.string()
     .email("Please enter a valid email.")
     .required("Email is required."),
@@ -55,18 +55,18 @@ const ContactUsForm = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Name Field */}
         <div className="space-y-2">
-          <label htmlFor="name" className="text-sm font-normal">
+          <label htmlFor="fullName" className="text-sm font-normal">
             Name
           </label>
           <Input
-            id="name"
+            id="fullName"
             placeholder="Enter Full name"
             className="h-10 sm:h-12 rounded-lg sm:rounded-xl bg-[#f5f5f5] border-0 font-normal placeholder:text-[#999] text-sm"
-            {...register("name")}
+            {...register("fullName")}
           />
-          {errors.name && (
+          {errors.fullName && (
             <p className="text-xs text-red-500 font-normal">
-              {errors.name.message}
+              {errors.fullName.message}
             </p>
           )}
         </div>
