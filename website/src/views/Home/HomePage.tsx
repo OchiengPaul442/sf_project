@@ -13,6 +13,7 @@ import throttle from "lodash/throttle";
 
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
+import { isMobileDevice } from "@/utils/deviceDetection";
 import type { RootState } from "@/redux-store";
 
 // Components
@@ -113,6 +114,7 @@ interface SectionConfig {
 const HomePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollLockRef = useRef(false);
 
   const dispatch = useDispatch();
@@ -211,6 +213,18 @@ const HomePage: React.FC = () => {
   }, []);
 
   /**
+   * Check mobile to decide whether to attach wheel events
+   */
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(isMobileDevice());
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  /**
    * Scroll to a specific section
    */
   const scrollToSection = useCallback(
@@ -236,7 +250,7 @@ const HomePage: React.FC = () => {
   );
 
   /**
-   * Throttled wheel handler (applies to all devices)
+   * Throttled wheel handler (desktop only)
    */
   const handleScroll = useCallback(
     throttle((event: WheelEvent) => {
@@ -256,44 +270,69 @@ const HomePage: React.FC = () => {
   );
 
   /**
-   * Add or remove wheel listener globally
+   * Add or remove wheel listener on desktop
    */
   useEffect(() => {
-    window.addEventListener("wheel", handleScroll, { passive: false });
-    return () => window.removeEventListener("wheel", handleScroll);
-  }, [handleScroll]);
+    if (!isMobile) {
+      window.addEventListener("wheel", handleScroll, { passive: false });
+      return () => window.removeEventListener("wheel", handleScroll);
+    }
+  }, [handleScroll, isMobile]);
 
   /**
-   * Render sections using AnimatedSection for all devices
+   * Render sections
    */
   const renderSections = () => {
-    return (
-      <div
-        style={{ height: `${100 * sections.length}vh`, position: "relative" }}
-      >
-        {sections.map(({ Component, id, useNextAction }, index) => (
-          <AnimatedSection
-            key={`section-${id}`}
-            index={index}
-            isActive={index === currentPage}
-            total={sections.length}
-            scrollDirection={currentPage > index ? "up" : "down"}
-          >
-            <Component
-              scrollToTop={() =>
-                useNextAction
-                  ? scrollToSection(currentPage + 1)
-                  : scrollToSection(0)
-              }
-            />
-          </AnimatedSection>
-        ))}
-      </div>
-    );
+    if (isMobile) {
+      // Mobile: default vertical scrolling
+      return (
+        <div className="w-full">
+          {sections.map(({ Component, id }, idx) => (
+            <div key={`section-${id}`} id={id} className="w-full min-h-screen">
+              <Component
+                scrollToTop={() => {
+                  // If you want the button in the first section to jump to next on mobile:
+                  if (idx === 0) {
+                    scrollToSection(1);
+                  } else {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    } else {
+      // Desktop: full viewport transitions
+      return (
+        <div
+          style={{ height: `${100 * sections.length}vh`, position: "relative" }}
+        >
+          {sections.map(({ Component, id, useNextAction }, index) => (
+            <AnimatedSection
+              key={`section-${id}`}
+              index={index}
+              isActive={index === currentPage}
+              total={sections.length}
+              scrollDirection={currentPage > index ? "up" : "down"}
+            >
+              <Component
+                scrollToTop={() =>
+                  useNextAction
+                    ? scrollToSection(currentPage + 1)
+                    : scrollToSection(0)
+                }
+              />
+            </AnimatedSection>
+          ))}
+        </div>
+      );
+    }
   };
 
   return (
-    <div className="relative w-full overflow-y-auto">
+    <div className="relative w-full overflow-hidden">
       <AnimatePresence>
         {isLoading && (
           <motion.div
