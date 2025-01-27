@@ -60,6 +60,10 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      animation: {
+        "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "pulse-slower": "pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports

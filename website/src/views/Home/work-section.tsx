@@ -1,25 +1,36 @@
 "use client";
 
 import { ArrowRight, X } from "lucide-react";
-import { useEffect, useRef, lazy, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import type { LottieRefCurrentProps } from "lottie-react";
+import lottie from "lottie-web";
 import { useDispatch } from "react-redux";
 import { setModalOpen } from "@/redux-store/slices/uiSlice";
 
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 import { ContactForm } from "@/components/forms/contact-form";
 
-const Lottie = lazy(() => import("lottie-react"));
-
 const WorkSection: React.FC<any> = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
+  const lottieContainerRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (lottieRef.current?.animationItem) {
-      lottieRef.current.animationItem.setSpeed(1.2);
+    if (lottieContainerRef.current) {
+      const animation = lottie.loadAnimation({
+        container: lottieContainerRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: ConstructionAnimation,
+      });
+
+      // Set animation speed
+      animation.setSpeed(1.2);
+
+      return () => {
+        animation.destroy();
+      };
     }
   }, []);
 
@@ -85,15 +96,9 @@ const WorkSection: React.FC<any> = () => {
         </div>
 
         <div className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none animate-float">
-          <Lottie
-            animationData={ConstructionAnimation}
-            loop
-            autoplay
-            lottieRef={lottieRef}
-            style={{
-              width: "100%",
-              height: "100%",
-            }}
+          <div
+            ref={lottieContainerRef}
+            style={{ width: "100%", height: "100%" }}
           />
         </div>
       </motion.div>

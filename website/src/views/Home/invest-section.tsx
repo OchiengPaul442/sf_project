@@ -1,18 +1,29 @@
 "use client";
 
-import React, { useEffect, useRef, lazy } from "react";
-import type { LottieRefCurrentProps } from "lottie-react";
+import React, { useEffect, useRef } from "react";
+import lottie from "lottie-web";
 import ContactUsForm from "@/components/forms/Contact-Us-Form";
 import AngelAnimation from "@/public/lottie/angel.json";
 
-const Lottie = lazy(() => import("lottie-react"));
-
 const InvestSection: React.FC<any> = () => {
-  const lottieRef = useRef<LottieRefCurrentProps | null>(null);
+  const lottieContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (lottieRef.current?.animationItem) {
-      lottieRef.current.animationItem.setSpeed(1.2);
+    if (lottieContainerRef.current) {
+      const animation = lottie.loadAnimation({
+        container: lottieContainerRef.current,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: AngelAnimation,
+      });
+
+      // Set animation speed
+      animation.setSpeed(1.2);
+
+      return () => {
+        animation.destroy();
+      };
     }
   }, []);
 
@@ -33,11 +44,8 @@ const InvestSection: React.FC<any> = () => {
 
         <div className="flex justify-center w-full -my-16">
           <div className="w-[200px] h-[200px] lg:w-[300px] lg:h-[300px]">
-            <Lottie
-              animationData={AngelAnimation}
-              loop
-              autoplay
-              lottieRef={lottieRef}
+            <div
+              ref={lottieContainerRef}
               style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
