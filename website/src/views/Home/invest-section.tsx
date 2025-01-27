@@ -27,7 +27,7 @@ const InvestSection: React.FC<any> = () => {
         animation.destroy();
       };
     }
-  }, []);
+  }, [isMobile]);
 
   return (
     <section

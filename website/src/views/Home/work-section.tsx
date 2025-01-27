@@ -34,7 +34,7 @@ const WorkSection: React.FC<any> = () => {
         animation.destroy();
       };
     }
-  }, []);
+  }, [isMobile]);
 
   useEffect(() => {
     dispatch(setModalOpen(isFormOpen));
