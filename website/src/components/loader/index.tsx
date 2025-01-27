@@ -1,35 +1,112 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import type React from "react";
-import { useEffect } from "react";
+import { Leaf } from "lucide-react";
 
-const ModernLoader: React.FC = () => {
-  useEffect(() => {
-    // Prevent scrolling when loader is active
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "visible";
-    };
-  }, []);
-
+const SavingFoodLoader: React.FC = () => {
   return (
-    <div
-      className={cn(
-        "fixed inset-0 z-[9999] flex items-center justify-center",
-        "bg-black/50 backdrop-blur-sm transition-all duration-300"
-      )}
-    >
-      <div className="relative">
-        <div className="w-24 h-24 rounded-full border-t-4 border-b-4 border-blue-500 animate-spin"></div>
-        <div className="absolute top-0 left-0 w-24 h-24 rounded-full border-t-4 border-b-4 border-blue-300 animate-ping"></div>
-        <div className="absolute top-0 left-0 w-24 h-24 rounded-full border-2 border-blue-200 animate-pulse"></div>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black">
+      <div className="relative w-40 h-40">
+        {/* Outer rotating rings */}
+        {[0, 1, 2].map((index) => (
+          <motion.div
+            key={index}
+            className={cn(
+              "absolute inset-0 rounded-full border-2",
+              "border-blue-400/30"
+            )}
+            style={{
+              boxShadow: "0 0 20px rgba(34, 211, 238, 0.2)",
+            }}
+            animate={{
+              rotate: 360,
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "linear",
+              delay: index * 0.5,
+            }}
+          />
+        ))}
+
+        {/* Pulsing circles */}
+        {[0, 1, 2].map((index) => (
+          <motion.div
+            key={`pulse-${index}`}
+            className="absolute inset-0 m-auto rounded-full bg-blue-500/20"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{
+              scale: [0.5, 1.5],
+              opacity: [0.7, 0],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              delay: index * 0.6,
+              ease: "easeOut",
+            }}
+            style={{
+              width: "calc(100% - 16px)",
+              height: "calc(100% - 16px)",
+            }}
+          />
+        ))}
+
+        {/* Center circle */}
+        <motion.div
+          className={cn(
+            "absolute inset-0 m-auto rounded-full",
+            "w-28 h-28",
+            "bg-gradient-radial from-blue-500/40 via-blue-400/20 to-transparent"
+          )}
+          style={{
+            background:
+              "radial-gradient(circle, rgba(59,130,246,0.4) 0%, rgba(37,99,235,0.2) 50%, transparent 100%)",
+          }}
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.6, 0.8, 0.6],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
+          }}
+        />
+
+        {/* Rotating leaf icon */}
+        <motion.div
+          className="absolute inset-0 m-auto w-10 h-10 z-10"
+          animate={{
+            rotate: 360,
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            rotate: {
+              duration: 8,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "linear",
+            },
+            scale: {
+              duration: 2,
+              repeat: Number.POSITIVE_INFINITY,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            },
+          }}
+        >
+          <Leaf className="w-full h-full text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.7)]" />
+        </motion.div>
       </div>
+
       <div className="sr-only" role="status" aria-live="polite">
-        Loading, please wait...
+        Loading SavingFood.ai, please wait...
       </div>
     </div>
   );
 };
 
-export default ModernLoader;
+export default SavingFoodLoader;

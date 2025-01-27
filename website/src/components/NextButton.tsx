@@ -23,11 +23,11 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick }) => {
     <AnimatePresence>
       <button
         onClick={onClick}
-        className="rounded-full border-2 border-black z-10 bg-transparent hover:bg-black/5 transition-colors flex items-center justify-center"
+        className="rounded-full border border-black z-10 bg-transparent hover:bg-black/5 transition-colors flex items-center justify-center"
         style={{ width: "32px", height: "64px" }}
       >
         <motion.div
-          className="w-[3px] h-6 bg-black rounded-full -mt-4"
+          className="w-[2px] h-6 bg-black rounded-full -mt-4"
           variants={lineVariants}
           initial="initial"
           animate="animate"
