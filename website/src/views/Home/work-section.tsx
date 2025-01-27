@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import lottie from "lottie-web";
 import { useDispatch } from "react-redux";
 import { setModalOpen } from "@/redux-store/slices/uiSlice";
-
+import Image from "next/image";
+import BuildSvgImage from "@/public/build.svg";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
@@ -22,8 +23,8 @@ const WorkSection: React.FC<any> = () => {
       const animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
         renderer: "svg",
-        loop: isMobile ? false : true,
-        autoplay: isMobile ? false : true,
+        loop: true,
+        autoplay: true,
         animationData: ConstructionAnimation,
       });
 
@@ -34,7 +35,7 @@ const WorkSection: React.FC<any> = () => {
         animation.destroy();
       };
     }
-  }, [isMobile]);
+  }, []);
 
   useEffect(() => {
     dispatch(setModalOpen(isFormOpen));
@@ -98,10 +99,14 @@ const WorkSection: React.FC<any> = () => {
         </div>
 
         <div className="absolute bottom-8 sm:bottom-12 md:bottom-16 lg:bottom-20 right-4 sm:right-8 md:right-12 lg:right-16 w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[260px] lg:h-[260px] xl:w-[300px] xl:h-[300px] pointer-events-none animate-float">
-          <div
-            ref={lottieContainerRef}
-            style={{ width: "100%", height: "100%" }}
-          />
+          {isMobile ? (
+            <Image src={BuildSvgImage} alt="Build" />
+          ) : (
+            <div
+              ref={lottieContainerRef}
+              style={{ width: "100%", height: "100%" }}
+            />
+          )}
         </div>
       </motion.div>
 

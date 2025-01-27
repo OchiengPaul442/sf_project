@@ -5,6 +5,8 @@ import lottie from "lottie-web";
 import ContactUsForm from "@/components/forms/Contact-Us-Form";
 import AngelAnimation from "@/public/lottie/angel.json";
 import { isMobileDevice } from "@/utils/deviceDetection";
+import Image from "next/image";
+import AngelSvgImage from "@/public/angel.svg";
 
 const InvestSection: React.FC<any> = () => {
   const isMobile = isMobileDevice();
@@ -15,8 +17,8 @@ const InvestSection: React.FC<any> = () => {
       const animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
         renderer: "svg",
-        loop: isMobile ? false : true,
-        autoplay: isMobile ? false : true,
+        loop: true,
+        autoplay: true,
         animationData: AngelAnimation,
       });
 
@@ -27,7 +29,7 @@ const InvestSection: React.FC<any> = () => {
         animation.destroy();
       };
     }
-  }, [isMobile]);
+  }, []);
 
   return (
     <section
@@ -46,10 +48,14 @@ const InvestSection: React.FC<any> = () => {
 
         <div className="flex justify-center w-full -my-16">
           <div className="w-[200px] h-[200px] lg:w-[300px] lg:h-[300px]">
-            <div
-              ref={lottieContainerRef}
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-            />
+            {isMobile ? (
+              <Image src={AngelSvgImage} alt="Angel" />
+            ) : (
+              <div
+                ref={lottieContainerRef}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            )}
           </div>
         </div>
 
