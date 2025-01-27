@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, memo } from "react";
+import React, { useEffect, useRef, memo, useState } from "react";
 import { motion, useAnimation, useInView } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
+import { isMobileDevice } from "@/utils/deviceDetection";
 
 // Preload the Lottie component
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -53,6 +54,32 @@ const RobotSection: React.FC<any> = memo(function RobotSection() {
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const isInView = useInView(sectionRef, { amount: 0.3, once: false });
   const controls = useAnimation();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Device detection with debouncing
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    const checkIsMobile = () => {
+      setIsMobile(isMobileDevice());
+    };
+
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(checkIsMobile, 150);
+    };
+
+    // Initial check
+    checkIsMobile();
+
+    // Add debounced event listener
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   // Handle animation and visibility
   useEffect(() => {
@@ -80,13 +107,13 @@ const RobotSection: React.FC<any> = memo(function RobotSection() {
       className="relative h-dvh snap-start bg-black flex flex-col items-center justify-center py-24 overflow-hidden"
     >
       <motion.div
-        variants={containerVariants}
+        variants={isMobile ? {} : containerVariants}
         initial="hidden"
         animate={controls}
         className="container mx-auto flex flex-col items-center"
       >
         <motion.h2
-          variants={itemVariants}
+          variants={isMobile ? {} : itemVariants}
           className="text-white text-2xl md:text-4xl font-extralight tracking-[-0.02em] mb-16 text-center"
         >
           with{" "}
@@ -96,7 +123,7 @@ const RobotSection: React.FC<any> = memo(function RobotSection() {
         </motion.h2>
 
         <motion.div
-          variants={itemVariants}
+          variants={isMobile ? {} : itemVariants}
           className="w-full max-w-[400px] aspect-square relative"
         >
           <Lottie
