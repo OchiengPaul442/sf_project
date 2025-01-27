@@ -135,7 +135,7 @@ const useAnimationLoader = (path: string) => {
 };
 
 // Main component
-const HowSectionCarousel = memo(function HowSectionCarousel() {
+const HowSectionCarousel: React.FC<any> = memo(function HowSectionCarousel() {
   const [selectedStepIndex, setSelectedStepIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const lottieRef = useRef<LottieRefCurrentProps>(null);

@@ -48,7 +48,7 @@ const itemVariants = {
   },
 };
 
-const RobotSection = memo(function RobotSection() {
+const RobotSection: React.FC<any> = memo(function RobotSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const isInView = useInView(sectionRef, { amount: 0.3, once: false });

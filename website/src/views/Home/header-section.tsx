@@ -57,7 +57,7 @@ const floatingVariants: Variants = {
   },
 };
 
-function HeaderSection() {
+const HeaderSection: React.FC<any> = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -162,7 +162,7 @@ function HeaderSection() {
       </div>
     </section>
   );
-}
+};
 
 HeaderSection.displayName = "HeaderSection";
 export default memo(HeaderSection);
