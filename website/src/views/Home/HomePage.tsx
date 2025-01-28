@@ -1,12 +1,9 @@
+// "@/pages/HomePage.tsx"
+
 "use client";
 
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+import type React from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 
@@ -21,21 +18,27 @@ import Loader from "@/components/loader";
 import NextButton from "@/components/NextButton";
 import MenuModal from "@/components/dialog/menu-modal";
 
+// Our refactored HowSectionCarousel
+import HowSectionCarousel from "@/components/carousels/how-section-carousel";
+
 // Constants
-const SCROLL_THRESHOLD = 30;
-const SCROLL_LOCK_DURATION = 400; // Reduced for faster response
-const SCROLL_DEBOUNCE = 50; // Reduced for faster response
+const SCROLL_THRESHOLD = 50;
+const SCROLL_LOCK_DURATION = 400;
 const PRELOAD_TIMEOUT = 5000;
 
+// Index of the carousel section
+const CAROUSEL_SECTION_INDEX = 3;
+
+// Preload Lottie JSONs
 const JSON_PATHS = [
-  "/lottie/robot.json",
-  "/lottie/contruction.json",
-  "/lottie/angel.json",
   "/lottie/sailing_boat_2.json",
   "/lottie/paper_flying.json",
   "/lottie/spag_json.json",
   "/lottie/mark_json.json",
   "/lottie/data.json",
+  "/lottie/robot.json",
+  "/lottie/contruction.json",
+  "/lottie/angel.json",
 ];
 
 // Enhanced dynamic imports with loading states
@@ -54,9 +57,6 @@ const RobotSectionRaw = withLoadingIndicator(
 const HowSectionRaw = withLoadingIndicator(
   () => import("@/views/Home/how-section")
 );
-const HowSectionCarouselRaw = withLoadingIndicator(
-  () => import("@/components/carousels/how-section-carousel")
-);
 const WorkSectionRaw = withLoadingIndicator(
   () => import("@/views/Home/work-section")
 );
@@ -66,7 +66,9 @@ const FooterSectionRaw = withLoadingIndicator(
 
 // Types
 export interface SectionProps {
-  scrollToTop: () => void;
+  scrollToTop?: () => void;
+  onScrollPastStart?: () => void;
+  onScrollPastEnd?: () => void;
 }
 
 interface SectionConfig {
@@ -95,25 +97,118 @@ const withScrollProp = <T extends object>(
 const HeaderSection = withScrollProp(HeaderSectionRaw as any);
 const RobotSection = withScrollProp(RobotSectionRaw as any);
 const HowSection = withScrollProp(HowSectionRaw as any);
-const HowSectionCarousel = withScrollProp(HowSectionCarouselRaw as any);
 const WorkSection = withScrollProp(WorkSectionRaw as any);
 const FooterSection = withScrollProp(FooterSectionRaw as any);
+
+// Step interface with animationData
+interface StepWithData {
+  id: string;
+  title: string;
+  animationData: any; // Replace 'any' with the appropriate type if available
+}
+
+// Debounce hook to manage scroll events
+const useDebouncedCallback = (
+  callback: (...args: any[]) => void,
+  delay: number
+) => {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedFunction = useCallback(
+    (...args: any[]) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    },
+    [callback, delay]
+  );
+
+  return debouncedFunction;
+};
 
 const HomePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [animationDataMap, setAnimationDataMap] = useState<Record<string, any>>(
+    {}
+  );
   const scrollLockRef = useRef(false);
   const touchStartY = useRef<number | null>(null);
-  const lastScrollTime = useRef<number>(Date.now());
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
+  const sectionsRef = useRef<SectionConfig[]>([]); // Ref to store sections
 
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
   const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
 
+  // Scroll to a specific section
+  const scrollToSection = useCallback(
+    (targetIndex: number) => {
+      if (modalOpen || scrollLockRef.current) return;
+      if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
+
+      // Standard "snap" to the desired section
+      scrollLockRef.current = true;
+      setCurrentPage(targetIndex);
+      window.scrollTo({
+        top: window.innerHeight * targetIndex,
+        behavior: "smooth",
+      });
+
+      setTimeout(() => {
+        scrollLockRef.current = false;
+      }, SCROLL_LOCK_DURATION);
+    },
+    [modalOpen]
+  );
+
+  // Scroll callbacks from carousel
+  const handleScrollPastStart = useCallback(() => {
+    scrollToSection(currentPage - 1);
+  }, [currentPage, scrollToSection]);
+
+  const handleScrollPastEnd = useCallback(() => {
+    scrollToSection(currentPage + 1);
+  }, [currentPage, scrollToSection]);
+
+  // Define steps with preloaded animationData
+  const stepsWithData: StepWithData[] = useMemo(() => {
+    if (isLoading) return [];
+    return [
+      {
+        id: "smooth-onboarding",
+        title: "Smooth Onboarding",
+        animationData: animationDataMap["/lottie/sailing_boat_2.json"],
+      },
+      {
+        id: "data-integrity",
+        title: "Data Integrity",
+        animationData: animationDataMap["/lottie/paper_flying.json"],
+      },
+      {
+        id: "managed-consumables",
+        title: "Tightly Managed Consumables",
+        animationData: animationDataMap["/lottie/spag_json.json"],
+      },
+      {
+        id: "recipe-adherence",
+        title: "Recipe Adherence",
+        animationData: animationDataMap["/lottie/mark_json.json"],
+      },
+      {
+        id: "fraud-eliminated",
+        title: "Fraud Eliminated",
+        animationData: animationDataMap["/lottie/data.json"],
+      },
+    ];
+  }, [animationDataMap, isLoading]);
+
   // Section definitions
-  const sections: SectionConfig[] = useMemo(
-    () => [
+  const sections: SectionConfig[] = useMemo(() => {
+    const sectionsArray: SectionConfig[] = [
       {
         Component: ({ scrollToTop }) => (
           <>
@@ -138,7 +233,14 @@ const HomePage: React.FC = () => {
         preloadPriority: 3,
       },
       {
-        Component: HowSectionCarousel,
+        // Carousel at index = 3
+        Component: () => (
+          <HowSectionCarousel
+            onScrollPastStart={handleScrollPastStart}
+            onScrollPastEnd={handleScrollPastEnd}
+            steps={stepsWithData}
+          />
+        ),
         id: "how-carousel",
         preloadPriority: 4,
       },
@@ -152,36 +254,50 @@ const HomePage: React.FC = () => {
         id: "footer",
         preloadPriority: 7,
       },
-    ],
-    []
-  );
+    ];
+
+    sectionsRef.current = sectionsArray;
+
+    return sectionsArray;
+  }, [
+    handleScrollPastEnd,
+    handleScrollPastStart,
+    stepsWithData,
+    scrollToSection,
+  ]);
 
   // Asset preloading
   useEffect(() => {
     const preloadAssets = async () => {
       try {
-        // Set up timeout for asset loading
         loadingTimeoutRef.current = setTimeout(() => {
           console.warn("Asset loading timeout - forcing load completion");
           setIsLoading(false);
         }, PRELOAD_TIMEOUT);
 
-        // Parallel fetch all JSON files
-        const jsonPromises = JSON_PATHS.map(async (path) => {
-          const res = await fetch(path);
-          if (!res.ok) throw new Error(`Failed to load ${path}`);
-          return res.json();
+        const fetchedData = await Promise.all(
+          JSON_PATHS.map(async (path) => {
+            const res = await fetch(path);
+            if (!res.ok) throw new Error(`Failed to load ${path}`);
+            const json = await res.json();
+            return { path, data: json };
+          })
+        );
+
+        const animationDataMap: Record<string, any> = {};
+        fetchedData.forEach(({ path, data }) => {
+          animationDataMap[path] = data;
         });
 
-        // Preload vector image
-        const vectorPromise = new Promise<void>((resolve, reject) => {
+        // Preload Vector.svg
+        await new Promise<void>((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve();
           img.onerror = () => reject(new Error("Vector image load failed"));
           img.src = VectorImage.src;
         });
 
-        await Promise.all([...jsonPromises, vectorPromise]);
+        setAnimationDataMap(animationDataMap);
         setIsLoading(false);
       } catch (error) {
         console.error("Asset preload error:", error);
@@ -202,91 +318,83 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
-  // Scroll handling
-  const scrollToSection = useCallback(
-    (targetIndex: number) => {
-      const now = Date.now();
-      if (
-        targetIndex < 0 ||
-        targetIndex >= sections.length ||
-        scrollLockRef.current ||
-        now - lastScrollTime.current < SCROLL_DEBOUNCE ||
-        modalOpen
-      ) {
-        return;
-      }
-
-      scrollLockRef.current = true;
-      lastScrollTime.current = now;
-
-      setCurrentPage(targetIndex);
-      window.scrollTo({
-        top: window.innerHeight * targetIndex,
-        behavior: "smooth",
-      });
-
-      setTimeout(() => {
-        scrollLockRef.current = false;
-      }, SCROLL_LOCK_DURATION);
-    },
-    [sections.length, modalOpen]
-  );
-
-  // Wheel event handler
-  const handleWheel = useCallback(
+  // Handle wheel scrolling with debouncing
+  const debouncedHandleWheel = useDebouncedCallback(
     (event: WheelEvent) => {
       if (modalOpen || scrollLockRef.current) return;
+
+      // If we are in the carousel section, do not handle here
+      if (currentPage === CAROUSEL_SECTION_INDEX) {
+        return;
+      }
 
       const delta = event.deltaY;
       if (Math.abs(delta) > SCROLL_THRESHOLD) {
         event.preventDefault();
-        scrollToSection(currentPage + (delta > 0 ? 1 : -1));
+        const direction = delta > 0 ? 1 : -1;
+        scrollToSection(currentPage + direction);
       }
     },
-    [currentPage, modalOpen, scrollToSection]
+    100 // Debounce delay in ms
   );
 
-  // Touch event handlers
-  const handleTouchStart = useCallback(
-    (event: TouchEvent) => {
-      if (!modalOpen) {
-        touchStartY.current = event.touches[0].clientY;
-      }
-    },
-    [modalOpen]
-  );
-
-  const handleTouchEnd = useCallback(
+  // Touch event handlers for mobile with debouncing
+  const debouncedHandleTouchEnd = useDebouncedCallback(
     (event: TouchEvent) => {
       if (modalOpen || scrollLockRef.current || touchStartY.current === null) {
         return;
       }
 
+      // If we are in carousel section, do not handle here
+      if (currentPage === CAROUSEL_SECTION_INDEX) {
+        touchStartY.current = null;
+        return;
+      }
+
       const deltaY = touchStartY.current - event.changedTouches[0].clientY;
       if (Math.abs(deltaY) > SCROLL_THRESHOLD) {
-        scrollToSection(currentPage + (deltaY > 0 ? 1 : -1));
+        event.preventDefault();
+        const direction = deltaY > 0 ? 1 : -1;
+        scrollToSection(currentPage + direction);
       }
 
       touchStartY.current = null;
     },
-    [currentPage, modalOpen, scrollToSection]
+    100 // Debounce delay in ms
   );
 
-  // Event listeners
+  // Attach/detach event listeners with debouncing
   useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      debouncedHandleWheel(e);
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (!modalOpen) {
+        touchStartY.current = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      debouncedHandleTouchEnd(e);
+    };
+
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: false });
 
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [handleWheel, handleTouchStart, handleTouchEnd]);
+  }, [debouncedHandleWheel, debouncedHandleTouchEnd, modalOpen]);
 
   return (
-    <div className="relative w-full overflow-hidden">
+    <div
+      className="relative w-full overflow-hidden snap-y snap-mandatory"
+      style={{ scrollBehavior: "smooth" }}
+    >
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -324,13 +432,15 @@ const HomePage: React.FC = () => {
                 total={sections.length}
                 scrollDirection={currentPage > index ? "up" : "down"}
               >
-                <Component
-                  scrollToTop={() =>
-                    useNextAction
-                      ? scrollToSection(currentPage + 1)
-                      : scrollToSection(0)
-                  }
-                />
+                <div className="w-full h-full snap-start">
+                  <Component
+                    scrollToTop={() =>
+                      useNextAction
+                        ? scrollToSection(currentPage + 1)
+                        : scrollToSection(0)
+                    }
+                  />
+                </div>
               </AnimatedSection>
             ))}
           </div>

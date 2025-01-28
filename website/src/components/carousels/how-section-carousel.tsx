@@ -1,76 +1,56 @@
+// "@/components/carousels/how-section-carousel.tsx"
+
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import type React from "react";
+import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
 
-// Dynamic import with loading state
+// Dynamically import Lottie for animations
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
+  loading: () => <div className="w-full h-full bg-black" />,
 });
 
-// Types and constants
-interface Step {
+// Step interface with preloaded animationData
+interface StepWithData {
   id: string;
   title: string;
-  animationPath: string;
+  animationData: any; // Replace 'any' with the appropriate type if available
 }
 
-const STEPS: Step[] = [
-  {
-    id: "smooth-onboarding",
-    title: "Smooth Onboarding",
-    animationPath: "/lottie/sailing_boat_2.json",
-  },
-  {
-    id: "data-integrity",
-    title: "Data Integrity",
-    animationPath: "/lottie/paper_flying.json",
-  },
-  {
-    id: "managed-consumables",
-    title: "Tightly Managed Consumables",
-    animationPath: "/lottie/spag_json.json",
-  },
-  {
-    id: "recipe-adherence",
-    title: "Recipe Adherence",
-    animationPath: "/lottie/mark_json.json",
-  },
-  {
-    id: "fraud-eliminated",
-    title: "Fraud Eliminated",
-    animationPath: "/lottie/data.json",
-  },
-];
+// Props for HowSectionCarousel to receive callbacks and preloaded steps
+interface HowSectionCarouselProps {
+  steps: StepWithData[];
+  onScrollPastStart?: () => void;
+  onScrollPastEnd?: () => void;
+}
 
-// Optimized animation variants
+// Animation variants for carousel transitions
 const carouselVariants = {
   enter: (direction: number) => ({
     y: direction > 0 ? 80 : -80,
     opacity: 0,
-    transition: { duration: 0.3 },
   }),
   center: {
     y: 0,
     opacity: 1,
-    transition: { duration: 0.3 },
   },
   exit: (direction: number) => ({
     y: direction < 0 ? 80 : -80,
     opacity: 0,
-    transition: { duration: 0.3 },
   }),
 };
 
-// Memoized Navigation Item
+// Navigation Item Component
 const NavItem = memo(function NavItem({
   step,
   isActive,
   onClick,
 }: {
-  step: Step;
+  step: StepWithData;
   isActive: boolean;
   onClick: () => void;
 }) {
@@ -104,160 +84,186 @@ const NavItem = memo(function NavItem({
   );
 });
 
-// Improved animation loader with retry mechanism
-const useAnimationLoader = (path: string) => {
-  const [data, setData] = useState<any>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const retryCount = useRef(0);
+// Debounce hook to manage scroll events
+const useDebouncedCallback = (
+  callback: (...args: any[]) => void,
+  delay: number
+) => {
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const loadAnimation = useCallback(async () => {
-    try {
-      const response = await fetch(path);
-      if (!response.ok) throw new Error(`Failed to load animation: ${path}`);
-      const json = await response.json();
-      setData(json);
-      setError(null);
-      retryCount.current = 0;
-    } catch (err) {
-      setError(err as Error);
-      if (retryCount.current < 3) {
-        retryCount.current += 1;
-        setTimeout(loadAnimation, 1000 * retryCount.current);
+  const debouncedFunction = useCallback(
+    (...args: any[]) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    }
-  }, [path]);
-
-  useEffect(() => {
-    loadAnimation();
-  }, [loadAnimation]);
-
-  return { data, error };
-};
-
-// Main component
-const HowSectionCarousel: React.FC<any> = memo(function HowSectionCarousel() {
-  const [selectedStepIndex, setSelectedStepIndex] = useState(0);
-  const [direction, setDirection] = useState(0);
-  const lottieRef = useRef<LottieRefCurrentProps>(null);
-  const autoPlayRef = useRef<NodeJS.Timeout>();
-  const isVisibleRef = useRef(true);
-
-  const currentStep = STEPS[selectedStepIndex];
-  const { data: animationData, error } = useAnimationLoader(
-    currentStep.animationPath
+      timeoutRef.current = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    },
+    [callback, delay]
   );
 
-  // Visibility observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isVisibleRef.current = entry.isIntersecting;
-        if (lottieRef.current?.animationItem) {
-          if (entry.isIntersecting) {
-            lottieRef.current.animationItem.play();
+  return debouncedFunction;
+};
+
+const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
+  function HowSectionCarousel({ steps, onScrollPastStart, onScrollPastEnd }) {
+    const [selectedStepIndex, setSelectedStepIndex] = useState(0);
+    const [direction, setDirection] = useState(0);
+    const lottieRef = useRef<LottieRefCurrentProps>(null);
+    const isVisibleRef = useRef(true);
+
+    const currentStep = steps[selectedStepIndex];
+
+    // Intersection Observer to pause/play the animation when not visible
+    useEffect(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          isVisibleRef.current = entry.isIntersecting;
+          if (lottieRef.current?.animationItem) {
+            if (entry.isIntersecting) {
+              lottieRef.current.animationItem.play();
+            } else {
+              lottieRef.current.animationItem.pause();
+            }
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      const element = document.getElementById("how-section-carousel");
+      if (element) {
+        observer.observe(element);
+        return () => observer.unobserve(element);
+      }
+    }, []);
+
+    // Handle wheel scrolling inside the carousel with debouncing
+    const debouncedHandleWheel = useDebouncedCallback(
+      (e: WheelEvent) => {
+        const threshold = 30;
+        if (Math.abs(e.deltaY) < threshold) return; // Ignore small scrolls
+
+        // Scroll Down
+        if (e.deltaY > 0) {
+          if (selectedStepIndex < steps.length - 1) {
+            // Move to next step
+            e.preventDefault(); // Prevent parent from snapping
+            setDirection(1);
+            setSelectedStepIndex((prev) => prev + 1);
           } else {
-            lottieRef.current.animationItem.pause();
+            // Last step: allow parent to handle scrolling to next section
+            if (onScrollPastEnd) {
+              onScrollPastEnd();
+            }
+          }
+        } else {
+          // Scroll Up
+          if (selectedStepIndex > 0) {
+            // Move to previous step
+            e.preventDefault(); // Prevent parent from snapping
+            setDirection(-1);
+            setSelectedStepIndex((prev) => prev - 1);
+          } else {
+            // First step: allow parent to handle scrolling to previous section
+            if (onScrollPastStart) {
+              onScrollPastStart();
+            }
           }
         }
       },
-      { threshold: 0.1 }
+      100 // Debounce delay in ms
     );
 
-    const element = document.getElementById("how-section-carousel");
-    if (element) {
-      observer.observe(element);
-      return () => observer.unobserve(element);
-    }
-  }, []);
+    // Attach wheel event listener with debouncing
+    useEffect(() => {
+      const carouselElement = document.getElementById("how-section-carousel");
+      if (!carouselElement) return;
 
-  // Auto-rotation
-  useEffect(() => {
-    const startAutoPlay = () => {
-      autoPlayRef.current = setInterval(() => {
-        if (isVisibleRef.current) {
-          setDirection(1);
-          setSelectedStepIndex((idx) => (idx + 1) % STEPS.length);
+      const handleWheel = (e: WheelEvent) => {
+        debouncedHandleWheel(e);
+      };
+
+      carouselElement.addEventListener("wheel", handleWheel, {
+        passive: false,
+      });
+
+      return () => {
+        carouselElement.removeEventListener("wheel", handleWheel);
+      };
+    }, [debouncedHandleWheel]);
+
+    // Navigation click handler
+    const handleNavClick = useCallback(
+      (index: number) => {
+        if (index !== selectedStepIndex) {
+          setDirection(index > selectedStepIndex ? 1 : -1);
+          setSelectedStepIndex(index);
         }
-      }, 3000);
-    };
+      },
+      [selectedStepIndex]
+    );
 
-    startAutoPlay();
-
-    return () => {
-      if (autoPlayRef.current) {
-        clearInterval(autoPlayRef.current);
-      }
-    };
-  }, []);
-
-  const handleNavClick = useCallback(
-    (index: number) => {
-      if (index !== selectedStepIndex) {
-        if (autoPlayRef.current) {
-          clearInterval(autoPlayRef.current);
-        }
-        setDirection(index > selectedStepIndex ? 1 : -1);
-        setSelectedStepIndex(index);
-      }
-    },
-    [selectedStepIndex]
-  );
-
-  return (
-    <section
-      id="how-section-carousel"
-      className="relative h-screen snap-start bg-black flex items-center justify-center overflow-hidden"
-    >
-      <motion.div className="container mx-auto px-4 sm:px-6 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-center">
-        {/* Navigation */}
-        <div className="relative w-full lg:w-1/2">
-          <div className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
-          <nav className="space-y-6 sm:space-y-8 lg:space-y-12">
-            {STEPS.map((step, index) => (
-              <NavItem
-                key={step.id}
-                step={step}
-                isActive={selectedStepIndex === index}
-                onClick={() => handleNavClick(index)}
-              />
-            ))}
-          </nav>
-        </div>
-
-        {/* Animation */}
-        <div className="relative w-full lg:w-1/2 h-64 sm:h-80 md:h-96 lg:h-[500px] flex items-center justify-center">
-          <AnimatePresence mode="wait" custom={direction}>
-            <motion.div
-              key={currentStep.id}
-              className="absolute inset-0 flex items-center justify-center"
-              custom={direction}
-              variants={carouselVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-            >
-              {error ? (
-                <div className="text-red-500">Failed to load animation</div>
-              ) : !animationData ? (
-                <div className="text-white">Loading...</div>
-              ) : (
-                <div className="w-full h-full max-w-[300px] sm:max-w-[400px] md:max-w-[500px]">
-                  <Lottie
-                    animationData={animationData}
-                    loop={true}
-                    autoplay={true}
-                    lottieRef={lottieRef}
-                    style={{ width: "100%", height: "100%" }}
-                    rendererSettings={{ preserveAspectRatio: "xMidYMid slice" }}
+    return (
+      <section
+        id="how-section-carousel"
+        className="relative w-full h-full bg-black overflow-hidden snap-start"
+      >
+        {/* Centered container for the carousel content */}
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="container mx-auto px-4 sm:px-6 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-center">
+            {/* Navigation */}
+            <div className="relative w-full lg:w-1/2">
+              <div className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
+              <nav className="space-y-6 sm:space-y-8 lg:space-y-12">
+                {steps.map((step, index) => (
+                  <NavItem
+                    key={step.id}
+                    step={step}
+                    isActive={selectedStepIndex === index}
+                    onClick={() => handleNavClick(index)}
                   />
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+                ))}
+              </nav>
+            </div>
+
+            {/* Animation Container */}
+            <div className="relative w-full lg:w-1/2 min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] flex items-center justify-center">
+              <AnimatePresence mode="wait" custom={direction}>
+                <motion.div
+                  key={currentStep.id}
+                  className="absolute inset-0 flex items-center justify-center"
+                  custom={direction}
+                  variants={carouselVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                >
+                  {currentStep.animationData ? (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Lottie
+                        animationData={currentStep.animationData}
+                        loop={true}
+                        autoplay={true}
+                        lottieRef={lottieRef}
+                        className="w-full h-full"
+                        rendererSettings={{
+                          preserveAspectRatio: "xMidYMid meet",
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-red-500">Failed to load animation</div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
-      </motion.div>
-    </section>
-  );
-});
+      </section>
+    );
+  }
+);
 
 export default HowSectionCarousel;

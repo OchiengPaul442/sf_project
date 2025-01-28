@@ -9,10 +9,10 @@ interface Props {
   total: number;
   scrollDirection: "up" | "down";
   children: React.ReactNode;
-  className?: string; // Optional prop for additional styling (e.g., height)
+  className?: string;
 }
 
-const ANIMATION_DURATION = 0.15; // Faster animation
+const ANIMATION_DURATION = 0.18; // Faster animation
 const ANIMATION_SCALE = 0.98; // Subtle scale effect
 
 const AnimatedSection: React.FC<Props> = ({
@@ -21,7 +21,7 @@ const AnimatedSection: React.FC<Props> = ({
   total,
   scrollDirection,
   children,
-  className = "", // Default to empty string if not provided
+  className = "",
 }) => {
   // Define animation variants based on scroll direction
   const variants = useMemo(
@@ -38,7 +38,7 @@ const AnimatedSection: React.FC<Props> = ({
         transition: {
           type: "tween",
           duration: ANIMATION_DURATION,
-          ease: [0.33, 1, 0.68, 1], // Custom easing for smoother animation
+          ease: "easeInOut",
         },
       },
       exit: {
@@ -48,7 +48,7 @@ const AnimatedSection: React.FC<Props> = ({
         transition: {
           type: "tween",
           duration: ANIMATION_DURATION,
-          ease: [0.32, 0, 0.67, 0], // Custom easing for smoother animation
+          ease: "easeInOut",
         },
       },
     }),

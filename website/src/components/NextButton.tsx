@@ -2,11 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 
-interface NextButtonProps {
-  onClick: () => void;
-}
-
-const NextButton: React.FC<NextButtonProps> = ({ onClick }) => {
+const NextButton: React.FC<any> = ({ onClick }) => {
   const lineVariants = {
     initial: { scaleY: 0.3, opacity: 0.3 },
     animate: {
