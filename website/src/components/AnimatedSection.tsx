@@ -9,22 +9,27 @@ interface Props {
   total: number;
   scrollDirection: "up" | "down";
   children: React.ReactNode;
+  className?: string; // Optional prop for additional styling (e.g., height)
 }
 
-// Named functional component
+const ANIMATION_DURATION = 0.15; // Faster animation
+const ANIMATION_SCALE = 0.98; // Subtle scale effect
+
 const AnimatedSection: React.FC<Props> = ({
   isActive,
   index,
   total,
   scrollDirection,
   children,
+  className = "", // Default to empty string if not provided
 }) => {
+  // Define animation variants based on scroll direction
   const variants = useMemo(
     () => ({
       initial: {
         y: scrollDirection === "down" ? "100%" : "-100%",
         opacity: 0,
-        scale: 0.95,
+        scale: ANIMATION_SCALE,
       },
       animate: {
         y: "0%",
@@ -32,18 +37,18 @@ const AnimatedSection: React.FC<Props> = ({
         scale: 1,
         transition: {
           type: "tween",
-          duration: 0.2, // faster
-          ease: "easeOut",
+          duration: ANIMATION_DURATION,
+          ease: [0.33, 1, 0.68, 1], // Custom easing for smoother animation
         },
       },
       exit: {
         y: scrollDirection === "down" ? "-100%" : "100%",
         opacity: 0,
-        scale: 0.95,
+        scale: ANIMATION_SCALE,
         transition: {
           type: "tween",
-          duration: 0.2, // faster
-          ease: "easeIn",
+          duration: ANIMATION_DURATION,
+          ease: [0.32, 0, 0.67, 0], // Custom easing for smoother animation
         },
       },
     }),
@@ -52,12 +57,14 @@ const AnimatedSection: React.FC<Props> = ({
 
   return (
     <motion.div
-      className="fixed inset-0 w-full h-screen overflow-hidden touch-none"
+      className={`fixed inset-0 w-full overflow-hidden touch-none will-change-transform ${className}`}
       initial="initial"
       animate={isActive ? "animate" : "exit"}
       variants={variants}
       style={{
         zIndex: isActive ? total : index,
+        perspective: "1000px",
+        backfaceVisibility: "hidden",
       }}
     >
       {children}
@@ -65,5 +72,4 @@ const AnimatedSection: React.FC<Props> = ({
   );
 };
 
-AnimatedSection.displayName = "AnimatedSection";
 export default AnimatedSection;

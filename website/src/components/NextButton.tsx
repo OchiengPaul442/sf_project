@@ -27,7 +27,7 @@ const NextButton: React.FC<NextButtonProps> = ({ onClick }) => {
         style={{ width: "32px", height: "64px" }}
       >
         <motion.div
-          className="w-[2px] h-6 bg-black rounded-full -mt-4"
+          className="w-[2px] h-6 bg-green-600 rounded-full -mt-4"
           variants={lineVariants}
           initial="initial"
           animate="animate"

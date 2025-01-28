@@ -14,10 +14,10 @@ const SavingFoodLoader: React.FC = () => {
             key={index}
             className={cn(
               "absolute inset-0 rounded-full border-2",
-              "border-blue-400/30"
+              "border-green-400/30"
             )}
             style={{
-              boxShadow: "0 0 20px rgba(34, 211, 238, 0.2)",
+              boxShadow: "0 0 20px rgba(34, 197, 94, 0.2)",
             }}
             animate={{
               rotate: 360,
@@ -36,7 +36,7 @@ const SavingFoodLoader: React.FC = () => {
         {[0, 1, 2].map((index) => (
           <motion.div
             key={`pulse-${index}`}
-            className="absolute inset-0 m-auto rounded-full bg-blue-500/20"
+            className="absolute inset-0 m-auto rounded-full bg-green-500/20"
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{
               scale: [0.5, 1.5],
@@ -60,11 +60,11 @@ const SavingFoodLoader: React.FC = () => {
           className={cn(
             "absolute inset-0 m-auto rounded-full",
             "w-28 h-28",
-            "bg-gradient-radial from-blue-500/40 via-blue-400/20 to-transparent"
+            "bg-gradient-radial from-green-500/40 via-green-400/20 to-transparent"
           )}
           style={{
             background:
-              "radial-gradient(circle, rgba(59,130,246,0.4) 0%, rgba(37,99,235,0.2) 50%, transparent 100%)",
+              "radial-gradient(circle, rgba(34,197,94,0.4) 0%, rgba(22,163,74,0.2) 50%, transparent 100%)",
           }}
           animate={{
             scale: [1, 1.1, 1],
@@ -98,7 +98,7 @@ const SavingFoodLoader: React.FC = () => {
             },
           }}
         >
-          <Leaf className="w-full h-full text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.7)]" />
+          <Leaf className="w-full h-full text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.7)]" />
         </motion.div>
       </div>
 

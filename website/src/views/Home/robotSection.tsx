@@ -23,7 +23,7 @@ const GlowEffect = memo(function GlowEffect() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-10 blur-[100px] animate-pulse-slow bg-blue-500/50"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-10 blur-[100px] animate-pulse-slow bg-green-500/50"
         aria-hidden="true"
       />
       <div

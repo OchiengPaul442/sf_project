@@ -109,8 +109,6 @@ const WorkSection: React.FC<any> = () => {
           )}
         </div>
       </motion.div>
-
-      {/* Sliding Form Panel */}
       <AnimatePresence>
         {isFormOpen && (
           <motion.div
@@ -121,18 +119,21 @@ const WorkSection: React.FC<any> = () => {
               type: "spring",
               stiffness: 300,
               damping: 30,
+              mass: 0.8,
             }}
-            className="fixed inset-y-0 right-0 w-full md:w-[600px] lg:w-[640px] bg-white shadow-2xl overflow-y-auto"
+            className="fixed inset-0 bg-white z-50 overflow-hidden"
           >
-            <div className="relative h-full pb-4">
+            <div className="relative h-full">
               <button
                 onClick={() => setIsFormOpen(false)}
-                className="absolute right-2 top-2 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="absolute right-4 top-4 p-2 bg-gray-100 text-green-600 md:hover:bg-gray-100 md:hover:text-green-600 rounded-full transition-colors z-50"
                 aria-label="Close Contact Form"
               >
                 <X className="w-6 h-6" />
               </button>
-              <ContactForm />
+              <div className="h-full overflow-y-auto">
+                <ContactForm />
+              </div>
             </div>
           </motion.div>
         )}
