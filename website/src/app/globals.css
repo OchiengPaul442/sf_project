@@ -13,11 +13,18 @@ body {
   color: white;
   font-family: var(--font-qanelas-soft), system-ui, sans-serif;
   scroll-behavior: smooth;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  overflow: hidden;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+body {
+  overflow-y: scroll; /* Enable vertical scrolling */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
 
 .custom-scrollbar {
   scrollbar-width: thin;
