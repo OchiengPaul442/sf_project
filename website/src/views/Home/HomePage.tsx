@@ -82,7 +82,7 @@ const HomePage: React.FC = () => {
 
   const scrollToSection = useCallback(
     (targetIndex: number) => {
-      if (modalOpen || scrollLockRef.current) return;
+      if (modalOpen || contactModalOpen || scrollLockRef.current) return;
       if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
 
       scrollLockRef.current = true;
@@ -96,7 +96,7 @@ const HomePage: React.FC = () => {
         scrollLockRef.current = false;
       }, SCROLL_LOCK_DURATION);
     },
-    [modalOpen]
+    [modalOpen, contactModalOpen]
   );
 
   const scrollToTop = useCallback(() => {
@@ -263,6 +263,7 @@ const HomePage: React.FC = () => {
     const handleScroll = (delta: number) => {
       if (modalOpen) return; // Prevent scrolling when modal is open
       if (contactModalOpen) return; // Prevent scrolling when modal is open
+
       const now = Date.now();
       if (now - lastScrollTime < scrollThrottle) return;
 
@@ -274,20 +275,25 @@ const HomePage: React.FC = () => {
     };
 
     const handleWheel = (e: WheelEvent) => {
-      if (modalOpen || scrollLockRef.current) return;
+      if (modalOpen || contactModalOpen || scrollLockRef.current) return;
       if (currentPage === CAROUSEL_SECTION_INDEX) return;
       e.preventDefault();
       handleScroll(e.deltaY);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (!modalOpen) {
+      if (!modalOpen || !contactModalOpen) {
         touchStartY.current = e.touches[0].clientY;
       }
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (modalOpen || scrollLockRef.current || touchStartY.current === null)
+      if (
+        modalOpen ||
+        contactModalOpen ||
+        scrollLockRef.current ||
+        touchStartY.current === null
+      )
         return;
       if (currentPage === CAROUSEL_SECTION_INDEX) {
         touchStartY.current = null;
@@ -308,7 +314,7 @@ const HomePage: React.FC = () => {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [currentPage, modalOpen, scrollToSection]);
+  }, [currentPage, modalOpen, scrollToSection, contactModalOpen]);
 
   return (
     <div
