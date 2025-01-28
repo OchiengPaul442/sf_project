@@ -22,7 +22,7 @@ import FooterSection from "@/views/Home/footer-section";
 
 // Constants
 const SCROLL_THRESHOLD = 50;
-const SCROLL_LOCK_DURATION = 50;
+const SCROLL_LOCK_DURATION = 500;
 const PRELOAD_TIMEOUT = 10000;
 const CAROUSEL_SECTION_INDEX = 3;
 
@@ -47,6 +47,7 @@ interface SectionProps {
   onScrollPastStart?: () => void;
   onScrollPastEnd?: () => void;
   onLoad?: () => void;
+  isActive: boolean;
 }
 
 interface SectionConfig {
@@ -68,10 +69,12 @@ const HomePage: React.FC = () => {
   const [animationDataMap, setAnimationDataMap] = useState<Record<string, any>>(
     {}
   );
+  const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
   const scrollLockRef = useRef(false);
   const touchStartY = useRef<number | null>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
   const sectionsRef = useRef<SectionConfig[]>([]);
+  const lastScrollTimeRef = useRef(0);
 
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
@@ -86,17 +89,14 @@ const HomePage: React.FC = () => {
       if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
 
       scrollLockRef.current = true;
+      setScrollDirection(targetIndex > currentPage ? "down" : "up");
       setCurrentPage(targetIndex);
-      window.scrollTo({
-        top: window.innerHeight * targetIndex,
-        behavior: "smooth",
-      });
 
       setTimeout(() => {
         scrollLockRef.current = false;
       }, SCROLL_LOCK_DURATION);
     },
-    [modalOpen, contactModalOpen]
+    [modalOpen, contactModalOpen, currentPage]
   );
 
   const scrollToTop = useCallback(() => {
@@ -149,11 +149,12 @@ const HomePage: React.FC = () => {
   const sections: SectionConfig[] = useMemo(() => {
     const sectionsArray: SectionConfig[] = [
       {
-        Component: () => (
+        Component: ({ isActive }) => (
           <>
             <LazyComponent
               component="HeaderSection"
               scrollToTop={scrollToTop}
+              isActive={isActive}
             />
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
               <NextButton onClick={scrollToNextSection} />
@@ -164,33 +165,42 @@ const HomePage: React.FC = () => {
         preloadPriority: 1,
       },
       {
-        Component: () => <LazyComponent component="RobotSection" />,
+        Component: ({ isActive }) => (
+          <LazyComponent component="RobotSection" isActive={isActive} />
+        ),
         id: "platform",
         preloadPriority: 2,
       },
       {
-        Component: () => <LazyComponent component="HowSection" />,
+        Component: ({ isActive }) => (
+          <LazyComponent component="HowSection" isActive={isActive} />
+        ),
         id: "solutions",
         preloadPriority: 3,
       },
       {
-        Component: () => (
+        Component: ({ isActive }) => (
           <HowSectionCarousel
             onScrollPastStart={handleScrollPastStart}
             onScrollPastEnd={handleScrollPastEnd}
             steps={stepsWithData}
+            isActive={isActive}
           />
         ),
         id: "how-carousel",
         preloadPriority: 4,
       },
       {
-        Component: () => <LazyComponent component="WorkSection" />,
+        Component: ({ isActive }) => (
+          <LazyComponent component="WorkSection" isActive={isActive} />
+        ),
         id: "work",
         preloadPriority: 5,
       },
       {
-        Component: () => <FooterSection scrollToTop={scrollToTop} />,
+        Component: ({ isActive }) => (
+          <FooterSection scrollToTop={scrollToTop} isActive={isActive} />
+        ),
         id: "footer",
         preloadPriority: 7,
       },
@@ -256,24 +266,24 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    let lastScrollTime = 0;
-    const scrollThrottle = 100; // ms
-
-    const handleScroll = (delta: number) => {
-      if (modalOpen) return; // Prevent scrolling when modal is open
-      if (contactModalOpen) return; // Prevent scrolling when modal is open
+  const handleScroll = useCallback(
+    (delta: number) => {
+      if (modalOpen || contactModalOpen || scrollLockRef.current) return;
+      if (currentPage === CAROUSEL_SECTION_INDEX) return;
 
       const now = Date.now();
-      if (now - lastScrollTime < scrollThrottle) return;
+      if (now - lastScrollTimeRef.current < SCROLL_LOCK_DURATION) return;
 
-      lastScrollTime = now;
+      lastScrollTimeRef.current = now;
       if (Math.abs(delta) > SCROLL_THRESHOLD) {
         const direction = delta > 0 ? 1 : -1;
         scrollToSection(currentPage + direction);
       }
-    };
+    },
+    [currentPage, modalOpen, contactModalOpen, scrollToSection]
+  );
 
+  useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (modalOpen || contactModalOpen || scrollLockRef.current) return;
       if (currentPage === CAROUSEL_SECTION_INDEX) return;
@@ -282,7 +292,7 @@ const HomePage: React.FC = () => {
     };
 
     const handleTouchStart = (e: TouchEvent) => {
-      if (!modalOpen || !contactModalOpen) {
+      if (!modalOpen && !contactModalOpen) {
         touchStartY.current = e.touches[0].clientY;
       }
     };
@@ -314,13 +324,10 @@ const HomePage: React.FC = () => {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [currentPage, modalOpen, scrollToSection, contactModalOpen]);
+  }, [currentPage, modalOpen, contactModalOpen, handleScroll]);
 
   return (
-    <div
-      className="relative w-full overflow-hidden snap-y snap-mandatory"
-      style={{ scrollBehavior: "smooth" }}
-    >
+    <div className="relative w-full h-screen overflow-hidden">
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -344,23 +351,16 @@ const HomePage: React.FC = () => {
           transition={{ duration: 0.2 }}
           className="relative w-full h-full"
         >
-          <div
-            style={{
-              height: `${100 * sections.length}vh`,
-              position: "relative",
-            }}
-          >
+          <div className="relative w-full h-full">
             {sections.map(({ Component, id }, index) => (
               <AnimatedSection
                 key={`section-${id}`}
                 index={index}
                 isActive={index === currentPage}
                 total={sections.length}
-                scrollDirection={currentPage > index ? "up" : "down"}
+                scrollDirection={scrollDirection}
               >
-                <div className="w-full h-full snap-start">
-                  <Component />
-                </div>
+                <Component isActive={index === currentPage} />
               </AnimatedSection>
             ))}
           </div>

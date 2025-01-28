@@ -1,21 +1,30 @@
-import React from "react";
+import type React from "react";
+import dynamic from "next/dynamic";
+
 const componentMap: {
-  [key: string]: React.LazyExoticComponent<React.ComponentType<any>>;
+  [key: string]: React.ComponentType<any>;
 } = {
-  HeaderSection: React.lazy(() => import("@/views/Home/header-section")),
-  RobotSection: React.lazy(() => import("@/views/Home/robotSection")),
-  HowSection: React.lazy(() => import("@/views/Home/how-section")),
-  WorkSection: React.lazy(() => import("@/views/Home/work-section")),
-  FooterSection: React.lazy(() => import("@/views/Home/footer-section")),
+  HeaderSection: dynamic(() => import("@/views/Home/header-section"), {
+    ssr: false,
+  }),
+  RobotSection: dynamic(() => import("@/views/Home/robotSection"), {
+    ssr: false,
+  }),
+  HowSection: dynamic(() => import("@/views/Home/how-section"), { ssr: false }),
+  WorkSection: dynamic(() => import("@/views/Home/work-section"), {
+    ssr: false,
+  }),
 };
 
 interface LazyComponentProps {
   component: string;
+  isActive: boolean;
   [key: string]: any;
 }
 
 const LazyComponent: React.FC<LazyComponentProps> = ({
   component,
+  isActive,
   ...props
 }) => {
   const Component = componentMap[component];
@@ -25,7 +34,11 @@ const LazyComponent: React.FC<LazyComponentProps> = ({
     return null;
   }
 
-  return <Component {...props} />;
+  return (
+    <div style={{ display: isActive ? "block" : "none" }}>
+      <Component {...props} isActive={isActive} />
+    </div>
+  );
 };
 
 export default LazyComponent;
