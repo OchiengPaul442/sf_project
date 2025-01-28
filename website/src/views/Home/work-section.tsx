@@ -19,8 +19,8 @@ const WorkSection: React.FC = () => {
   const dispatch = useDispatch();
 
   const handleOpenForm = useCallback(() => {
-    dispatch(setModalOpen(true));
     setIsFormOpen(true);
+    dispatch(setModalOpen(true));
   }, [dispatch]);
 
   const handleCloseForm = useCallback(() => {
@@ -29,8 +29,9 @@ const WorkSection: React.FC = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    let animation: any;
     if (lottieContainerRef.current && !isMobile) {
-      const animation = lottie.loadAnimation({
+      animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
         renderer: "svg",
         loop: true,
@@ -39,20 +40,14 @@ const WorkSection: React.FC = () => {
       });
 
       animation.setSpeed(1.2);
-
-      return () => {
-        animation.destroy();
-      };
     }
-  }, [isMobile]);
-
-  useEffect(() => {
-    document.body.style.overflow = isFormOpen ? "hidden" : "unset";
 
     return () => {
-      document.body.style.overflow = "unset";
+      if (animation) {
+        animation.destroy();
+      }
     };
-  }, [isFormOpen]);
+  }, [isMobile]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -60,8 +55,14 @@ const WorkSection: React.FC = () => {
         handleCloseForm();
       }
     };
+
+    document.body.style.overflow = isFormOpen ? "hidden" : "unset";
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isFormOpen, handleCloseForm]);
 
   return (
@@ -116,9 +117,9 @@ const WorkSection: React.FC = () => {
       <AnimatePresence>
         {isFormOpen && (
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: "0%" }}
-            exit={{ x: "100%" }}
+            initial={{ opacity: 0, x: "100%" }}
+            animate={{ opacity: 1, x: "0%" }}
+            exit={{ opacity: 0, x: "100%" }}
             transition={{
               type: "spring",
               stiffness: 300,
