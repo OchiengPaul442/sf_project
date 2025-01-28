@@ -1,5 +1,3 @@
-// "@/components/carousels/how-section-carousel.tsx"
-
 "use client";
 
 import type React from "react";
