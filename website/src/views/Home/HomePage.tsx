@@ -1,33 +1,32 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import dynamic from "next/dynamic";
-
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import type { RootState } from "@/redux-store";
 import VectorImage from "@/public/Vector.svg";
 
-// Components
 import AnimatedSection from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
 import NextButton from "@/components/NextButton";
 import MenuModal from "@/components/dialog/menu-modal";
-
-// Our refactored HowSectionCarousel
 import HowSectionCarousel from "@/components/carousels/how-section-carousel";
+import FooterSection from "@/views/Home/footer-section";
 
 // Constants
 const SCROLL_THRESHOLD = 50;
 const SCROLL_LOCK_DURATION = 50;
 const PRELOAD_TIMEOUT = 10000;
-
-// Index of the carousel section
 const CAROUSEL_SECTION_INDEX = 3;
 
-// Preload Lottie JSONs
+// JSON paths for preloading
 const JSON_PATHS = [
   "/lottie/sailing_boat_2.json",
   "/lottie/paper_flying.json",
@@ -39,34 +38,15 @@ const JSON_PATHS = [
   "/lottie/angel.json",
 ];
 
-// Enhanced dynamic imports with loading states
-const withLoadingIndicator = (importFn: () => Promise<any>) =>
-  dynamic(importFn, {
-    ssr: false,
-    loading: () => <div className="animate-pulse bg-gray-200 h-full w-full" />,
-  });
-
-const HeaderSectionRaw = withLoadingIndicator(
-  () => import("@/views/Home/header-section")
-);
-const RobotSectionRaw = withLoadingIndicator(
-  () => import("@/views/Home/robotSection")
-);
-const HowSectionRaw = withLoadingIndicator(
-  () => import("@/views/Home/how-section")
-);
-const WorkSectionRaw = withLoadingIndicator(
-  () => import("@/views/Home/work-section")
-);
-const FooterSectionRaw = withLoadingIndicator(
-  () => import("@/views/Home/footer-section")
-);
+// Lazy load components
+const LazyComponent = React.lazy(() => import("@/components/LazyComponent"));
 
 // Types
-export interface SectionProps {
+interface SectionProps {
   scrollToTop?: () => void;
   onScrollPastStart?: () => void;
   onScrollPastEnd?: () => void;
+  onLoad?: () => void;
 }
 
 interface SectionConfig {
@@ -76,56 +56,11 @@ interface SectionConfig {
   useNextAction?: boolean;
 }
 
-/**
- * HOC to ensure consistent prop typing across sections
- */
-const withScrollProp = <T extends object>(
-  Component: React.ComponentType<T & SectionProps>
-): React.FC<T & SectionProps> => {
-  const WrappedComponent: React.FC<T & SectionProps> = (props) => (
-    <Component {...props} />
-  );
-  WrappedComponent.displayName = `WithScroll(${
-    Component.displayName || Component.name || "Component"
-  })`;
-  return WrappedComponent;
-};
-
-// Wrap components with scroll prop
-const HeaderSection = withScrollProp(HeaderSectionRaw as any);
-const RobotSection = withScrollProp(RobotSectionRaw as any);
-const HowSection = withScrollProp(HowSectionRaw as any);
-const WorkSection = withScrollProp(WorkSectionRaw as any);
-const FooterSection = withScrollProp(FooterSectionRaw as any);
-
-// Step interface with animationData
 interface StepWithData {
   id: string;
   title: string;
-  animationData: any; // Replace 'any' with the appropriate type if available
+  animationData: any;
 }
-
-// Debounce hook to manage scroll events
-const useDebouncedCallback = (
-  callback: (...args: any[]) => void,
-  delay: number
-) => {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const debouncedFunction = useCallback(
-    (...args: any[]) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        callback(...args);
-      }, delay);
-    },
-    [callback, delay]
-  );
-
-  return debouncedFunction;
-};
 
 const HomePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -136,34 +71,36 @@ const HomePage: React.FC = () => {
   const scrollLockRef = useRef(false);
   const touchStartY = useRef<number | null>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
-  const sectionsRef = useRef<SectionConfig[]>([]); // Ref to store sections
+  const sectionsRef = useRef<SectionConfig[]>([]);
 
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
   const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
 
-  // Scroll to a specific section
-  const scrollToSection = useCallback(
-    (targetIndex: number) => {
-      if (modalOpen || scrollLockRef.current) return;
-      if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
+  const scrollToSection = useCallback((targetIndex: number) => {
+    if (scrollLockRef.current) return;
+    if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
 
-      // Standard "snap" to the desired section
-      scrollLockRef.current = true;
-      setCurrentPage(targetIndex);
-      window.scrollTo({
-        top: window.innerHeight * targetIndex,
-        behavior: "smooth",
-      });
+    scrollLockRef.current = true;
+    setCurrentPage(targetIndex);
+    window.scrollTo({
+      top: window.innerHeight * targetIndex,
+      behavior: "smooth",
+    });
 
-      setTimeout(() => {
-        scrollLockRef.current = false;
-      }, SCROLL_LOCK_DURATION);
-    },
-    [modalOpen]
-  );
+    setTimeout(() => {
+      scrollLockRef.current = false;
+    }, SCROLL_LOCK_DURATION);
+  }, []);
 
-  // Scroll callbacks from carousel
+  const scrollToTop = useCallback(() => {
+    scrollToSection(0);
+  }, [scrollToSection]);
+
+  const scrollToNextSection = useCallback(() => {
+    scrollToSection(currentPage + 1);
+  }, [currentPage, scrollToSection]);
+
   const handleScrollPastStart = useCallback(() => {
     scrollToSection(currentPage - 1);
   }, [currentPage, scrollToSection]);
@@ -172,7 +109,6 @@ const HomePage: React.FC = () => {
     scrollToSection(currentPage + 1);
   }, [currentPage, scrollToSection]);
 
-  // Define steps with preloaded animationData
   const stepsWithData: StepWithData[] = useMemo(() => {
     if (isLoading) return [];
     return [
@@ -204,34 +140,34 @@ const HomePage: React.FC = () => {
     ];
   }, [animationDataMap, isLoading]);
 
-  // Section definitions
   const sections: SectionConfig[] = useMemo(() => {
     const sectionsArray: SectionConfig[] = [
       {
-        Component: ({ scrollToTop }) => (
+        Component: () => (
           <>
-            <HeaderSection scrollToTop={scrollToTop} />
+            <LazyComponent
+              component="HeaderSection"
+              scrollToTop={scrollToTop}
+            />
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-              <NextButton onClick={scrollToTop} />
+              <NextButton onClick={scrollToNextSection} />
             </div>
           </>
         ),
         id: "home",
         preloadPriority: 1,
-        useNextAction: true,
       },
       {
-        Component: RobotSection,
+        Component: () => <LazyComponent component="RobotSection" />,
         id: "platform",
         preloadPriority: 2,
       },
       {
-        Component: HowSection,
+        Component: () => <LazyComponent component="HowSection" />,
         id: "solutions",
         preloadPriority: 3,
       },
       {
-        // Carousel at index = 3
         Component: () => (
           <HowSectionCarousel
             onScrollPastStart={handleScrollPastStart}
@@ -243,23 +179,27 @@ const HomePage: React.FC = () => {
         preloadPriority: 4,
       },
       {
-        Component: WorkSection,
+        Component: () => <LazyComponent component="WorkSection" />,
         id: "work",
         preloadPriority: 5,
       },
       {
-        Component: FooterSection,
+        Component: () => <FooterSection scrollToTop={scrollToTop} />,
         id: "footer",
         preloadPriority: 7,
       },
     ];
 
     sectionsRef.current = sectionsArray;
-
     return sectionsArray;
-  }, [handleScrollPastEnd, handleScrollPastStart, stepsWithData]);
+  }, [
+    scrollToTop,
+    scrollToNextSection,
+    handleScrollPastEnd,
+    handleScrollPastStart,
+    stepsWithData,
+  ]);
 
-  // Asset preloading
   useEffect(() => {
     const preloadAssets = async () => {
       try {
@@ -282,7 +222,6 @@ const HomePage: React.FC = () => {
           animationDataMap[path] = data;
         });
 
-        // Preload Vector.svg
         await new Promise<void>((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve();
@@ -311,55 +250,26 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
-  // Handle wheel scrolling with debouncing
-  const debouncedHandleWheel = useDebouncedCallback(
-    (event: WheelEvent) => {
-      if (modalOpen || scrollLockRef.current) return;
+  useEffect(() => {
+    let lastScrollTime = 0;
+    const scrollThrottle = 200; // ms
 
-      // If we are in the carousel section, do not handle here
-      if (currentPage === CAROUSEL_SECTION_INDEX) {
-        return;
-      }
+    const handleScroll = (delta: number) => {
+      const now = Date.now();
+      if (now - lastScrollTime < scrollThrottle) return;
 
-      const delta = event.deltaY;
+      lastScrollTime = now;
       if (Math.abs(delta) > SCROLL_THRESHOLD) {
-        event.preventDefault();
         const direction = delta > 0 ? 1 : -1;
         scrollToSection(currentPage + direction);
       }
-    },
-    50 // Debounce delay in ms
-  );
+    };
 
-  // Touch event handlers for mobile with debouncing
-  const debouncedHandleTouchEnd = useDebouncedCallback(
-    (event: TouchEvent) => {
-      if (modalOpen || scrollLockRef.current || touchStartY.current === null) {
-        return;
-      }
-
-      // If we are in carousel section, do not handle here
-      if (currentPage === CAROUSEL_SECTION_INDEX) {
-        touchStartY.current = null;
-        return;
-      }
-
-      const deltaY = touchStartY.current - event.changedTouches[0].clientY;
-      if (Math.abs(deltaY) > SCROLL_THRESHOLD) {
-        event.preventDefault();
-        const direction = deltaY > 0 ? 1 : -1;
-        scrollToSection(currentPage + direction);
-      }
-
-      touchStartY.current = null;
-    },
-    50 // Debounce delay in ms
-  );
-
-  // Attach/detach event listeners with debouncing
-  useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
-      debouncedHandleWheel(e);
+      if (scrollLockRef.current) return;
+      if (currentPage === CAROUSEL_SECTION_INDEX) return;
+      e.preventDefault();
+      handleScroll(e.deltaY);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
@@ -369,7 +279,16 @@ const HomePage: React.FC = () => {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      debouncedHandleTouchEnd(e);
+      if (modalOpen || scrollLockRef.current || touchStartY.current === null)
+        return;
+      if (currentPage === CAROUSEL_SECTION_INDEX) {
+        touchStartY.current = null;
+        return;
+      }
+
+      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+      handleScroll(deltaY);
+      touchStartY.current = null;
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
@@ -381,7 +300,7 @@ const HomePage: React.FC = () => {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [debouncedHandleWheel, debouncedHandleTouchEnd, modalOpen]);
+  }, [currentPage, modalOpen, scrollToSection]);
 
   return (
     <div
@@ -417,7 +336,7 @@ const HomePage: React.FC = () => {
               position: "relative",
             }}
           >
-            {sections.map(({ Component, id, useNextAction }, index) => (
+            {sections.map(({ Component, id }, index) => (
               <AnimatedSection
                 key={`section-${id}`}
                 index={index}
@@ -426,13 +345,7 @@ const HomePage: React.FC = () => {
                 scrollDirection={currentPage > index ? "up" : "down"}
               >
                 <div className="w-full h-full snap-start">
-                  <Component
-                    scrollToTop={() =>
-                      useNextAction
-                        ? scrollToSection(currentPage + 1)
-                        : scrollToSection(0)
-                    }
-                  />
+                  <Component />
                 </div>
               </AnimatedSection>
             ))}

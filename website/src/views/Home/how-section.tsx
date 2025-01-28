@@ -1,12 +1,13 @@
 "use client";
 
-import { GradientSeparator } from "@/components/ui/separator";
+import type React from "react";
+import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import React, { useRef } from "react";
 import AnimatedText from "@/components/AnimatedText";
+import { GradientSeparator } from "@/components/ui/separator";
 
-const HowSection: React.FC<any> = () => {
-  const sectionRef = useRef(null);
+const HowSection: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -15,12 +16,13 @@ const HowSection: React.FC<any> = () => {
 
   const yFirst = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const ySecond = useTransform(scrollYProgress, [0, 1], [0, -30]);
+  const separatorOpacity = useTransform(scrollYProgress, [0.3, 0.7], [0, 1]);
 
   return (
     <section
       ref={sectionRef}
       id="solutions"
-      className="relative h-dvh snap-start py-20 sm:py-32 md:py-40 flex justify-center items-center bg-black overflow-hidden"
+      className="relative h-dvh snap-start py-20 sm:py-32 md:py-40 flex flex-col justify-center items-center bg-black overflow-hidden"
     >
       <div className="container mx-auto space-y-16 sm:space-y-24 px-4 sm:px-6">
         <motion.div style={{ y: yFirst }} className="relative">
@@ -30,7 +32,19 @@ const HowSection: React.FC<any> = () => {
           />
         </motion.div>
 
-        <GradientSeparator className="w-full" />
+        <motion.div
+          style={{ opacity: separatorOpacity }}
+          className="w-full relative bottom-10 md:bottom-14"
+        >
+          <GradientSeparator
+            gradientColors={[
+              "rgba(255, 255, 255, 1)",
+              "rgba(255, 255, 255, 0)",
+            ]}
+            leftThickness={2}
+            rightThickness={1}
+          />
+        </motion.div>
 
         <motion.div style={{ y: ySecond }} className="relative">
           <AnimatedText
@@ -44,5 +58,4 @@ const HowSection: React.FC<any> = () => {
   );
 };
 
-HowSection.displayName = "HowSection";
 export default HowSection;

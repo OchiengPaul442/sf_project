@@ -12,8 +12,8 @@ interface Props {
   className?: string;
 }
 
-const ANIMATION_DURATION = 0.15; // Faster animation
-const ANIMATION_SCALE = 0.98; // Subtle scale effect
+const ANIMATION_DURATION = 0.15;
+const ANIMATION_SCALE = 0.98;
 
 const AnimatedSection: React.FC<Props> = ({
   isActive,
@@ -23,16 +23,17 @@ const AnimatedSection: React.FC<Props> = ({
   children,
   className = "",
 }) => {
-  // Define animation variants based on scroll direction
   const variants = useMemo(
     () => ({
       initial: {
-        y: scrollDirection === "down" ? "100%" : "-100%",
+        transform: `translateY(${
+          scrollDirection === "down" ? "100%" : "-100%"
+        })`,
         opacity: 0,
         scale: ANIMATION_SCALE,
       },
       animate: {
-        y: "0%",
+        transform: "translateY(0%)",
         opacity: 1,
         scale: 1,
         transition: {
@@ -42,7 +43,9 @@ const AnimatedSection: React.FC<Props> = ({
         },
       },
       exit: {
-        y: scrollDirection === "down" ? "-100%" : "100%",
+        transform: `translateY(${
+          scrollDirection === "down" ? "-100%" : "100%"
+        })`,
         opacity: 0,
         scale: ANIMATION_SCALE,
         transition: {

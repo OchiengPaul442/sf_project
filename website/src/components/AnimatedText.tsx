@@ -1,47 +1,54 @@
-// components/ui/AnimatedText.tsx
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import React, { useRef, useEffect } from "react";
+import type React from "react";
+import { useRef, useEffect } from "react";
+import { motion, useInView, useAnimation, type Variants } from "framer-motion";
 
 interface AnimatedTextProps {
   text: string;
-  className: string;
+  className?: string;
   align?: "left" | "right" | "center";
+  once?: boolean;
+  delay?: number;
 }
 
 const AnimatedText: React.FC<AnimatedTextProps> = ({
   text,
-  className,
+  className = "",
   align = "left",
+  once = true,
+  delay = 0,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { amount: 0.3 });
+  const isInView = useInView(ref, { amount: 0.3, once });
+  const controls = useAnimation();
   const words = text.split(" ");
 
   useEffect(() => {
-    if (!isInView) {
-      ref.current?.style.setProperty("opacity", "0");
+    if (isInView) {
+      controls.start("visible");
+    } else if (!once) {
+      controls.start("hidden");
     }
-  }, [isInView]);
+  }, [isInView, controls, once]);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.1,
+        staggerChildren: 0.05,
+        delayChildren: delay,
       },
     },
   };
 
-  const wordVariants = {
+  const wordVariants: Variants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.8, ease: [0.2, 0.65, 0.3, 0.9] },
+      transition: { duration: 0.6, ease: [0.2, 0.65, 0.3, 0.9] },
     },
   };
 
@@ -57,7 +64,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
       }`}
       variants={containerVariants}
       initial="hidden"
-      animate={isInView ? "visible" : "hidden"}
+      animate={controls}
     >
       {words.map((word, index) => (
         <motion.span

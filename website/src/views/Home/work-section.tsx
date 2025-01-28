@@ -1,22 +1,33 @@
 "use client";
 
-import { ArrowRight, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDispatch } from "@/redux-store/hooks";
 import lottie from "lottie-web";
-import { useDispatch } from "react-redux";
-import { setModalOpen } from "@/redux-store/slices/uiSlice";
 import Image from "next/image";
-import BuildSvgImage from "@/public/build.svg";
-import ConstructionAnimation from "@/public/lottie/contruction.json";
+import { ArrowRight, X } from "lucide-react";
+
+import { setModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
+import BuildSvgImage from "@/public/build.svg";
+import ConstructionAnimation from "@/public/lottie/contruction.json";
 
 const WorkSection: React.FC = () => {
   const isMobile = isMobileDevice();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const lottieContainerRef = useRef<HTMLDivElement | null>(null);
+  const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
+
+  const handleOpenForm = useCallback(() => {
+    console.log("Opening form");
+    setIsFormOpen(true);
+  }, []);
+
+  const handleCloseForm = useCallback(() => {
+    setIsFormOpen(false);
+  }, []);
 
   useEffect(() => {
     if (lottieContainerRef.current && !isMobile) {
@@ -42,19 +53,18 @@ const WorkSection: React.FC = () => {
 
     return () => {
       document.body.style.overflow = "unset";
-      dispatch(setModalOpen(false));
     };
   }, [isFormOpen, dispatch]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isFormOpen) {
-        setIsFormOpen(false);
+        handleCloseForm();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isFormOpen]);
+  }, [isFormOpen, handleCloseForm]);
 
   return (
     <section
@@ -83,7 +93,7 @@ const WorkSection: React.FC = () => {
           </h3>
           <div className="mt-8 lg:mt-12">
             <button
-              onClick={() => setIsFormOpen(true)}
+              onClick={handleOpenForm}
               className="group inline-flex items-center font-bold relative text-sm sm:text-base"
             >
               <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
@@ -128,7 +138,7 @@ const WorkSection: React.FC = () => {
           >
             <div className="relative h-full">
               <button
-                onClick={() => setIsFormOpen(false)}
+                onClick={handleCloseForm}
                 className="absolute right-4 top-4 p-2 bg-gray-100 text-green-600 hover:bg-gray-200 hover:text-green-700 rounded-full transition-colors z-50"
                 aria-label="Close Contact Form"
               >
