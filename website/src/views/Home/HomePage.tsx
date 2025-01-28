@@ -76,6 +76,9 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
   const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
+  const contactModalOpen = useSelector(
+    (state) => state.ui.contactModalOpen
+  ) as any;
 
   const scrollToSection = useCallback(
     (targetIndex: number) => {
@@ -255,10 +258,11 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     let lastScrollTime = 0;
-    const scrollThrottle = 200; // ms
+    const scrollThrottle = 100; // ms
 
     const handleScroll = (delta: number) => {
       if (modalOpen) return; // Prevent scrolling when modal is open
+      if (contactModalOpen) return; // Prevent scrolling when modal is open
       const now = Date.now();
       if (now - lastScrollTime < scrollThrottle) return;
 

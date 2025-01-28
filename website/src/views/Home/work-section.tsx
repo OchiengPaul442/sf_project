@@ -1,31 +1,31 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useDispatch } from "@/redux-store/hooks";
+import { useDispatch, useSelector } from "@/redux-store/hooks";
 import lottie from "lottie-web";
 import { ArrowRight, X } from "lucide-react";
 
-import { setModalOpen } from "@/redux-store/slices/uiSlice";
+import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 
 const WorkSection: React.FC = () => {
   const isMobile = isMobileDevice();
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
+  const contactModalOpen = useSelector(
+    (state) => state.ui.contactModalOpen
+  ) as any;
 
   const handleOpenForm = useCallback(() => {
-    setIsFormOpen(true);
-    dispatch(setModalOpen(true));
+    dispatch(setContactModalOpen(true));
   }, [dispatch]);
 
   const handleCloseForm = useCallback(() => {
-    setIsFormOpen(false);
-    dispatch(setModalOpen(false));
+    dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
   useEffect(() => {
@@ -51,19 +51,19 @@ const WorkSection: React.FC = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isFormOpen) {
+      if (e.key === "Escape" && contactModalOpen) {
         handleCloseForm();
       }
     };
 
-    document.body.style.overflow = isFormOpen ? "hidden" : "unset";
+    document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isFormOpen, handleCloseForm]);
+  }, [contactModalOpen, handleCloseForm]);
 
   return (
     <section
@@ -73,8 +73,8 @@ const WorkSection: React.FC = () => {
       <motion.div
         className="container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative"
         animate={{
-          x: isFormOpen ? "-5%" : "0%",
-          scale: isFormOpen ? 0.98 : 1,
+          x: contactModalOpen ? "-5%" : "0%",
+          scale: contactModalOpen ? 0.98 : 1,
         }}
         transition={{
           type: "spring",
@@ -115,7 +115,7 @@ const WorkSection: React.FC = () => {
       </motion.div>
 
       <AnimatePresence>
-        {isFormOpen && (
+        {contactModalOpen && (
           <motion.div
             initial={{ opacity: 0, x: "100%" }}
             animate={{ opacity: 1, x: "0%" }}
