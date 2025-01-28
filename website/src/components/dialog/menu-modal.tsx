@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Leaf, ChefHat, ArrowUpRight } from "lucide-react";
 
@@ -23,16 +23,19 @@ export default function MenuModal({
   sections,
   scrollToSection,
 }: MenuModalProps) {
-  console.log("onClose prop:", onClose);
+  const modalRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    document.body.style.overflow = isOpen ? "hidden" : "";
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = originalStyle;
     };
   }, [isOpen]);
 
   const handleLinkClick = (id: string) => {
-    console.log("handleLinkClick called with id:", id);
     onClose();
     setTimeout(() => {
       const index = sections.findIndex((section) => section.id === id);
@@ -46,7 +49,8 @@ export default function MenuModal({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-[1000] bg-black/95 text-white overflow-hidden"
+          ref={modalRef}
+          className="fixed inset-0 z-[1000] bg-black/95 text-white overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -58,7 +62,7 @@ export default function MenuModal({
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           />
-          <div className="container mx-auto px-6 py-12 min-h-screen flex flex-col relative">
+          <div className="container mx-auto px-4 sm:px-6 py-12 min-h-screen flex flex-col relative">
             <div className="flex justify-between items-center">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -77,18 +81,18 @@ export default function MenuModal({
               </button>
             </div>
 
-            <div className="flex-grow grid md:grid-cols-2 gap-12 mt-16">
-              <div className="space-y-12">
+            <div className="flex-grow grid md:grid-cols-2 gap-8 md:gap-12 mt-12 md:mt-16">
+              <div className="space-y-8 md:space-y-12">
                 <nav>
                   <motion.h2
-                    className="text-sm text-green-400 mb-8 uppercase tracking-wider"
+                    className="text-sm text-green-400 mb-6 md:mb-8 uppercase tracking-wider"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.5 }}
                   >
                     Menu
                   </motion.h2>
-                  <ul className="space-y-6">
+                  <ul className="space-y-4 md:space-y-6">
                     {menuItems.map((item, index) => (
                       <motion.li
                         key={item.title}
@@ -99,7 +103,7 @@ export default function MenuModal({
                         <button
                           type="button"
                           onClick={() => handleLinkClick(item.id)}
-                          className="text-4xl font-bold hover:text-green-400 transition-colors flex items-center group"
+                          className="text-2xl md:text-4xl font-bold hover:text-green-400 transition-colors flex items-center group"
                         >
                           {item.title}
                           <motion.div
@@ -111,7 +115,7 @@ export default function MenuModal({
                               damping: 10,
                             }}
                           >
-                            <ArrowUpRight className="h-6 w-6" />
+                            <ArrowUpRight className="h-4 w-4 md:h-6 md:w-6" />
                           </motion.div>
                         </button>
                       </motion.li>
@@ -120,9 +124,9 @@ export default function MenuModal({
                 </nav>
               </div>
 
-              <div className="space-y-12">
+              <div className="space-y-8 md:space-y-12">
                 <motion.div
-                  className="space-y-8"
+                  className="space-y-6 md:space-y-8"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.5 }}
@@ -130,7 +134,7 @@ export default function MenuModal({
                   <h2 className="text-sm text-green-400 uppercase tracking-wider mb-4">
                     How We Help
                   </h2>
-                  <div className="space-y-6">
+                  <div className="space-y-4 md:space-y-6">
                     <motion.div
                       className="flex gap-4 items-start p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
                       whileHover={{ scale: 1.05 }}
@@ -172,9 +176,9 @@ export default function MenuModal({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8, duration: 0.5 }}
-              className="mt-12 pt-6 border-t border-gray-800"
+              className="mt-8 md:mt-12 pt-6 border-t border-gray-800"
             >
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <p className="text-sm text-gray-400">
                   &copy; {new Date().getFullYear()} SavingFood.ai. All rights
                   reserved.
