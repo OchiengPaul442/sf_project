@@ -21,8 +21,8 @@ import HowSectionCarousel from "@/components/carousels/how-section-carousel";
 
 // Constants
 const SCROLL_THRESHOLD = 40;
-const SCROLL_LOCK_DURATION = 300;
-const PRELOAD_TIMEOUT = 5000;
+const SCROLL_LOCK_DURATION = 200;
+const PRELOAD_TIMEOUT = 10000;
 
 // Index of the carousel section
 const CAROUSEL_SECTION_INDEX = 3;
