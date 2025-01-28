@@ -20,8 +20,8 @@ import MenuModal from "@/components/dialog/menu-modal";
 import HowSectionCarousel from "@/components/carousels/how-section-carousel";
 
 // Constants
-const SCROLL_THRESHOLD = 50;
-const SCROLL_LOCK_DURATION = 400;
+const SCROLL_THRESHOLD = 40;
+const SCROLL_LOCK_DURATION = 300;
 const PRELOAD_TIMEOUT = 5000;
 
 // Index of the carousel section

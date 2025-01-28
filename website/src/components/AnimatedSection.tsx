@@ -12,7 +12,7 @@ interface Props {
   className?: string;
 }
 
-const ANIMATION_DURATION = 0.18; // Faster animation
+const ANIMATION_DURATION = 0.15; // Faster animation
 const ANIMATION_SCALE = 0.98; // Subtle scale effect
 
 const AnimatedSection: React.FC<Props> = ({
