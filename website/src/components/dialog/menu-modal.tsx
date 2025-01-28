@@ -68,7 +68,7 @@ export default function MenuModal({
             transition={{ delay: 0.2, duration: 0.5 }}
           />
           <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen flex flex-col">
-            <div className="flex justify-between items-center mb-8 sm:mb-12">
+            <div className="flex justify-between items-center mb-6 sm:mb-12">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -87,18 +87,18 @@ export default function MenuModal({
               </button>
             </div>
 
-            <div className="flex-grow grid sm:grid-cols-2 gap-8 sm:gap-12">
+            <div className="flex-grow grid sm:grid-cols-2 gap-4 sm:gap-12">
               <div className="space-y-8">
                 <nav>
                   <motion.h2
-                    className="text-sm text-green-400 mb-6 uppercase tracking-wider"
+                    className="text-sm text-green-400 mb-5 uppercase tracking-wider"
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4, duration: 0.5 }}
                   >
                     Menu
                   </motion.h2>
-                  <ul className="space-y-4">
+                  <ul className="space-y-2 md:space-y-4">
                     {menuItems.map((item, index) => (
                       <motion.li
                         key={item.title}
@@ -130,9 +130,9 @@ export default function MenuModal({
                 </nav>
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-7">
                 <motion.div
-                  className="space-y-6"
+                  className="space-y-5"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.6, duration: 0.5 }}

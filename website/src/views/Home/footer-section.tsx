@@ -15,7 +15,7 @@ export default function FooterSection({ scrollToTop }: FooterSectionProps) {
         className="absolute left-1/2 transform -translate-x-1/2 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-white flex items-center justify-center shadow-lg"
         style={{ top: "clamp(20%, 40%, 60%)" }}
       >
-        <PiArrowULeftUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-black font-bold" />
+        <PiArrowULeftUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-green-600 font-bold" />
       </button>
 
       <div className="flex flex-row justify-between items-end w-full h-full gap-4 sm:gap-0">

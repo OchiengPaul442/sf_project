@@ -20,8 +20,8 @@ import MenuModal from "@/components/dialog/menu-modal";
 import HowSectionCarousel from "@/components/carousels/how-section-carousel";
 
 // Constants
-const SCROLL_THRESHOLD = 40;
-const SCROLL_LOCK_DURATION = 200;
+const SCROLL_THRESHOLD = 50;
+const SCROLL_LOCK_DURATION = 50;
 const PRELOAD_TIMEOUT = 10000;
 
 // Index of the carousel section
@@ -257,12 +257,7 @@ const HomePage: React.FC = () => {
     sectionsRef.current = sectionsArray;
 
     return sectionsArray;
-  }, [
-    handleScrollPastEnd,
-    handleScrollPastStart,
-    stepsWithData,
-    scrollToSection,
-  ]);
+  }, [handleScrollPastEnd, handleScrollPastStart, stepsWithData]);
 
   // Asset preloading
   useEffect(() => {
@@ -333,7 +328,7 @@ const HomePage: React.FC = () => {
         scrollToSection(currentPage + direction);
       }
     },
-    100 // Debounce delay in ms
+    50 // Debounce delay in ms
   );
 
   // Touch event handlers for mobile with debouncing
@@ -358,7 +353,7 @@ const HomePage: React.FC = () => {
 
       touchStartY.current = null;
     },
-    100 // Debounce delay in ms
+    50 // Debounce delay in ms
   );
 
   // Attach/detach event listeners with debouncing
