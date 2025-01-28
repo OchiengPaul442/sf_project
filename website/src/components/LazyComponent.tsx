@@ -1,8 +1,4 @@
-import React, { Suspense } from "react";
-
-import Loader from "@/components/loader";
-import { motion } from "framer-motion";
-
+import React from "react";
 const componentMap: {
   [key: string]: React.LazyExoticComponent<React.ComponentType<any>>;
 } = {
@@ -29,24 +25,7 @@ const LazyComponent: React.FC<LazyComponentProps> = ({
     return null;
   }
 
-  return (
-    <Suspense
-      fallback={
-        <motion.div
-          key="loader"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black"
-        >
-          <Loader />
-        </motion.div>
-      }
-    >
-      <Component {...props} />
-    </Suspense>
-  );
+  return <Component {...props} />;
 };
 
 export default LazyComponent;
