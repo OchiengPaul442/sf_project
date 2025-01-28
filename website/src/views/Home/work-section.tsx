@@ -92,7 +92,6 @@ const WorkSection: React.FC = () => {
             <span className="block sm:inline">mission?</span>
           </h3>
           <div className="mt-8 lg:mt-12">
-            ;
             <button
               onClick={handleOpenForm}
               className="group inline-flex items-center font-bold relative text-sm sm:text-base cursor-pointer"
