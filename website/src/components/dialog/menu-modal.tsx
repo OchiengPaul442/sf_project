@@ -24,38 +24,21 @@ export default function MenuModal({
   scrollToSection,
 }: MenuModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [modalScrollable, setModalScrollable] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   useEffect(() => {
     if (isOpen) {
-      const scrollBarWidth =
-        window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = "hidden";
-      document.body.style.paddingRight = `${scrollBarWidth}px`;
+      setScrollPosition(window.pageYOffset);
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollPosition}px`;
+      document.body.style.width = "100%";
+    } else {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollPosition);
     }
-
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.paddingRight = "";
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    const checkModalScrollable = () => {
-      if (modalRef.current) {
-        setModalScrollable(
-          modalRef.current.scrollHeight > modalRef.current.clientHeight
-        );
-      }
-    };
-
-    checkModalScrollable();
-    window.addEventListener("resize", checkModalScrollable);
-
-    return () => {
-      window.removeEventListener("resize", checkModalScrollable);
-    };
-  }, [modalRef]); //Corrected dependency
+  }, [isOpen, scrollPosition]);
 
   const handleLinkClick = (id: string) => {
     onClose();
@@ -72,9 +55,7 @@ export default function MenuModal({
       {isOpen && (
         <motion.div
           ref={modalRef}
-          className={`fixed inset-0 z-[1000] bg-black/95 text-white ${
-            modalScrollable ? "overflow-y-auto" : "overflow-hidden"
-          }`}
+          className="fixed inset-0 z-[1000] bg-black/95 text-white overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -86,7 +67,7 @@ export default function MenuModal({
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           />
-          <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen flex flex-col relative">
+          <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen flex flex-col">
             <div className="flex justify-between items-center mb-8 sm:mb-12">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
