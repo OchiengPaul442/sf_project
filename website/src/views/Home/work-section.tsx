@@ -5,13 +5,11 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch } from "@/redux-store/hooks";
 import lottie from "lottie-web";
-import Image from "next/image";
 import { ArrowRight, X } from "lucide-react";
 
 import { setModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
-import BuildSvgImage from "@/public/build.svg";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 
 const WorkSection: React.FC = () => {
@@ -69,10 +67,10 @@ const WorkSection: React.FC = () => {
   return (
     <section
       id="contact"
-      className="min-h-screen bg-[#f5f5f5] text-black relative md:overflow-hidden flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div
-        className="container mx-auto flex flex-col lg:flex-row items-center justify-between h-full relative"
+        className="container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative"
         animate={{
           x: isFormOpen ? "-5%" : "0%",
           scale: isFormOpen ? 0.98 : 1,
@@ -83,7 +81,7 @@ const WorkSection: React.FC = () => {
           damping: 30,
         }}
       >
-        <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl mx-auto lg:mx-0 mb-12 lg:mb-0">
+        <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl w-full lg:w-1/2 mb-12 lg:mb-0">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
             Work with us
           </h2>
@@ -106,20 +104,13 @@ const WorkSection: React.FC = () => {
           </div>
         </div>
 
-        <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
-          <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative animate-float">
-            {isMobile ? (
-              <Image
-                src={BuildSvgImage || "/placeholder.svg"}
-                alt="Build"
-                layout="fill"
-                objectFit="contain"
-              />
-            ) : (
+        {!isMobile && (
+          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
+            <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative animate-float">
               <div ref={lottieContainerRef} className="w-full h-full" />
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </motion.div>
 
       <AnimatePresence>
