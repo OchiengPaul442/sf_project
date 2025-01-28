@@ -77,21 +77,24 @@ const HomePage: React.FC = () => {
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
   const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
 
-  const scrollToSection = useCallback((targetIndex: number) => {
-    if (scrollLockRef.current) return;
-    if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
+  const scrollToSection = useCallback(
+    (targetIndex: number) => {
+      if (modalOpen || scrollLockRef.current) return;
+      if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
 
-    scrollLockRef.current = true;
-    setCurrentPage(targetIndex);
-    window.scrollTo({
-      top: window.innerHeight * targetIndex,
-      behavior: "smooth",
-    });
+      scrollLockRef.current = true;
+      setCurrentPage(targetIndex);
+      window.scrollTo({
+        top: window.innerHeight * targetIndex,
+        behavior: "smooth",
+      });
 
-    setTimeout(() => {
-      scrollLockRef.current = false;
-    }, SCROLL_LOCK_DURATION);
-  }, []);
+      setTimeout(() => {
+        scrollLockRef.current = false;
+      }, SCROLL_LOCK_DURATION);
+    },
+    [modalOpen]
+  );
 
   const scrollToTop = useCallback(() => {
     scrollToSection(0);
@@ -255,6 +258,7 @@ const HomePage: React.FC = () => {
     const scrollThrottle = 200; // ms
 
     const handleScroll = (delta: number) => {
+      if (modalOpen) return; // Prevent scrolling when modal is open
       const now = Date.now();
       if (now - lastScrollTime < scrollThrottle) return;
 
@@ -266,7 +270,7 @@ const HomePage: React.FC = () => {
     };
 
     const handleWheel = (e: WheelEvent) => {
-      if (scrollLockRef.current) return;
+      if (modalOpen || scrollLockRef.current) return;
       if (currentPage === CAROUSEL_SECTION_INDEX) return;
       e.preventDefault();
       handleScroll(e.deltaY);

@@ -189,7 +189,7 @@ export function ContactForm() {
             }`}
             layout
           >
-            <div className="h-full md:overflow-y-auto custom-scrollbar">
+            <div className="h-full md:overflow-y-auto overflow-x-hidden custom-scrollbar">
               <AnimatePresence mode="wait">
                 {!selectedForm ? (
                   <motion.div

@@ -21,13 +21,14 @@ const WorkSection: React.FC = () => {
   const dispatch = useDispatch();
 
   const handleOpenForm = useCallback(() => {
-    console.log("Opening form");
+    dispatch(setModalOpen(true));
     setIsFormOpen(true);
-  }, []);
+  }, [dispatch]);
 
   const handleCloseForm = useCallback(() => {
     setIsFormOpen(false);
-  }, []);
+    dispatch(setModalOpen(false));
+  }, [dispatch]);
 
   useEffect(() => {
     if (lottieContainerRef.current && !isMobile) {
@@ -48,13 +49,12 @@ const WorkSection: React.FC = () => {
   }, [isMobile]);
 
   useEffect(() => {
-    dispatch(setModalOpen(isFormOpen));
     document.body.style.overflow = isFormOpen ? "hidden" : "unset";
 
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isFormOpen, dispatch]);
+  }, [isFormOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -92,14 +92,15 @@ const WorkSection: React.FC = () => {
             <span className="block sm:inline">mission?</span>
           </h3>
           <div className="mt-8 lg:mt-12">
+            ;
             <button
               onClick={handleOpenForm}
-              className="group inline-flex items-center font-bold relative text-sm sm:text-base"
+              className="group inline-flex items-center font-bold relative text-sm sm:text-base cursor-pointer"
             >
-              <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9]">
+              <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9] pointer-events-none">
                 Reach out
               </span>
-              <span className="relative z-20 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full text-white transition-transform group-hover:translate-x-1 -ml-5 sm:-ml-7">
+              <span className="relative z-20 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full text-white transition-transform group-hover:translate-x-1 -ml-5 sm:-ml-7 pointer-events-none">
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </span>
             </button>
