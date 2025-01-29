@@ -26,6 +26,10 @@ const GlowEffect = memo(function GlowEffect() {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-10 blur-[100px] animate-pulse-slow bg-green-500/50"
         aria-hidden="true"
       />
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full opacity-10 blur-[100px] animate-pulse-slower bg-green-500/40"
+        aria-hidden="true"
+      />
     </div>
   );
 });
