@@ -78,10 +78,10 @@ const NavItem = memo(function NavItem({
           transition={{ duration: 0.3 }}
         />
         <span
-          className={`font-light tracking-wide ${
+          className={`font-light tracking-wide transition-all duration-300 ${
             isActive
-              ? "text-white text-base sm:text-xl md:text-2xl lg:text-3xl"
-              : "text-zinc-200 text-sm sm:text-base md:text-lg lg:text-xl"
+              ? "text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl"
+              : "text-zinc-200 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl"
           }`}
         >
           {step.title}
@@ -90,7 +90,6 @@ const NavItem = memo(function NavItem({
     </motion.div>
   );
 });
-
 // Debounce hook to manage scroll events
 const useDebouncedCallback = (
   callback: (...args: any[]) => void,
@@ -299,13 +298,13 @@ const HowSectionCarousel: React.FC<any> = memo(function HowSectionCarousel({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Centered container for the carousel content */}
       <div className="w-full h-full flex items-center justify-center">
-        <div className="container mx-auto px-4 sm:px-6 flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-center">
-          {/* Navigation */}
-          <div className="relative w-full lg:w-1/2">
+        {/* Updated container with better responsive sizing */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between">
+          {/* Navigation Section - Adjusted for better spacing */}
+          <div className="relative w-full lg:w-[45%] py-6 lg:py-0">
             <div className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
-            <nav className="space-y-6 sm:space-y-8 lg:space-y-12">
+            <nav className="space-y-6 sm:space-y-8 lg:space-y-10">
               {steps.map((step: any, index: any) => (
                 <NavItem
                   key={step.id}
@@ -317,8 +316,8 @@ const HowSectionCarousel: React.FC<any> = memo(function HowSectionCarousel({
             </nav>
           </div>
 
-          {/* Animation Container */}
-          <div className="relative w-full lg:w-1/2 min-h-[300px] sm:min-h-[400px] lg:min-h-[500px] flex items-center justify-center">
+          {/* Animation Container - Improved sizing and positioning */}
+          <div className="relative w-full lg:w-[55%] h-[40vh] lg:h-[60vh] xl:h-[70vh]">
             <AnimatePresence mode="wait" custom={direction}>
               <motion.div
                 key={currentStep.id}
@@ -331,17 +330,29 @@ const HowSectionCarousel: React.FC<any> = memo(function HowSectionCarousel({
                 transition={{ duration: 0.5, ease: "easeInOut" }}
               >
                 {currentStep.animationData ? (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Lottie
-                      animationData={currentStep.animationData}
-                      loop={true}
-                      autoplay={true}
-                      lottieRef={lottieRef}
-                      className="w-full h-full"
-                      rendererSettings={{
-                        preserveAspectRatio: "xMidYMid meet",
-                      }}
-                    />
+                  <div className="relative w-full h-full">
+                    {/* Animation wrapper with aspect ratio preservation */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-full h-full max-w-[90%] max-h-[90%] lg:max-w-[85%] lg:max-h-[85%]">
+                        <Lottie
+                          animationData={currentStep.animationData}
+                          loop={true}
+                          autoplay={true}
+                          lottieRef={lottieRef}
+                          className="w-full h-full"
+                          renderer="svg"
+                          rendererSettings={{
+                            preserveAspectRatio: "xMidYMid meet",
+                            progressiveLoad: true,
+                          }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-red-500">Failed to load animation</div>
