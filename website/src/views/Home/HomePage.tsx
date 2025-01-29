@@ -23,8 +23,8 @@ import FooterSection from "@/views/Home/footer-section";
 import LazyComponent from "@/components/LazyComponent";
 
 // ----- Constants -----
-const SCROLL_THRESHOLD = 50;
-const SCROLL_LOCK_DURATION = 500;
+const SCROLL_THRESHOLD = 25;
+const SCROLL_LOCK_DURATION = 200;
 const PRELOAD_TIMEOUT = 10000;
 
 // Section indices
