@@ -13,7 +13,7 @@ interface Props {
   className?: string;
 }
 
-const ANIMATION_DURATION = 0.2;
+const ANIMATION_DURATION = 0.3;
 
 const AnimatedSection: React.FC<Props> = ({
   isActive,
@@ -36,27 +36,23 @@ const AnimatedSection: React.FC<Props> = ({
         opacity: 1,
         transition: {
           type: "spring",
-          stiffness: 200,
-          damping: 25,
+          stiffness: 100, // Reduced for smoother mobile animation
+          damping: 20,
           duration: ANIMATION_DURATION,
           mass: 0.5,
-          // Add these to make transitions smoother
-          opacity: { duration: 0.2 }, // Faster opacity transition
-          y: { type: "spring", stiffness: 200, damping: 25 },
+          opacity: { duration: 0.3 },
         },
       },
-
       exit: {
         y: scrollDirection === "down" ? "-100%" : "100%",
         opacity: 0,
         transition: {
           type: "spring",
-          stiffness: 200,
-          damping: 25,
+          stiffness: 100,
+          damping: 20,
           duration: ANIMATION_DURATION,
           mass: 0.5,
-          // Make exit opacity slower than enter
-          opacity: { duration: 0.3 },
+          opacity: { duration: 0.2 },
         },
       },
     }),
