@@ -1,3 +1,4 @@
+// components/WorkSection.tsx
 "use client";
 
 import type React from "react";
@@ -10,6 +11,7 @@ import { ArrowRight, X } from "lucide-react";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
+import { isMobileDevice } from "@/utils/deviceDetection";
 
 const WorkSection: React.FC = () => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
@@ -17,6 +19,8 @@ const WorkSection: React.FC = () => {
   const contactModalOpen = useSelector(
     (state) => state.ui.contactModalOpen
   ) as any;
+
+  const isMobile = useMemo(() => isMobileDevice(), []);
 
   const handleOpenForm = useCallback(() => {
     dispatch(setContactModalOpen(true));
@@ -77,15 +81,31 @@ const WorkSection: React.FC = () => {
     >
       <motion.div
         className="container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative"
-        animate={{
-          x: contactModalOpen ? "-5%" : "0%",
-          scale: contactModalOpen ? 0.98 : 1,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-        }}
+        initial={
+          isMobile
+            ? {}
+            : {
+                opacity: 0,
+                y: 50,
+              }
+        }
+        animate={
+          isMobile
+            ? {}
+            : {
+                opacity: 1,
+                y: 0,
+              }
+        }
+        transition={
+          isMobile
+            ? {}
+            : {
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+              }
+        }
       >
         <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl w-full lg:w-1/2 mb-12 lg:mb-0">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
@@ -112,7 +132,11 @@ const WorkSection: React.FC = () => {
         </div>
 
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
-          <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative animate-float">
+          <div
+            className={`w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative ${
+              isMobile ? "" : "animate-float"
+            }`}
+          >
             <div ref={lottieContainerRef} className="w-full h-full" />
           </div>
         </div>
@@ -140,7 +164,7 @@ const WorkSection: React.FC = () => {
               >
                 <X className="w-6 h-6" />
               </button>
-              <div className="h-full overflow-y-auto">
+              <div className="h-full">
                 <ContactForm />
               </div>
             </div>

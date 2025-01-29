@@ -71,7 +71,7 @@ const NavItem = memo(function NavItem({
     >
       <div className="relative pl-6 sm:pl-12">
         <motion.div
-          className={`absolute left-1 sm:left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${
+          className={`absolute left-[5px] sm:left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${
             isActive ? "bg-white" : "border border-white/30"
           }`}
           animate={{ scale: isActive ? 1 : 0.8 }}

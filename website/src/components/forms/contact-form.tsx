@@ -189,7 +189,7 @@ export function ContactForm() {
             }`}
             layout
           >
-            <div className="h-full md:overflow-y-auto overflow-x-hidden custom-scrollbar">
+            <div className="h-full overflow-x-hidden custom-scrollbar">
               <AnimatePresence mode="wait">
                 {!selectedForm ? (
                   <motion.div
@@ -233,7 +233,7 @@ export function ContactForm() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="h-full p-6 md:p-8 overflow-y-auto"
+                    className="h-full p-6 md:p-8 overflow-y-scroll custom-scrollbar"
                   >
                     {selectedForm === "engineer" && <EngineerForm />}
                     {selectedForm === "restaurant" && <RestaurantForm />}

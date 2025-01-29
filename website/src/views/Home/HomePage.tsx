@@ -1,18 +1,12 @@
 "use client";
 
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+import type React from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import type { RootState } from "@/redux-store";
 
-// Components
 import AnimatedSection from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
 import NextButton from "@/components/NextButton";
@@ -21,18 +15,12 @@ import HowSectionCarousel from "@/components/carousels/how-section-carousel";
 import FooterSection from "@/views/Home/footer-section";
 import LazyComponent from "@/components/LazyComponent";
 
-// ----- Constants -----
-const SCROLL_THRESHOLD = 20;
-const SCROLL_LOCK_DURATION = 200;
+import { isMobileDevice } from "@/utils/deviceDetection";
+
+const SCROLL_THRESHOLD = 50;
+const SCROLL_LOCK_DURATION = 500;
 const PRELOAD_TIMEOUT = 10000;
 
-// Basic mobile check
-const isMobileDevice = (): boolean => {
-  if (typeof window === "undefined") return false;
-  return /Mobi|Android/i.test(window.navigator.userAgent);
-};
-
-// JSON paths for preloading (lottie animations)
 const JSON_PATHS = [
   "/lottie/sailing_boat_2.json",
   "/lottie/paper_flying.json",
@@ -44,18 +32,18 @@ const JSON_PATHS = [
   "/lottie/angel.json",
 ];
 
-// ----- Types -----
 interface SectionProps {
   isActive: boolean;
   onScrollPastStart?: () => void;
   onScrollPastEnd?: () => void;
   scrollToTop?: () => void;
+  onScrollComplete?: () => void;
 }
 
 interface SectionConfig {
   Component: React.ComponentType<SectionProps>;
   id: string;
-  allowScroll?: boolean; // If true, no snap logic is applied for that section
+  allowScroll?: boolean;
 }
 
 interface StepWithData {
@@ -64,18 +52,14 @@ interface StepWithData {
   animationData: any;
 }
 
-// ----- HomePage Component -----
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
-
-  // --- Global Redux State ---
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
   const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
   const contactModalOpen = useSelector(
     (state: RootState) => state.ui.contactModalOpen
   );
 
-  // --- Local State ---
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [animationDataMap, setAnimationDataMap] = useState<Record<string, any>>(
@@ -83,27 +67,19 @@ const HomePage: React.FC = () => {
   );
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
 
-  // Refs for controlling scroll snaps and locking
   const scrollLockRef = useRef<boolean>(false);
   const lastScrollTimeRef = useRef<number>(0);
-
-  // Touch coordinate for mobile
   const touchStartYRef = useRef<number | null>(null);
-
-  // Timer ref
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // ----- Preload Lottie Assets -----
   useEffect(() => {
     const preloadAssets = async () => {
-      // Safety timeout
       loadingTimeoutRef.current = setTimeout(() => {
         console.warn("Asset loading timeout - forcing load completion.");
         setIsLoading(false);
       }, PRELOAD_TIMEOUT);
 
       try {
-        // Preload JSON
         const fetchedData = await Promise.all(
           JSON_PATHS.map(async (path) => {
             const res = await fetch(path);
@@ -136,7 +112,6 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
-  // ----- Section Navigation -----
   const scrollToSection = useCallback(
     (targetIndex: number) => {
       if (modalOpen || contactModalOpen || scrollLockRef.current) return;
@@ -161,7 +136,6 @@ const HomePage: React.FC = () => {
     scrollToSection(currentPage + 1);
   }, [currentPage, scrollToSection]);
 
-  // Callbacks to move from partial-scrolling sections
   const handleScrollPastStart = useCallback(() => {
     scrollToSection(currentPage - 1);
   }, [currentPage, scrollToSection]);
@@ -170,7 +144,10 @@ const HomePage: React.FC = () => {
     scrollToSection(currentPage + 1);
   }, [currentPage, scrollToSection]);
 
-  // ----- Steps for the Carousel -----
+  const handleScrollComplete = useCallback(() => {
+    scrollToSection(currentPage + 1);
+  }, [currentPage, scrollToSection]);
+
   const stepsWithData: StepWithData[] = useMemo(() => {
     if (isLoading) return [];
     return [
@@ -202,7 +179,8 @@ const HomePage: React.FC = () => {
     ];
   }, [animationDataMap, isLoading]);
 
-  // ----- Sections Array -----
+  const isMobile = isMobileDevice();
+
   const sections: SectionConfig[] = useMemo(
     () => [
       {
@@ -229,23 +207,31 @@ const HomePage: React.FC = () => {
         ),
       },
       {
-        // HOW Section
         id: "solutions",
-        allowScroll: true, // partial scrolling on desktop
-        Component: ({ isActive, onScrollPastStart, onScrollPastEnd }) => (
+        allowScroll: true,
+        Component: ({
+          isActive,
+          onScrollPastStart,
+          onScrollPastEnd,
+          onScrollComplete,
+        }) => (
           <LazyComponent
             component="HowSection"
             isActive={isActive}
             onScrollProgress={(p: number) => {
-              // detect boundaries
-              if (p <= 0) onScrollPastStart?.();
-              if (p >= 1) onScrollPastEnd?.();
+              if (isMobile) {
+                if (p <= 0) onScrollPastStart?.();
+                if (p >= 1) onScrollComplete?.();
+              } else {
+                if (p <= 0) onScrollPastStart?.();
+                if (p >= 1) onScrollPastEnd?.();
+              }
             }}
+            onScrollComplete={isMobile ? undefined : onScrollComplete}
           />
         ),
       },
       {
-        // HOW Carousel
         id: "how-carousel",
         allowScroll: true,
         Component: ({ isActive, onScrollPastStart, onScrollPastEnd }) => (
@@ -253,7 +239,8 @@ const HomePage: React.FC = () => {
             steps={stepsWithData}
             isActive={isActive}
             onScrollPastStart={onScrollPastStart}
-            onScrollPastEnd={onScrollPastEnd}
+            onScrollPastEnd={isMobile ? undefined : onScrollPastEnd}
+            onScrollComplete={isMobile ? onScrollPastEnd : undefined}
           />
         ),
       },
@@ -272,21 +259,14 @@ const HomePage: React.FC = () => {
         ),
       },
     ],
-    [scrollToTop, scrollToNextSection, stepsWithData]
+    [scrollToTop, scrollToNextSection, stepsWithData, isMobile]
   );
 
-  // ----- Snap / Scroll Handling -----
   const handleGlobalScroll = useCallback(
     (deltaY: number) => {
       if (modalOpen || contactModalOpen || scrollLockRef.current) return;
+      if (sections[currentPage]?.allowScroll && !isMobile) return;
 
-      // If this section allows partial scroll, let it scroll freely.
-      if (sections[currentPage]?.allowScroll) return;
-
-      // If mobile, do not snap scroll.
-      if (isMobileDevice()) return;
-
-      // Desktop snap logic
       const now = Date.now();
       if (now - lastScrollTimeRef.current < SCROLL_LOCK_DURATION) return;
       lastScrollTimeRef.current = now;
@@ -296,14 +276,19 @@ const HomePage: React.FC = () => {
         scrollToSection(currentPage + direction);
       }
     },
-    [modalOpen, contactModalOpen, currentPage, sections, scrollToSection]
+    [
+      modalOpen,
+      contactModalOpen,
+      currentPage,
+      sections,
+      scrollToSection,
+      isMobile,
+    ]
   );
 
-  // ----- Wheel Event -----
   useEffect(() => {
     const onWheel = (e: WheelEvent) => {
-      // Prevent default if snapping is used (and not on mobile).
-      if (!sections[currentPage]?.allowScroll && !isMobileDevice()) {
+      if (!sections[currentPage]?.allowScroll || isMobile) {
         e.preventDefault();
       }
       handleGlobalScroll(e.deltaY);
@@ -313,57 +298,61 @@ const HomePage: React.FC = () => {
     return () => {
       window.removeEventListener("wheel", onWheel);
     };
-  }, [currentPage, sections, handleGlobalScroll]);
+  }, [currentPage, sections, handleGlobalScroll, isMobile]);
 
-  // ----- Touch Events (for Mobile & Touch Devices) -----
   useEffect(() => {
+    let touchMoveHandler: ((e: TouchEvent) => void) | null = null;
+
     const onTouchStart = (e: TouchEvent) => {
       if (!modalOpen && !contactModalOpen) {
         touchStartYRef.current = e.touches[0].clientY;
+
+        touchMoveHandler = (moveEvent: TouchEvent) => {
+          if (touchStartYRef.current === null) return;
+
+          const currentY = moveEvent.touches[0].clientY;
+          const deltaY = touchStartYRef.current - currentY;
+
+          if (Math.abs(deltaY) >= SCROLL_THRESHOLD) {
+            if (!sections[currentPage]?.allowScroll || !isMobile) {
+              const direction = deltaY > 0 ? 1 : -1;
+              scrollToSection(currentPage + direction);
+              touchStartYRef.current = null;
+              window.removeEventListener("touchmove", touchMoveHandler!);
+            }
+          }
+        };
+
+        window.addEventListener("touchmove", touchMoveHandler);
       }
     };
 
-    const onTouchEnd = (e: TouchEvent) => {
-      if (
-        modalOpen ||
-        contactModalOpen ||
-        scrollLockRef.current ||
-        touchStartYRef.current === null
-      ) {
-        return;
-      }
-
-      // If allowScroll is true, we do nothing (free scroll).
-      if (sections[currentPage]?.allowScroll) {
-        touchStartYRef.current = null;
-        return;
-      }
-
-      // If mobile, skip snapping altogether.
-      if (isMobileDevice()) {
-        touchStartYRef.current = null;
-        return;
-      }
-
-      // Otherwise, do the desktop snap logic for touch devices
-      const deltaY = touchStartYRef.current - e.changedTouches[0].clientY;
-      if (Math.abs(deltaY) >= SCROLL_THRESHOLD) {
-        const direction = deltaY > 0 ? 1 : -1;
-        scrollToSection(currentPage + direction);
-      }
+    const onTouchEnd = () => {
       touchStartYRef.current = null;
+      if (touchMoveHandler) {
+        window.removeEventListener("touchmove", touchMoveHandler);
+      }
     };
 
     window.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchend", onTouchEnd, { passive: false });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
+      if (touchMoveHandler) {
+        window.removeEventListener("touchmove", touchMoveHandler);
+      }
     };
-  }, [currentPage, sections, modalOpen, contactModalOpen, scrollToSection]);
+  }, [
+    currentPage,
+    modalOpen,
+    contactModalOpen,
+    scrollToSection,
+    sections,
+    isMobile,
+  ]);
 
-  // ----- Render -----
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
       <AnimatePresence mode="wait">
@@ -402,6 +391,9 @@ const HomePage: React.FC = () => {
                   isActive={index === currentPage}
                   onScrollPastStart={handleScrollPastStart}
                   onScrollPastEnd={handleScrollPastEnd}
+                  onScrollComplete={
+                    id === "solutions" ? handleScrollComplete : undefined
+                  }
                 />
               </AnimatedSection>
             ))}
