@@ -9,7 +9,6 @@ const useViewportHeight = (): number => {
 
   useEffect(() => {
     const updateVh = () => {
-      // Some devices (especially mobile) provide a dynamic viewport height
       setVh(window.visualViewport?.height || window.innerHeight);
     };
     updateVh();
@@ -22,6 +21,12 @@ const useViewportHeight = (): number => {
   }, []);
 
   return vh;
+};
+
+// Simple device check
+const isMobileDevice = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return /Mobi|Android/i.test(window.navigator.userAgent);
 };
 
 // --- TextReveal Component ---
@@ -38,6 +43,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
   range,
   align = "left",
 }) => {
+  // Calculate how far along we are in this text block reveal
   const progress = Math.max(
     0,
     Math.min(1, (scrollYProgress - range[0]) / (range[1] - range[0]))
@@ -50,11 +56,10 @@ const TextReveal: React.FC<TextRevealProps> = ({
     <div
       className={`relative ${align === "right" ? "text-right" : "text-left"}`}
     >
-      {/* Invisible text for layout and spacing */}
+      {/* Invisible text for layout */}
       <p
         className="invisible text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] 
-                    font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1]
-                    tracking-normal"
+                   font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1] tracking-normal"
       >
         {text}
       </p>
@@ -119,7 +124,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
 // --- Gradient Separator ---
 const GradientSeparator: React.FC<{ progress: number }> = ({ progress }) => {
   return (
-    <div className="w-full flex items-center gap-4 py-6">
+    <div className="relative w-full flex items-center gap-4 py-6">
       {/* Ghost separator (gray) */}
       <div className="absolute w-full flex items-center gap-4">
         <div className="flex-1 h-px bg-gradient-to-r from-white/20 to-transparent" />
@@ -150,14 +155,14 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress }) => {
   const [mounted, setMounted] = useState(false);
   const [currentScrollProgress, setCurrentScrollProgress] = useState(0);
 
-  // We'll make the section 3x viewport height to allow for parallax
   const vh = useViewportHeight();
 
+  // SSR-safe mount check
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // framer-motion scroll tracking
+  // Framer Motion scroll tracking
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end end"],
@@ -172,24 +177,26 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress }) => {
     return () => unsubscribe();
   }, [scrollYProgress, onScrollProgress]);
 
-  // Example text
+  // On mobile, only 1× vh; on desktop, 3× vh
+  const sectionHeight = isMobileDevice() ? vh : vh * 3;
+
   const firstParagraph =
-    "By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability";
+    "By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability.";
 
   const secondParagraph =
-    "Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest";
+    "Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest.";
 
-  if (!mounted) return null; // SSR-safe mount check
+  if (!mounted) return null;
 
   return (
     <section
       ref={sectionRef}
       className="relative bg-black min-h-screen"
-      style={{ height: vh ? `${vh * 3}px` : "300vh" }}
+      style={{ height: sectionHeight ? `${sectionHeight}px` : "100vh" }}
     >
       <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center">
         <div className="container mx-auto px-4">
-          <div className="w-full relative max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] mx-auto">
+          <div className="relative mx-auto w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%]">
             <div className="flex flex-col justify-center items-center h-full space-y-4 sm:space-y-24 md:space-y-28">
               <div className="w-full">
                 <TextReveal
@@ -200,7 +207,6 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress }) => {
                 />
               </div>
 
-              {/* Adjusted separator timing to match the text reveal effect */}
               <div className="w-full">
                 <GradientSeparator
                   progress={Math.max(

@@ -1,10 +1,9 @@
 "use client";
 
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import type React from "react";
-import { useMemo } from "react";
 
-interface Props {
+interface AnimatedSectionProps {
   isActive: boolean;
   index: number;
   total: number;
@@ -15,7 +14,7 @@ interface Props {
 
 const ANIMATION_DURATION = 0.3;
 
-const AnimatedSection: React.FC<Props> = ({
+const AnimatedSection: React.FC<AnimatedSectionProps> = ({
   isActive,
   index,
   total,
@@ -23,20 +22,19 @@ const AnimatedSection: React.FC<Props> = ({
   children,
   className = "",
 }) => {
+  // UseMemo to define animation variants
   const variants = useMemo(
     () => ({
-      // Initial state (before animation starts)
       initial: {
-        y: scrollDirection === "down" ? "100%" : "-100%", // Start position
-        opacity: 0, // Fully transparent
+        y: scrollDirection === "down" ? "100%" : "-100%",
+        opacity: 0,
       },
-
       animate: {
         y: 0,
         opacity: 1,
         transition: {
           type: "spring",
-          stiffness: 100, // Reduced for smoother mobile animation
+          stiffness: 90,
           damping: 20,
           duration: ANIMATION_DURATION,
           mass: 0.5,
@@ -48,7 +46,7 @@ const AnimatedSection: React.FC<Props> = ({
         opacity: 0,
         transition: {
           type: "spring",
-          stiffness: 100,
+          stiffness: 90,
           damping: 20,
           duration: ANIMATION_DURATION,
           mass: 0.5,
@@ -56,7 +54,7 @@ const AnimatedSection: React.FC<Props> = ({
         },
       },
     }),
-    [scrollDirection] // Recalculate when scroll direction changes
+    [scrollDirection]
   );
 
   return (
