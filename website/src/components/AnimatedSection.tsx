@@ -13,7 +13,7 @@ interface Props {
   className?: string;
 }
 
-const ANIMATION_DURATION = 0.3;
+const ANIMATION_DURATION = 0.2;
 
 const AnimatedSection: React.FC<Props> = ({
   isActive,
@@ -25,28 +25,28 @@ const AnimatedSection: React.FC<Props> = ({
 }) => {
   const variants = useMemo(
     () => ({
-      // Initial state (before animation starts)
       initial: {
-        y: scrollDirection === "down" ? "100%" : "-100%", // Start position
-        opacity: 0, // Fully transparent
+        y: scrollDirection === "down" ? "100%" : "-100%",
+        // Remove opacity from initial state
       },
 
-      // Animated state (during active view)
       animate: {
-        y: 0, // Center position
-        opacity: 1, // Fully visible
+        y: 0,
+        opacity: 1,
         transition: {
-          type: "spring", // Spring animation type
-          stiffness: 200, // Spring stiffness (higher = more rigid)
-          damping: 25, // Spring bounce (lower = more bounce)
+          type: "spring",
+          stiffness: 200,
+          damping: 25,
           duration: ANIMATION_DURATION,
           mass: 0.5,
+          // Add these to make transitions smoother
+          opacity: { duration: 0.2 }, // Faster opacity transition
+          y: { type: "spring", stiffness: 200, damping: 25 },
         },
       },
 
-      // Exit state (when leaving view)
       exit: {
-        y: scrollDirection === "down" ? "-100%" : "100%", // Exit position
+        y: scrollDirection === "down" ? "-100%" : "100%",
         opacity: 0,
         transition: {
           type: "spring",
@@ -54,10 +54,12 @@ const AnimatedSection: React.FC<Props> = ({
           damping: 25,
           duration: ANIMATION_DURATION,
           mass: 0.5,
+          // Make exit opacity slower than enter
+          opacity: { duration: 0.3 },
         },
       },
     }),
-    [scrollDirection] // Recalculate when scroll direction changes
+    [scrollDirection]
   );
 
   return (

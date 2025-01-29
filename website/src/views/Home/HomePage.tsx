@@ -24,7 +24,7 @@ import LazyComponent from "@/components/LazyComponent";
 
 // ----- Constants -----
 const SCROLL_THRESHOLD = 25;
-const SCROLL_LOCK_DURATION = 200;
+const SCROLL_LOCK_DURATION = 150;
 const PRELOAD_TIMEOUT = 10000;
 
 // Section indices
@@ -364,9 +364,10 @@ const HomePage: React.FC = () => {
 
   // ----- Render -----
   return (
-    <div className="relative w-full h-screen overflow-hidden">
-      {/* Loader */}
-      <AnimatePresence>
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      {" "}
+      {/* Add bg-black here */}
+      <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
             key="loader"
@@ -380,31 +381,30 @@ const HomePage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Main Content */}
       {!isLoading && (
         <motion.div
           key="content"
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }} // Change from 0 to 1
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
           className="relative w-full h-full"
         >
           <div className="relative w-full h-full">
-            {sections.map(({ Component, id }, index) => (
-              <AnimatedSection
-                key={id}
-                index={index}
-                isActive={index === currentPage}
-                total={sections.length}
-                scrollDirection={scrollDirection}
-              >
-                <Component isActive={index === currentPage} />
-              </AnimatedSection>
-            ))}
+            <AnimatePresence mode="wait">
+              {sections.map(({ Component, id }, index) => (
+                <AnimatedSection
+                  key={id}
+                  index={index}
+                  isActive={index === currentPage}
+                  total={sections.length}
+                  scrollDirection={scrollDirection}
+                >
+                  <Component isActive={index === currentPage} />
+                </AnimatedSection>
+              ))}
+            </AnimatePresence>
           </div>
 
-          {/* Menu Modal */}
           <MenuModal
             isOpen={isMenuOpen as any}
             onClose={() => dispatch(toggleMenu())}
