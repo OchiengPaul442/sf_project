@@ -25,9 +25,10 @@ const AnimatedSection: React.FC<Props> = ({
 }) => {
   const variants = useMemo(
     () => ({
+      // Initial state (before animation starts)
       initial: {
-        y: scrollDirection === "down" ? "100%" : "-100%",
-        // Remove opacity from initial state
+        y: scrollDirection === "down" ? "100%" : "-100%", // Start position
+        opacity: 0, // Fully transparent
       },
 
       animate: {
@@ -59,7 +60,7 @@ const AnimatedSection: React.FC<Props> = ({
         },
       },
     }),
-    [scrollDirection]
+    [scrollDirection] // Recalculate when scroll direction changes
   );
 
   return (
