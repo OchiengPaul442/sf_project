@@ -53,7 +53,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
       {/* Invisible text for layout and spacing */}
       <p
         className="invisible text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] 
-                    font-normal leading-[1.75] sm:leading-[1.5] md:leading-[1]
+                    font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1]
                     tracking-normal"
       >
         {text}
@@ -63,7 +63,7 @@ const TextReveal: React.FC<TextRevealProps> = ({
       <div className="absolute top-0 left-0 right-0">
         <p
           className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] xl:text-[3.25rem] 
-                     font-normal leading-[1.75] sm:leading-[1.5] md:leading-[1]
+                     font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1]
                      tracking-normal"
         >
           {/* Ghost layer */}
@@ -174,10 +174,10 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress }) => {
 
   // Example text
   const firstParagraph =
-    "By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability.";
+    "By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability";
 
   const secondParagraph =
-    "Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest.";
+    "Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest";
 
   if (!mounted) return null; // SSR-safe mount check
 
@@ -189,33 +189,35 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress }) => {
     >
       <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col justify-center items-center h-full space-y-4 sm:space-y-24 md:space-y-28">
-            <div className="w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] mx-auto">
-              <TextReveal
-                text={firstParagraph}
-                scrollYProgress={currentScrollProgress}
-                range={[0.1, 0.4]}
-                align="left"
-              />
-            </div>
+          <div className="w-full relative max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] mx-auto">
+            <div className="flex flex-col justify-center items-center h-full space-y-4 sm:space-y-24 md:space-y-28">
+              <div className="w-full">
+                <TextReveal
+                  text={firstParagraph}
+                  scrollYProgress={currentScrollProgress}
+                  range={[0.1, 0.4]}
+                  align="left"
+                />
+              </div>
 
-            {/* Adjusted separator timing to match the text reveal effect */}
-            <div className="w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] mx-auto">
-              <GradientSeparator
-                progress={Math.max(
-                  0,
-                  Math.min(1, (currentScrollProgress - 0.45) / 0.1)
-                )}
-              />
-            </div>
+              {/* Adjusted separator timing to match the text reveal effect */}
+              <div className="w-full">
+                <GradientSeparator
+                  progress={Math.max(
+                    0,
+                    Math.min(1, (currentScrollProgress - 0.45) / 0.1)
+                  )}
+                />
+              </div>
 
-            <div className="w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] mx-auto">
-              <TextReveal
-                text={secondParagraph}
-                scrollYProgress={currentScrollProgress}
-                range={[0.6, 0.9]}
-                align="right"
-              />
+              <div className="w-full">
+                <TextReveal
+                  text={secondParagraph}
+                  scrollYProgress={currentScrollProgress}
+                  range={[0.6, 0.9]}
+                  align="right"
+                />
+              </div>
             </div>
           </div>
         </div>
