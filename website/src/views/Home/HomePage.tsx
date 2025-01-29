@@ -13,18 +13,24 @@ import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import type { RootState } from "@/redux-store";
 import VectorImage from "@/public/Vector.svg";
 
+// Components
 import AnimatedSection from "@/components/AnimatedSection";
 import Loader from "@/components/loader";
 import NextButton from "@/components/NextButton";
 import MenuModal from "@/components/dialog/menu-modal";
 import HowSectionCarousel from "@/components/carousels/how-section-carousel";
 import FooterSection from "@/views/Home/footer-section";
+import LazyComponent from "@/components/LazyComponent";
 
-// Constants
+// ----- Constants -----
 const SCROLL_THRESHOLD = 50;
 const SCROLL_LOCK_DURATION = 500;
 const PRELOAD_TIMEOUT = 10000;
-const CAROUSEL_SECTION_INDEX = 3;
+
+// Section indices
+const HOME_SECTION_INDEX = 0;
+const HOW_SECTION_INDEX = 2;
+const HOW_CAROUSEL_SECTION_INDEX = 3;
 
 // JSON paths for preloading
 const JSON_PATHS = [
@@ -38,23 +44,17 @@ const JSON_PATHS = [
   "/lottie/angel.json",
 ];
 
-// Lazy load components
-const LazyComponent = React.lazy(() => import("@/components/LazyComponent"));
-
-// Types
+// ----- Types -----
 interface SectionProps {
+  isActive: boolean;
   scrollToTop?: () => void;
   onScrollPastStart?: () => void;
   onScrollPastEnd?: () => void;
-  onLoad?: () => void;
-  isActive: boolean;
 }
 
 interface SectionConfig {
   Component: React.ComponentType<SectionProps>;
   id: string;
-  preloadPriority: number;
-  useNextAction?: boolean;
 }
 
 interface StepWithData {
@@ -63,30 +63,37 @@ interface StepWithData {
   animationData: any;
 }
 
+// ----- HomePage Component -----
 const HomePage: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const dispatch = useDispatch();
+
+  // --- Global State ---
+  const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
+  const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
+  const contactModalOpen = useSelector(
+    (state: RootState) => state.ui.contactModalOpen
+  );
+
+  // --- Local State ---
+  const [currentPage, setCurrentPage] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [animationDataMap, setAnimationDataMap] = useState<Record<string, any>>(
     {}
   );
   const [scrollDirection, setScrollDirection] = useState<"up" | "down">("down");
-  const scrollLockRef = useRef(false);
+
+  // --- Refs ---
+  const scrollLockRef = useRef<boolean>(false);
+  const lastScrollTimeRef = useRef<number>(0);
   const touchStartY = useRef<number | null>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
-  const sectionsRef = useRef<SectionConfig[]>([]);
-  const lastScrollTimeRef = useRef(0);
 
-  const dispatch = useDispatch();
-  const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
-  const modalOpen = useSelector((state: RootState) => state.ui.modalOpen);
-  const contactModalOpen = useSelector(
-    (state) => state.ui.contactModalOpen
-  ) as any;
-
+  // ----- Handlers -----
   const scrollToSection = useCallback(
     (targetIndex: number) => {
+      // Avoid scrolling if modals are open or if we're locked
       if (modalOpen || contactModalOpen || scrollLockRef.current) return;
-      if (targetIndex < 0 || targetIndex >= sectionsRef.current.length) return;
+      if (targetIndex < 0 || targetIndex >= sections.length) return;
 
       scrollLockRef.current = true;
       setScrollDirection(targetIndex > currentPage ? "down" : "up");
@@ -100,7 +107,7 @@ const HomePage: React.FC = () => {
   );
 
   const scrollToTop = useCallback(() => {
-    scrollToSection(0);
+    scrollToSection(HOME_SECTION_INDEX);
   }, [scrollToSection]);
 
   const scrollToNextSection = useCallback(() => {
@@ -115,6 +122,7 @@ const HomePage: React.FC = () => {
     scrollToSection(currentPage + 1);
   }, [currentPage, scrollToSection]);
 
+  // Steps for the "HowSectionCarousel"
   const stepsWithData: StepWithData[] = useMemo(() => {
     if (isLoading) return [];
     return [
@@ -146,10 +154,24 @@ const HomePage: React.FC = () => {
     ];
   }, [animationDataMap, isLoading]);
 
+  // When HowSection completes scrolling (reaches top or bottom)
+  const handleHowSectionComplete = useCallback(
+    (direction: "up" | "down") => {
+      if (direction === "up" && currentPage === HOW_SECTION_INDEX) {
+        scrollToSection(currentPage - 1);
+      } else if (direction === "down" && currentPage === HOW_SECTION_INDEX) {
+        scrollToSection(currentPage + 1);
+      }
+    },
+    [currentPage, scrollToSection]
+  );
+
+  // ----- Sections Array -----
   const sections: SectionConfig[] = useMemo(() => {
-    const sectionsArray: SectionConfig[] = [
+    return [
       {
-        Component: ({ isActive }) => (
+        id: "home",
+        Component: ({ isActive }: SectionProps) => (
           <>
             <LazyComponent
               component="HeaderSection"
@@ -161,25 +183,30 @@ const HomePage: React.FC = () => {
             </div>
           </>
         ),
-        id: "home",
-        preloadPriority: 1,
       },
       {
-        Component: ({ isActive }) => (
+        id: "platform",
+        Component: ({ isActive }: SectionProps) => (
           <LazyComponent component="RobotSection" isActive={isActive} />
         ),
-        id: "platform",
-        preloadPriority: 2,
       },
       {
-        Component: ({ isActive }) => (
-          <LazyComponent component="HowSection" isActive={isActive} />
-        ),
         id: "solutions",
-        preloadPriority: 3,
+        Component: ({ isActive }: SectionProps) => (
+          <LazyComponent
+            component="HowSection"
+            isActive={isActive}
+            onScrollProgress={(progress: number) => {
+              // If near top, scroll to previous; if near bottom, scroll to next.
+              if (progress <= 0) handleHowSectionComplete("up");
+              if (progress >= 1) handleHowSectionComplete("down");
+            }}
+          />
+        ),
       },
       {
-        Component: ({ isActive }) => (
+        id: "how-carousel",
+        Component: ({ isActive }: SectionProps) => (
           <HowSectionCarousel
             onScrollPastStart={handleScrollPastStart}
             onScrollPastEnd={handleScrollPastEnd}
@@ -187,43 +214,40 @@ const HomePage: React.FC = () => {
             isActive={isActive}
           />
         ),
-        id: "how-carousel",
-        preloadPriority: 4,
       },
       {
-        Component: ({ isActive }) => (
+        id: "work",
+        Component: ({ isActive }: SectionProps) => (
           <LazyComponent component="WorkSection" isActive={isActive} />
         ),
-        id: "work",
-        preloadPriority: 5,
       },
       {
-        Component: ({ isActive }) => (
+        id: "footer",
+        Component: ({ isActive }: SectionProps) => (
           <FooterSection scrollToTop={scrollToTop} isActive={isActive} />
         ),
-        id: "footer",
-        preloadPriority: 7,
       },
     ];
-
-    sectionsRef.current = sectionsArray;
-    return sectionsArray;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    stepsWithData,
+    handleScrollPastStart,
+    handleScrollPastEnd,
     scrollToTop,
     scrollToNextSection,
-    handleScrollPastEnd,
-    handleScrollPastStart,
-    stepsWithData,
+    handleHowSectionComplete,
   ]);
 
+  // ----- Preload Lottie + Vector Assets -----
   useEffect(() => {
     const preloadAssets = async () => {
-      try {
-        loadingTimeoutRef.current = setTimeout(() => {
-          console.warn("Asset loading timeout - forcing load completion");
-          setIsLoading(false);
-        }, PRELOAD_TIMEOUT);
+      loadingTimeoutRef.current = setTimeout(() => {
+        console.warn("Asset loading timeout - forcing load completion.");
+        setIsLoading(false);
+      }, PRELOAD_TIMEOUT);
 
+      try {
+        // Preload JSON
         const fetchedData = await Promise.all(
           JSON_PATHS.map(async (path) => {
             const res = await fetch(path);
@@ -233,32 +257,30 @@ const HomePage: React.FC = () => {
           })
         );
 
-        const animationDataMap: Record<string, any> = {};
+        const dataMap: Record<string, any> = {};
         fetchedData.forEach(({ path, data }) => {
-          animationDataMap[path] = data;
+          dataMap[path] = data;
         });
 
+        // Preload Vector
         await new Promise<void>((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve();
-          img.onerror = () => reject(new Error("Vector image load failed"));
+          img.onerror = () => reject(new Error("Vector image load failed."));
           img.src = VectorImage.src;
         });
 
-        setAnimationDataMap(animationDataMap);
+        setAnimationDataMap(dataMap);
         setIsLoading(false);
       } catch (error) {
         console.error("Asset preload error:", error);
         setIsLoading(false);
       } finally {
-        if (loadingTimeoutRef.current) {
-          clearTimeout(loadingTimeoutRef.current);
-        }
+        if (loadingTimeoutRef.current) clearTimeout(loadingTimeoutRef.current);
       }
     };
 
     preloadAssets();
-
     return () => {
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
@@ -266,38 +288,50 @@ const HomePage: React.FC = () => {
     };
   }, []);
 
-  const handleScroll = useCallback(
-    (delta: number) => {
+  // ----- Wheel & Touch Scroll Logic -----
+  const handleGlobalScroll = useCallback(
+    (deltaY: number) => {
       if (modalOpen || contactModalOpen || scrollLockRef.current) return;
-      if (currentPage === CAROUSEL_SECTION_INDEX) return;
+
+      // If we are in the HowSection or the HowCarousel, do not snap scroll
+      // (they handle their own scrolling).
+      if (
+        currentPage === HOW_SECTION_INDEX ||
+        currentPage === HOW_CAROUSEL_SECTION_INDEX
+      ) {
+        return;
+      }
 
       const now = Date.now();
+      // Prevent multiple triggers within the lock duration
       if (now - lastScrollTimeRef.current < SCROLL_LOCK_DURATION) return;
-
       lastScrollTimeRef.current = now;
-      if (Math.abs(delta) > SCROLL_THRESHOLD) {
-        const direction = delta > 0 ? 1 : -1;
+
+      // Snap logic
+      if (Math.abs(deltaY) > SCROLL_THRESHOLD) {
+        const direction = deltaY > 0 ? 1 : -1;
         scrollToSection(currentPage + direction);
       }
     },
-    [currentPage, modalOpen, contactModalOpen, scrollToSection]
+    [currentPage, scrollToSection, modalOpen, contactModalOpen]
   );
 
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (modalOpen || contactModalOpen || scrollLockRef.current) return;
-      if (currentPage === CAROUSEL_SECTION_INDEX) return;
-      e.preventDefault();
-      handleScroll(e.deltaY);
+    const onWheel = (e: WheelEvent) => {
+      // If in the how section, allow normal scroll
+      if (currentPage !== HOW_SECTION_INDEX) {
+        e.preventDefault();
+      }
+      handleGlobalScroll(e.deltaY);
     };
 
-    const handleTouchStart = (e: TouchEvent) => {
+    const onTouchStart = (e: TouchEvent) => {
       if (!modalOpen && !contactModalOpen) {
         touchStartY.current = e.touches[0].clientY;
       }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
+    const onTouchEnd = (e: TouchEvent) => {
       if (
         modalOpen ||
         contactModalOpen ||
@@ -305,29 +339,33 @@ const HomePage: React.FC = () => {
         touchStartY.current === null
       )
         return;
-      if (currentPage === CAROUSEL_SECTION_INDEX) {
-        touchStartY.current = null;
-        return;
-      }
 
-      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
-      handleScroll(deltaY);
+      // If not in the how section or carousel, do snap scrolling
+      if (
+        currentPage !== HOW_SECTION_INDEX &&
+        currentPage !== HOW_CAROUSEL_SECTION_INDEX
+      ) {
+        const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+        handleGlobalScroll(deltaY);
+      }
       touchStartY.current = null;
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    window.addEventListener("touchstart", handleTouchStart, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd, { passive: false });
+    window.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: false });
 
     return () => {
-      window.removeEventListener("wheel", handleWheel);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("wheel", onWheel);
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [currentPage, modalOpen, contactModalOpen, handleScroll]);
+  }, [currentPage, handleGlobalScroll, modalOpen, contactModalOpen]);
 
+  // ----- Render -----
   return (
     <div className="relative w-full h-screen overflow-hidden">
+      {/* Loader */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
@@ -343,6 +381,7 @@ const HomePage: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* Main Content */}
       {!isLoading && (
         <motion.div
           key="content"
@@ -354,7 +393,7 @@ const HomePage: React.FC = () => {
           <div className="relative w-full h-full">
             {sections.map(({ Component, id }, index) => (
               <AnimatedSection
-                key={`section-${id}`}
+                key={id}
                 index={index}
                 isActive={index === currentPage}
                 total={sections.length}
@@ -365,6 +404,7 @@ const HomePage: React.FC = () => {
             ))}
           </div>
 
+          {/* Menu Modal */}
           <MenuModal
             isOpen={isMenuOpen as any}
             onClose={() => dispatch(toggleMenu())}

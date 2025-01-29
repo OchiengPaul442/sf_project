@@ -1,19 +1,17 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
-import lottie from "lottie-web";
+import lottie, { type AnimationItem } from "lottie-web";
 import { ArrowRight, X } from "lucide-react";
 
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
-import { isMobileDevice } from "@/utils/deviceDetection";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 
 const WorkSection: React.FC = () => {
-  const isMobile = isMobileDevice();
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const contactModalOpen = useSelector(
@@ -28,15 +26,22 @@ const WorkSection: React.FC = () => {
     dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
+  const lottieOptions = useMemo(
+    () => ({
+      renderer: "svg" as const,
+      loop: true,
+      autoplay: true,
+      animationData: ConstructionAnimation,
+    }),
+    []
+  );
+
   useEffect(() => {
-    let animation: any;
-    if (lottieContainerRef.current && !isMobile) {
+    let animation: AnimationItem | null = null;
+    if (lottieContainerRef.current) {
       animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
-        renderer: "svg",
-        loop: true,
-        autoplay: true,
-        animationData: ConstructionAnimation,
+        ...lottieOptions,
       });
 
       animation.setSpeed(1.2);
@@ -47,7 +52,7 @@ const WorkSection: React.FC = () => {
         animation.destroy();
       }
     };
-  }, [isMobile]);
+  }, [lottieOptions]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -94,6 +99,7 @@ const WorkSection: React.FC = () => {
             <button
               onClick={handleOpenForm}
               className="group inline-flex items-center font-bold relative text-sm sm:text-base cursor-pointer"
+              aria-label="Open contact form"
             >
               <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9] pointer-events-none">
                 Reach out
@@ -105,13 +111,11 @@ const WorkSection: React.FC = () => {
           </div>
         </div>
 
-        {!isMobile && (
-          <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
-            <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative animate-float">
-              <div ref={lottieContainerRef} className="w-full h-full" />
-            </div>
+        <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
+          <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative animate-float">
+            <div ref={lottieContainerRef} className="w-full h-full" />
           </div>
-        )}
+        </div>
       </motion.div>
 
       <AnimatePresence>
