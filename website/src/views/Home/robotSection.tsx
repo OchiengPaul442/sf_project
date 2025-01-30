@@ -71,7 +71,7 @@ const GlowEffect = memo(() => {
 GlowEffect.displayName = "GlowEffect";
 
 type RobotSectionProps = {
-  id: string;
+  id?: string;
   animationData?: any; // Receives animationData from HomePage
 };
 

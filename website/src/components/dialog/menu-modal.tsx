@@ -8,7 +8,7 @@ interface MenuModalProps {
   isOpen: boolean;
   onClose: () => void;
   sections: { id: string }[];
-  scrollToSection: (index: number) => void;
+  scrollToSection: (index: any) => void;
 }
 
 const menuItems = [

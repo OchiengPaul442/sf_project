@@ -15,8 +15,7 @@ import BuildSVGImage from "@/public/build.svg";
 import Image from "next/image";
 
 type WorkSectionProps = {
-  id: string;
-  className?: string;
+  id?: string;
 };
 
 const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
