@@ -17,7 +17,7 @@ const GlowEffect = memo(() => {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Outer Glow (Larger on Desktop, Scales Down on Mobile) */}
+      {/* Outer Glow */}
       <div
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
           ${
@@ -28,7 +28,7 @@ const GlowEffect = memo(() => {
           rounded-full opacity-30 animate-pulse-slow bg-green-500/50`}
         aria-hidden="true"
       />
-      {/* Inner Glow (More Subtle, Smaller on Mobile) */}
+      {/* Inner Glow */}
       <div
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
           ${
@@ -55,17 +55,22 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
   const controls = useAnimation();
   const isMobile = isMobileDevice();
 
-  // 🚀 Ensure animation plays when in view (desktop only)
+  // 🚀 Play Lottie animation and start Framer Motion animation when in view
   useEffect(() => {
     if (isMobile) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          lottieRef.current?.animationItem?.play();
-          controls.start("visible");
+          // Ensure animations only start after mount
+          requestAnimationFrame(() => {
+            lottieRef.current?.animationItem?.play();
+            controls.start("visible"); // ✅ Moved inside requestAnimationFrame
+          });
         } else {
-          lottieRef.current?.animationItem?.pause();
+          requestAnimationFrame(() => {
+            lottieRef.current?.animationItem?.pause();
+          });
         }
       },
       { threshold: 0.3 }
@@ -74,7 +79,9 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
     if (sectionRef.current) observer.observe(sectionRef.current);
 
     return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       if (sectionRef.current) observer.unobserve(sectionRef.current);
+      observer.disconnect(); // ✅ Ensures proper cleanup
     };
   }, [controls, isMobile]);
 
@@ -84,13 +91,13 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
       ref={sectionRef}
       className="relative min-h-screen bg-black flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
     >
-      {/* 🌟 Futuristic Glow Effect (Now Works on Mobile) */}
+      {/* 🌟 Futuristic Glow Effect */}
       <GlowEffect />
 
       {/* Title & Animation Wrapper */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
-        animate="visible"
+        animate={controls} // ✅ Now using useAnimation() properly
         variants={{
           visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
         }}

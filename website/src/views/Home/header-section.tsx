@@ -1,25 +1,11 @@
-// components/HeaderSection.tsx
 "use client";
 
 import React, { memo, useRef, useEffect, useState } from "react";
 import Image from "next/image";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  MotionValue,
-  Variants,
-} from "framer-motion";
+import { motion, useAnimation, Variants } from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
 import VectorImage from "@/public/Vector.svg";
 import { isMobileDevice } from "@/utils/deviceDetection";
-
-// Parallax Transformation Function
-function useParallax(scrollProgress: MotionValue<number>, distance: number) {
-  return useTransform(scrollProgress, [0, 1], [0, distance], {
-    clamp: true,
-  });
-}
 
 // Memoized Image Component for Performance Optimization
 const OptimizedImage = memo(() => (
@@ -63,28 +49,8 @@ const HeaderSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
 
-  // Destructure scrollYProgress from useScroll hook
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
-
-  // Apply Parallax Effect
-  const parallaxY = useParallax(scrollYProgress, 150);
-
-  // Transformations based on scroll progress
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.05], {
-    clamp: true,
-  });
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0], {
-    clamp: true,
-  });
-  const blurOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 0.5], {
-    clamp: true,
-  });
-  const blurScale = useTransform(scrollYProgress, [0, 0.5], [0.8, 1.1], {
-    clamp: true,
-  });
+  // Animation Controls
+  const controls = useAnimation();
 
   // Device Detection with Debouncing to Optimize Resize Events
   useEffect(() => {
@@ -112,10 +78,13 @@ const HeaderSection: React.FC = () => {
     };
   }, []);
 
-  // Scroll to Top on Mount without Animation (Instant)
+  // Trigger container animation when component mounts
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }, []);
+    controls.start("visible");
+    return () => {
+      controls.stop();
+    };
+  }, [controls]);
 
   return (
     <section
@@ -132,30 +101,21 @@ const HeaderSection: React.FC = () => {
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          animate="visible"
+          animate={controls}
           className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
         >
           {/* Background Blur Effect - Render Only on Desktop */}
           {!isMobile && (
             <motion.div
               className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full"
-              style={{
-                scale: blurScale,
-                opacity: blurOpacity,
-              }}
               aria-hidden="true"
             />
           )}
 
-          {/* Main Image Container with Conditional Animations */}
+          {/* Main Image Container with Floating Animation */}
           <motion.div
             variants={!isMobile ? floatingVariants : undefined}
             animate={!isMobile ? "float" : undefined}
-            style={{
-              y: !isMobile ? parallaxY : 0,
-              scale: !isMobile ? scale : 1,
-              opacity: !isMobile ? opacity : 1,
-            }}
             className="relative z-10"
           >
             <OptimizedImage />
