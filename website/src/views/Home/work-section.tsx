@@ -1,4 +1,3 @@
-// components/WorkSection.tsx
 "use client";
 
 import type React from "react";
@@ -12,6 +11,8 @@ import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 import { isMobileDevice } from "@/utils/deviceDetection";
+import BuildSVGImage from "@/public/build.svg";
+import Image from "next/image";
 
 type WorkSectionProps = {
   id: string;
@@ -137,13 +138,21 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
         </div>
 
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
-          <div
-            className={`w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative ${
-              isMobile ? "" : "animate-float"
-            }`}
-          >
-            <div ref={lottieContainerRef} className="w-full h-full" />
-          </div>
+          {isMobile ? (
+            <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 relative">
+              <Image
+                src={BuildSVGImage}
+                alt="Under construction"
+                layout="fill"
+                objectFit="contain"
+                priority
+              />
+            </div>
+          ) : (
+            <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative">
+              <div ref={lottieContainerRef} className="w-full h-full" />
+            </div>
+          )}
         </div>
       </motion.div>
 
