@@ -1,3 +1,4 @@
+// hooks/useScrollHandler.ts
 import { useState, useRef, useCallback, useEffect } from "react";
 import { isMobileDevice } from "@/utils/deviceDetection";
 
@@ -45,17 +46,19 @@ export const useScrollHandler = (
 
       if (isMobile) {
         // On mobile, use scrollIntoView for smooth scrolling
-        const element = document.getElementById(targetSection.id);
-        if (element) {
-          scrollLockRef.current = true;
-          element.scrollIntoView({ behavior: "smooth" });
+        if (typeof window !== "undefined") {
+          const element = document.getElementById(targetSection.id);
+          if (element) {
+            scrollLockRef.current = true;
+            element.scrollIntoView({ behavior: "smooth" });
 
-          // Optional: Update currentPage after scrolling completes
-          // This requires listening to the scroll event or using a timeout
-          setTimeout(() => {
-            setCurrentPage(targetIndex);
-            scrollLockRef.current = false;
-          }, SCROLL_LOCK_DURATION);
+            // Optional: Update currentPage after scrolling completes
+            // This requires listening to the scroll event or using a timeout
+            setTimeout(() => {
+              setCurrentPage(targetIndex);
+              scrollLockRef.current = false;
+            }, SCROLL_LOCK_DURATION);
+          }
         }
       } else {
         // On desktop, use snap-scroll by updating currentPage
