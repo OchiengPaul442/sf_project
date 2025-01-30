@@ -5,21 +5,13 @@ import { useState, useRef, useCallback, memo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
+import type { StepWithData } from "@/utils/types/section";
 
-// Dynamically import Lottie for animations
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-black" />,
 });
 
-// Step interface with preloaded animationData
-interface StepWithData {
-  id: string;
-  title: string;
-  animationData: any; // Ideally, replace 'any' with a specific type from lottie-react
-}
-
-// Animation variants for carousel transitions
 const carouselVariants = {
   enter: (direction: number) => ({
     y: direction > 0 ? 80 : -80,
@@ -29,14 +21,12 @@ const carouselVariants = {
     y: 0,
     opacity: 1,
   },
-
   exit: (direction: number) => ({
     y: direction < 0 ? 80 : -80,
     opacity: 0,
   }),
 };
 
-// Navigation Item Component
 const NavItem = memo(function NavItem({
   step,
   isActive,
@@ -47,16 +37,9 @@ const NavItem = memo(function NavItem({
   onClick: () => void;
 }) {
   return (
-    <motion.div
-      className="relative cursor-pointer focus:outline-none"
+    <motion.button
+      className="relative cursor-pointer focus:outline-none w-full text-left"
       onClick={onClick}
-      onKeyPress={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          onClick();
-        }
-      }}
-      role="button"
-      tabIndex={0}
       initial={false}
       animate={{ opacity: isActive ? 1 : 0.5 }}
       transition={{ duration: 0.3 }}
@@ -81,25 +64,19 @@ const NavItem = memo(function NavItem({
           {step.title}
         </span>
       </div>
-    </motion.div>
+    </motion.button>
   );
 });
 
-type HowSectionCarouselProps = {
-  id: string;
-  steps: StepWithData[];
-};
-
-const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
-  function HowSectionCarousel({ steps, id }) {
+const HowSectionCarousel: React.FC<StepWithData> = memo(
+  function HowSectionCarousel({ id, title, steps }) {
     const [selectedStepIndex, setSelectedStepIndex] = useState(0);
     const [direction, setDirection] = useState(0);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
     const isVisibleRef = useRef(true);
 
-    const currentStep = steps[selectedStepIndex];
+    const currentStep = steps?.[selectedStepIndex];
 
-    // Intersection Observer to pause/play the animation when not visible
     useEffect(() => {
       const observer = new IntersectionObserver(
         ([entry]) => {
@@ -122,7 +99,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       }
     }, [id]);
 
-    // Navigation click handler
     const handleNavClick = useCallback(
       (index: number) => {
         if (index !== selectedStepIndex) {
@@ -133,18 +109,25 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       [selectedStepIndex]
     );
 
+    if (!steps || steps.length === 0) {
+      return null;
+    }
+
     return (
       <section
         id={id}
         className="relative w-full h-full bg-black overflow-hidden snap-start"
+        aria-label={title}
       >
         <div className="w-full h-full flex items-center justify-center">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between">
-            {/* Navigation Section */}
             <div className="relative w-full lg:w-[45%] py-6 lg:py-0">
               <div className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
-              <nav className="space-y-6 sm:space-y-8 lg:space-y-10">
-                {steps.map((step: any, index: any) => (
+              <nav
+                className="space-y-6 sm:space-y-8 lg:space-y-10"
+                aria-label={`${title} navigation`}
+              >
+                {steps.map((step, index) => (
                   <NavItem
                     key={step.id}
                     step={step}
@@ -155,7 +138,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
               </nav>
             </div>
 
-            {/* Animation Container */}
             <div className="relative w-full lg:w-[55%] h-[40vh] lg:h-[60vh] xl:h-[70vh]">
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
@@ -193,7 +175,9 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                       </div>
                     </div>
                   ) : (
-                    <div className="text-red-500">Failed to load animation</div>
+                    <div className="text-white text-center" aria-live="polite">
+                      No animation available for this step
+                    </div>
                   )}
                 </motion.div>
               </AnimatePresence>

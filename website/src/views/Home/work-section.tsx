@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useRef, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import lottie, { type AnimationItem } from "lottie-web";
@@ -9,23 +9,18 @@ import { ArrowRight, X } from "lucide-react";
 
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
-import ConstructionAnimation from "@/public/lottie/contruction.json";
 import { isMobileDevice } from "@/utils/deviceDetection";
-import BuildSVGImage from "@/public/build.svg";
 import Image from "next/image";
+import type { SectionProps } from "@/utils/types/section";
 
-type WorkSectionProps = {
-  id?: string;
-};
-
-const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
+const WorkSection: React.FC<SectionProps> = ({ id, title, animationData }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const contactModalOpen = useSelector(
     (state) => state.ui.contactModalOpen
   ) as any;
 
-  const isMobile = useMemo(() => isMobileDevice(), []);
+  const isMobile = isMobileDevice();
 
   const handleOpenForm = useCallback(() => {
     dispatch(setContactModalOpen(true));
@@ -35,22 +30,15 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
     dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
-  const lottieOptions = useMemo(
-    () => ({
-      renderer: "svg" as const,
-      loop: true,
-      autoplay: true,
-      animationData: ConstructionAnimation,
-    }),
-    []
-  );
-
   useEffect(() => {
     let animation: AnimationItem | null = null;
-    if (lottieContainerRef.current) {
+    if (lottieContainerRef.current && animationData) {
       animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
-        ...lottieOptions,
+        renderer: "svg",
+        loop: true,
+        autoplay: true,
+        animationData: animationData,
       });
 
       animation.setSpeed(1.2);
@@ -61,7 +49,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
         animation.destroy();
       }
     };
-  }, [lottieOptions]);
+  }, [animationData]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -86,22 +74,8 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
     >
       <motion.div
         className="container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative"
-        initial={
-          isMobile
-            ? {}
-            : {
-                opacity: 0,
-                y: 50,
-              }
-        }
-        animate={
-          isMobile
-            ? {}
-            : {
-                opacity: 1,
-                y: 0,
-              }
-        }
+        initial={isMobile ? {} : { opacity: 0, y: 50 }}
+        animate={isMobile ? {} : { opacity: 1, y: 0 }}
         transition={
           isMobile
             ? {}
@@ -114,7 +88,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
       >
         <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl w-full lg:w-1/2 mb-12 lg:mb-0">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
-            Work with us
+            {title}
           </h2>
           <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.02em] leading-[1.1]">
             Are you an engineer who&apos;s excited about our{" "}
@@ -140,7 +114,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
           {isMobile ? (
             <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 relative">
               <Image
-                src={BuildSVGImage}
+                src="/build.svg"
                 alt="Under construction"
                 layout="fill"
                 objectFit="contain"

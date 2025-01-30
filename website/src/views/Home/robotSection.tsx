@@ -1,12 +1,13 @@
 "use client";
 
-import React, { memo, useRef, useEffect, useState } from "react";
+import type React from "react";
+import { memo, useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion, useAnimation } from "framer-motion";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { LottieRefCurrentProps } from "lottie-react";
+import type { SectionProps } from "@/utils/types/section";
 
-// Optimize Lottie loading with suspense and preload
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
   loading: () => (
@@ -16,11 +17,9 @@ const Lottie = dynamic(() => import("lottie-react"), {
   ),
 });
 
-// Separate GlowEffect component with optimized rendering
 const GlowEffect = memo(() => {
   const isMobile = isMobileDevice();
 
-  // Simplified mobile glow with reduced blur and size
   const mobileConfig = {
     outer: {
       size: "w-[250px] h-[250px]",
@@ -34,7 +33,6 @@ const GlowEffect = memo(() => {
     },
   };
 
-  // Full desktop glow effect
   const desktopConfig = {
     outer: {
       size: "w-[600px] h-[600px]",
@@ -70,33 +68,26 @@ const GlowEffect = memo(() => {
 
 GlowEffect.displayName = "GlowEffect";
 
-type RobotSectionProps = {
-  id?: string;
-  animationData?: any; // Receives animationData from HomePage
-};
-
-const RobotSection: React.FC<RobotSectionProps> = ({ id, animationData }) => {
+const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const controls = useAnimation();
   const isMobile = isMobileDevice();
-  const [isMounted, setIsMounted] = useState(false); // New state flag
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Set isMounted to true after component mounts
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Desktop-only animations
   useEffect(() => {
-    if (!isMounted) return; // Ensure component is mounted
+    if (!isMounted) return;
     if (isMobile) {
       controls.set({ opacity: 1, y: 0 });
       return;
     }
 
     const observerCallback: IntersectionObserverCallback = ([entry]) => {
-      if (!isMounted) return; // Double-check mount status
+      if (!isMounted) return;
 
       if (entry.isIntersecting) {
         lottieRef.current?.animationItem?.play();
@@ -169,7 +160,6 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id, animationData }) => {
               }}
             />
           ) : (
-            // Optionally, show a fallback loader or placeholder
             <div className="w-full h-full flex items-center justify-center">
               <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
             </div>

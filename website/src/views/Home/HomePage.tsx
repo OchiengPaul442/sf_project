@@ -1,21 +1,25 @@
 "use client";
 
-import React from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "@/components/loader";
-import RobotSection from "@/views/Home/robotSection";
-import FooterSection from "./footer-section";
-import dynamic from "next/dynamic";
 import { useAssetLoader } from "@/hooks/useAssetLoader";
-import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
+import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import MenuModal from "@/components/dialog/menu-modal";
+import dynamic from "next/dynamic";
+import type { SectionProps, StepWithData } from "@/utils/types/section";
 
-// Dynamically import sections with no SSR
+// Dynamically import sections
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
   { ssr: false }
 );
+
+const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
+  ssr: false,
+});
 
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
@@ -26,6 +30,10 @@ const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
 });
 
 const HowSection = dynamic(() => import("@/views/Home/how-section"), {
+  ssr: false,
+});
+
+const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
   ssr: false,
 });
 
@@ -40,7 +48,7 @@ const JSON_PATHS = [
   "/lottie/angel.json",
 ] as const;
 
-const STEPS_WITH_IDS: any[] = [
+const STEPS_WITH_IDS: StepWithData[] = [
   { id: "smooth-onboarding", title: "Smooth Onboarding" },
   { id: "data-integrity", title: "Data Integrity" },
   { id: "managed-consumables", title: "Tightly Managed Consumables" },
@@ -48,7 +56,7 @@ const STEPS_WITH_IDS: any[] = [
   { id: "fraud-eliminated", title: "Fraud Eliminated" },
 ];
 
-const SECTIONS = [
+const SECTIONS: SectionProps[] = [
   { id: "home", title: "Home" },
   { id: "robot", title: "Robot" },
   { id: "how", title: "How it works" },
@@ -58,11 +66,25 @@ const SECTIONS = [
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
-  // Use the new asset loader
-  const { isLoading, hasErrors, errors } = useAssetLoader(JSON_PATHS);
+  const { isLoading, hasErrors, errors, animationDataMap } =
+    useAssetLoader(JSON_PATHS);
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
+  const [pageLoaded, setPageLoaded] = useState(false);
 
-  // Show error state if any assets failed to load
+  useEffect(() => {
+    if (!isLoading && !hasErrors) {
+      setPageLoaded(true);
+    }
+  }, [isLoading, hasErrors]);
+
+  useEffect(() => {
+    if (animationDataMap) {
+      STEPS_WITH_IDS.forEach((step, index) => {
+        step.animationData = animationDataMap[JSON_PATHS[index]];
+      });
+    }
+  }, [animationDataMap]);
+
   if (hasErrors) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white p-4">
@@ -79,7 +101,10 @@ const HomePage: React.FC = () => {
   }
 
   const scrollToSection = (id: string) => {
-    return;
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
@@ -99,15 +124,31 @@ const HomePage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {!isLoading && (
-        <>
-          <HeaderSection />
-          <RobotSection />
-          <HowSection />
-          <HowSectionCarousel steps={STEPS_WITH_IDS} />
-          <WorkSection />
-          <FooterSection />
-        </>
+      {pageLoaded && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <HeaderSection id="home" title="Home" image="/Vector.svg" />
+          <RobotSection
+            id="robot"
+            title="Robot"
+            animationData={animationDataMap["/lottie/robot.json"]}
+          />
+          <HowSection id="how" title="How it works" />
+          <HowSectionCarousel
+            id="how-carousel"
+            title="How It Works Carousel"
+            steps={STEPS_WITH_IDS}
+          />
+          <WorkSection
+            id="work"
+            title="Work"
+            animationData={animationDataMap["/lottie/contruction.json"]}
+          />
+          <FooterSection id="footer" title="Footer" image="/logo-white.png" />
+        </motion.div>
       )}
 
       <MenuModal

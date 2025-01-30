@@ -1,40 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-export const useAssetLoader = (paths: readonly string[]) => {
+interface AssetLoaderResult {
+  isLoading: boolean;
+  hasErrors: boolean;
+  errors: Record<string, string>;
+  animationDataMap: Record<string, any>;
+}
+
+export const useAssetLoader = (paths: readonly string[]): AssetLoaderResult => {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
-    paths.reduce((acc, path) => ({ ...acc, [path]: true }), {})
+    Object.fromEntries(paths.map((path) => [path, true]))
   );
   const [errorStates, setErrorStates] = useState<Record<string, string>>({});
   const [animationDataMap, setAnimationDataMap] = useState<Record<string, any>>(
     {}
   );
 
-  useEffect(() => {
-    const loadAsset = async (path: string) => {
-      try {
-        const response = await fetch(path);
-        if (!response.ok) {
-          throw new Error(`Failed to load ${path}: ${response.statusText}`);
-        }
-        const data = await response.json();
-        setAnimationDataMap((prev) => ({ ...prev, [path]: data }));
-        setLoadingStates((prev) => ({ ...prev, [path]: false }));
-      } catch (error) {
-        console.error(`Error loading ${path}:`, error);
-        setErrorStates((prev) => ({
-          ...prev,
-          [path]: (error as Error).message,
-        }));
-        setLoadingStates((prev) => ({ ...prev, [path]: false }));
+  const loadAsset = useCallback(async (path: string) => {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to load ${path}: ${response.statusText}`);
       }
-    };
+      const data = await response.json();
+      setAnimationDataMap((prev) => ({ ...prev, [path]: data }));
+      setLoadingStates((prev) => ({ ...prev, [path]: false }));
+    } catch (error) {
+      console.error(`Error loading ${path}:`, error);
+      setErrorStates((prev) => ({
+        ...prev,
+        [path]: error instanceof Error ? error.message : String(error),
+      }));
+      setLoadingStates((prev) => ({ ...prev, [path]: false }));
+    }
+  }, []);
 
+  useEffect(() => {
     paths.forEach((path) => {
       loadAsset(path);
     });
-  }, [paths]);
+  }, [paths, loadAsset]);
 
   const isLoading = Object.values(loadingStates).some((state) => state);
   const hasErrors = Object.keys(errorStates).length > 0;
