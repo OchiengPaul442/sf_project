@@ -12,17 +12,36 @@ import Loader from "@/components/loader";
 import NextButton from "@/components/NextButton";
 import MenuModal from "@/components/dialog/menu-modal";
 
-// sections
-import HowSectionCarousel from "@/components/carousels/how-section-carousel";
-import FooterSection from "@/views/Home/footer-section";
-import HeaderSection from "@/views/Home/header-section";
-import RobotSection from "@/views/Home/robotSection";
-import WorkSection from "@/views/Home/work-section";
-import HowSection from "@/views/Home/how-section";
-
 import { isMobileDevice } from "@/utils/deviceDetection";
 import { useAssetPreloader } from "@/hooks/useAssetPreloader";
 import { useScrollHandler } from "@/hooks/useScrollHandler";
+import dynamic from "next/dynamic";
+
+// Dynamically import sections with no SSR
+const HowSectionCarousel = dynamic(
+  () => import("@/components/carousels/how-section-carousel"),
+  { ssr: false }
+);
+
+const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
+  ssr: false,
+});
+
+const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
+  ssr: false,
+});
+
+const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
+  ssr: false,
+});
+
+const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
+  ssr: false,
+});
+
+const HowSection = dynamic(() => import("@/views/Home/how-section"), {
+  ssr: false,
+});
 
 const JSON_PATHS = [
   "/lottie/sailing_boat_2.json",
