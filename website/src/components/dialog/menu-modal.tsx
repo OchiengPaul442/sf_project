@@ -13,7 +13,7 @@ interface MenuModalProps {
 
 const menuItems = [
   { title: "HOME", id: "home" },
-  { title: "SOLUTIONS", id: "solutions" },
+  { title: "SOLUTIONS", id: "how-carousel" },
   { title: "WORK", id: "work" },
 ];
 

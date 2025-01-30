@@ -13,7 +13,12 @@ import { ContactForm } from "@/components/forms/contact-form";
 import ConstructionAnimation from "@/public/lottie/contruction.json";
 import { isMobileDevice } from "@/utils/deviceDetection";
 
-const WorkSection: React.FC = () => {
+type WorkSectionProps = {
+  id: string;
+  className?: string;
+};
+
+const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const contactModalOpen = useSelector(
@@ -76,7 +81,7 @@ const WorkSection: React.FC = () => {
 
   return (
     <section
-      id="contact"
+      id={id}
       className="min-h-screen bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div

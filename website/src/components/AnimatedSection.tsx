@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { isMobileDevice } from "@/utils/deviceDetection";
 
@@ -31,55 +30,52 @@ const ANIMATION_CONFIG = {
   },
 };
 
-const AnimatedSection: React.FC<AnimatedSectionProps> = ({
-  isActive,
-  index,
-  total,
-  scrollDirection,
-  children,
-  className = "",
-}) => {
-  const isMobile = isMobileDevice();
-  const animationConfig = isMobile
-    ? ANIMATION_CONFIG.mobile
-    : ANIMATION_CONFIG.desktop;
+const AnimatedSection: React.FC<AnimatedSectionProps> = React.memo(
+  ({ isActive, index, total, scrollDirection, children, className = "" }) => {
+    const isMobile = isMobileDevice();
+    const animationConfig = isMobile
+      ? ANIMATION_CONFIG.mobile
+      : ANIMATION_CONFIG.desktop;
 
-  const variants = useMemo(
-    () => ({
-      initial: {
-        y: scrollDirection === "down" ? "100%" : "-100%",
-        opacity: 0,
-      },
-      animate: {
-        y: 0,
-        opacity: 1,
-        transition: animationConfig,
-      },
-      exit: {
-        y: scrollDirection === "down" ? "-100%" : "100%",
-        opacity: 0,
-        transition: {
-          ...animationConfig,
-          duration: animationConfig.duration - 0.1,
+    const variants = useMemo(
+      () => ({
+        initial: {
+          y: scrollDirection === "down" ? "100%" : "-100%",
+          opacity: 0,
         },
-      },
-    }),
-    [scrollDirection, animationConfig]
-  );
+        animate: {
+          y: 0,
+          opacity: 1,
+          transition: animationConfig,
+        },
+        exit: {
+          y: scrollDirection === "down" ? "-100%" : "100%",
+          opacity: 0,
+          transition: {
+            ...animationConfig,
+            duration: animationConfig.duration - 0.1,
+          },
+        },
+      }),
+      [scrollDirection, animationConfig]
+    );
 
-  return (
-    <motion.div
-      className={`fixed inset-0 w-full h-full overflow-hidden ${className}`}
-      initial="initial"
-      animate={isActive ? "animate" : "exit"}
-      variants={variants}
-      style={{
-        zIndex: isActive ? total : index,
-      }}
-    >
-      {children}
-    </motion.div>
-  );
-};
+    return (
+      <motion.div
+        className={`fixed inset-0 w-full h-full overflow-hidden ${className}`}
+        initial="initial"
+        animate={isActive ? "animate" : "exit"}
+        variants={variants}
+        style={{
+          zIndex: isActive ? total : index,
+        }}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+);
+
+AnimatedSection.displayName = "AnimatedSection";
 
 export default AnimatedSection;

@@ -1,41 +1,42 @@
+// components/HeaderSection.tsx
 "use client";
 
-import { memo, useRef, useEffect, useState } from "react";
+import React, { memo, useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import {
   motion,
   useScroll,
   useTransform,
-  type MotionValue,
-  type Variants,
+  MotionValue,
+  Variants,
 } from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
 import VectorImage from "@/public/Vector.svg";
 import { isMobileDevice } from "@/utils/deviceDetection";
 
-// Optimized parallax hook
+// Parallax Transformation Function
 function useParallax(scrollProgress: MotionValue<number>, distance: number) {
   return useTransform(scrollProgress, [0, 1], [0, distance], {
     clamp: true,
   });
 }
 
-// Memoized image component
-const OptimizedImage = memo(function OptimizedImage() {
-  return (
-    <Image
-      src={VectorImage || "/placeholder.svg"}
-      alt="WE'RE SAVING FOOD"
-      width={480}
-      height={480}
-      priority
-      className="w-full h-auto"
-      sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 400px, 480px"
-    />
-  );
-});
+// Memoized Image Component for Performance Optimization
+const OptimizedImage = memo(() => (
+  <Image
+    src={VectorImage || "/placeholder.svg"}
+    alt="We're Saving Food"
+    width={480}
+    height={480}
+    priority
+    className="w-full h-auto"
+    sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 400px, 480px"
+  />
+));
 
-// Animation variants
+OptimizedImage.displayName = "OptimizedImage";
+
+// Animation Variants for Container
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.8 },
   visible: {
@@ -45,6 +46,7 @@ const containerVariants: Variants = {
   },
 };
 
+// Animation Variants for Floating Effect
 const floatingVariants: Variants = {
   float: {
     y: [-10, 10],
@@ -57,17 +59,20 @@ const floatingVariants: Variants = {
   },
 };
 
-const HeaderSection: React.FC<any> = () => {
+const HeaderSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
+  // Destructure scrollYProgress from useScroll hook
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  // Memoized transforms
+  // Apply Parallax Effect
   const parallaxY = useParallax(scrollYProgress, 150);
+
+  // Transformations based on scroll progress
   const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.05], {
     clamp: true,
   });
@@ -81,7 +86,7 @@ const HeaderSection: React.FC<any> = () => {
     clamp: true,
   });
 
-  // Device detection with debouncing
+  // Device Detection with Debouncing to Optimize Resize Events
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
@@ -94,25 +99,22 @@ const HeaderSection: React.FC<any> = () => {
       timeoutId = setTimeout(checkIsMobile, 150);
     };
 
-    // Initial check
+    // Initial Check
     checkIsMobile();
 
-    // Add debounced event listener
+    // Add Debounced Resize Event Listener
     window.addEventListener("resize", handleResize, { passive: true });
 
+    // Cleanup on Unmount
     return () => {
       window.removeEventListener("resize", handleResize);
       clearTimeout(timeoutId);
     };
   }, []);
 
-  // Scroll to top on mount with RAF
+  // Scroll to Top on Mount without Animation (Instant)
   useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    });
-
-    return () => cancelAnimationFrame(rafId);
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   return (
@@ -125,7 +127,7 @@ const HeaderSection: React.FC<any> = () => {
         <Nav />
       </div>
 
-      {/* Content container */}
+      {/* Content Container */}
       <div className="sticky top-0 h-screen flex items-center justify-center px-4">
         <motion.div
           variants={containerVariants}
@@ -133,7 +135,7 @@ const HeaderSection: React.FC<any> = () => {
           animate="visible"
           className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
         >
-          {/* Background blur effect - only render when needed */}
+          {/* Background Blur Effect - Render Only on Desktop */}
           {!isMobile && (
             <motion.div
               className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full"
@@ -145,7 +147,7 @@ const HeaderSection: React.FC<any> = () => {
             />
           )}
 
-          {/* Main image container */}
+          {/* Main Image Container with Conditional Animations */}
           <motion.div
             variants={!isMobile ? floatingVariants : undefined}
             animate={!isMobile ? "float" : undefined}
@@ -164,5 +166,8 @@ const HeaderSection: React.FC<any> = () => {
   );
 };
 
+// Assign Display Name for Better Debugging
 HeaderSection.displayName = "HeaderSection";
+
+// Export Memoized Component to Prevent Unnecessary Re-renders
 export default memo(HeaderSection);

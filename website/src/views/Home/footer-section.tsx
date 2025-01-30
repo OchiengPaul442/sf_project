@@ -4,7 +4,11 @@ import Image from "next/image";
 import { PiArrowULeftUp } from "react-icons/pi";
 import LogoImage from "@/public/logo-white.png";
 
-const FooterSection: React.FC<any> = ({ scrollToTop }) => {
+interface FooterSectionProps {
+  scrollToTop?: () => void;
+}
+
+const FooterSection: React.FC<FooterSectionProps> = ({ scrollToTop }) => {
   return (
     <footer className="h-dvh container mx-auto bg-transparent flex flex-col justify-end relative p-4 sm:p-6 md:p-8 lg:p-12">
       <button

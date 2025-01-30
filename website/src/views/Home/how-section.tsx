@@ -146,11 +146,12 @@ const GradientSeparator: React.FC<{ progress: number }> = ({ progress }) => {
 
 // --- HowSection Component ---
 interface HowSectionProps {
+  id: string;
   isActive?: boolean;
   onScrollProgress?: (progress: number) => void;
 }
 
-const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress }) => {
+const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress, id }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [currentScrollProgress, setCurrentScrollProgress] = useState(0);
@@ -191,10 +192,11 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress }) => {
   return (
     <section
       ref={sectionRef}
+      id={id}
       className="relative bg-black min-h-screen"
       style={{ height: sectionHeight ? `${sectionHeight}px` : "100vh" }}
     >
-      <div className="fixed top-0 left-0 w-full h-screen flex items-center justify-center">
+      <div className="relative md:fixed top-0 left-0 w-full h-screen flex items-center justify-center">
         <div className="container mx-auto px-4">
           <div className="relative mx-auto w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%]">
             <div className="flex flex-col justify-center items-center h-full space-y-4 sm:space-y-24 md:space-y-28">
