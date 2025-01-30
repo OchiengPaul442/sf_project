@@ -55,6 +55,11 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
   const controls = useAnimation();
   const isMobile = isMobileDevice();
 
+  // Initialize animation controls
+  useEffect(() => {
+    controls.start({ opacity: 0, y: 30 });
+  }, [controls]);
+
   // 🚀 Play Lottie animation and start Framer Motion animation when in view
   useEffect(() => {
     if (isMobile) return;
@@ -62,26 +67,29 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          // Ensure animations only start after mount
-          requestAnimationFrame(() => {
-            lottieRef.current?.animationItem?.play();
-            controls.start("visible"); // ✅ Moved inside requestAnimationFrame
+          lottieRef.current?.animationItem?.play();
+          controls.start({
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.6 },
           });
         } else {
-          requestAnimationFrame(() => {
-            lottieRef.current?.animationItem?.pause();
-          });
+          lottieRef.current?.animationItem?.pause();
+          controls.start({ opacity: 0, y: 30 });
         }
       },
       { threshold: 0.3 }
     );
 
-    if (sectionRef.current) observer.observe(sectionRef.current);
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     return () => {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      if (sectionRef.current) observer.unobserve(sectionRef.current);
-      observer.disconnect(); // ✅ Ensures proper cleanup
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+      observer.disconnect();
     };
   }, [controls, isMobile]);
 
@@ -91,19 +99,12 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
       ref={sectionRef}
       className="relative min-h-screen bg-black flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
     >
-      {/* 🌟 Futuristic Glow Effect */}
       <GlowEffect />
 
-      {/* Title & Animation Wrapper */}
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={controls} // ✅ Now using useAnimation() properly
-        variants={{
-          visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-        }}
+        animate={controls}
         className="relative z-10 flex flex-col items-center text-center"
       >
-        {/* 🚀 Title */}
         <h2 className="text-white text-3xl sm:text-4xl font-light mb-12 tracking-tight">
           with{" "}
           <span className="font-extrabold text-green-400 drop-shadow-lg">
@@ -111,7 +112,6 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
           </span>
         </h2>
 
-        {/* 🤖 Robot Animation */}
         <div className="w-full max-w-[280px] sm:max-w-[400px] aspect-square">
           <Lottie
             animationData={robotAnimation}

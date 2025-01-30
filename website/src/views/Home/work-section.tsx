@@ -82,7 +82,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
   return (
     <section
       id={id}
-      className="min-h-screen bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen overflow-y-scroll bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div
         className="container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative"
@@ -159,7 +159,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
               damping: 30,
               mass: 0.8,
             }}
-            className="fixed inset-0 bg-white z-50 overflow-hidden"
+            className="fixed inset-0 bg-white z-50 overflow-y-scroll md:overflow-hidden"
           >
             <div className="relative h-full">
               <button

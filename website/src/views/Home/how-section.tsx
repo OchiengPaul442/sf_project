@@ -198,7 +198,7 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress, id }) => {
         } top-0 left-0 w-full h-screen flex items-center justify-center`}
       >
         <div className="container mx-auto px-4">
-          <div className="relative mx-auto w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%]">
+          <div className="relative mx-auto w-full max-w-[90%] sm:max-w-[85%]">
             <div className="flex flex-col justify-center items-center h-full space-y-4 sm:space-y-24 md:space-y-28">
               <div className="w-full">
                 <TextReveal
