@@ -189,7 +189,7 @@ const HowSection: React.FC<HowSectionProps> = ({ onScrollProgress, id }) => {
     <section
       ref={sectionRef}
       id={id}
-      className="relative bg-black min-h-screen"
+      className="relative bg-black h-dvh md:min-h-screen"
       style={{ height: sectionHeight ? `${sectionHeight}px` : "100vh" }}
     >
       <div

@@ -83,7 +83,7 @@ const WorkSection: React.FC<WorkSectionProps> = ({ id }) => {
   return (
     <section
       id={id}
-      className="min-h-screen overflow-y-scroll bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      className="h-dvh md:min-h-screen overflow-y-scroll bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div
         className="container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative"

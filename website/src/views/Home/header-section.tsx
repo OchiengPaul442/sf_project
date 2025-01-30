@@ -89,7 +89,7 @@ const HeaderSection: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative h-dvh bg-white overflow-hidden"
+      className="relative h-dvh md:min-h-screen bg-white overflow-hidden"
     >
       {/* Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50">
