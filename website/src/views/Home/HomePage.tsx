@@ -38,14 +38,14 @@ const JSON_PATHS = [
 interface SectionProps {
   onScrollPastStart?: () => void;
   onScrollPastEnd?: () => void;
-  scrollToTop?: () => void;
   onScrollComplete?: () => void;
+  scrollToTop?: () => void;
 }
 
 interface SectionConfig {
-  Component: React.ComponentType<SectionProps>;
   id: string;
-  allowScroll?: boolean; // Let’s add this explicitly
+  allowScroll?: boolean;
+  Component: React.ComponentType<SectionProps>;
 }
 
 interface StepWithData {
@@ -125,12 +125,12 @@ const HomePage: React.FC = () => {
       },
       {
         id: "solutions",
-        allowScroll: true, // Key: let this section handle its scroll
+        allowScroll: true, // Let this section handle its scroll
         Component: ({
           onScrollPastStart,
           onScrollPastEnd,
           onScrollComplete,
-        }) => (
+        }: SectionProps) => (
           <HowSection
             id="solutions"
             onScrollProgress={(p: number) => {
@@ -148,8 +148,8 @@ const HomePage: React.FC = () => {
       },
       {
         id: "how-carousel",
-        allowScroll: true, // Key: let this section handle its scroll
-        Component: ({ onScrollPastStart, onScrollPastEnd }) => (
+        allowScroll: true, // Let this section handle its scroll
+        Component: ({ onScrollPastStart, onScrollPastEnd }: SectionProps) => (
           <HowSectionCarousel
             id="how-carousel"
             steps={stepsWithData}
@@ -161,19 +161,18 @@ const HomePage: React.FC = () => {
       },
       {
         id: "work",
-        allowScroll: false,
+        allowScroll: contactModalOpen ? true : false,
         Component: () => <WorkSection id="work" />,
       },
       {
         id: "footer",
         allowScroll: false,
-        Component: ({ scrollToTop }) => (
+        Component: ({ scrollToTop }: SectionProps) => (
           <FooterSection scrollToTop={scrollToTop} />
         ),
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [stepsWithData, isMobile]
+    [stepsWithData, isMobile, contactModalOpen]
   );
 
   // -- useScrollHandler now takes the sections array too --
