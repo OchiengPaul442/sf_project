@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
@@ -13,8 +12,9 @@ import NextButton from "@/components/NextButton";
 import MenuModal from "@/components/dialog/menu-modal";
 
 import { isMobileDevice } from "@/utils/deviceDetection";
-import { useAssetPreloader } from "@/hooks/useAssetPreloader";
 import { useScrollHandler } from "@/hooks/useScrollHandler";
+import FooterSection from "@/views/Home/footer-section";
+import RobotSection from "@/views/Home/robotSection";
 import dynamic from "next/dynamic";
 
 // Dynamically import sections with no SSR
@@ -23,15 +23,7 @@ const HowSectionCarousel = dynamic(
   { ssr: false }
 );
 
-const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
-  ssr: false,
-});
-
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
-  ssr: false,
-});
-
-const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
   ssr: false,
 });
 
@@ -52,13 +44,14 @@ const JSON_PATHS = [
   "/lottie/robot.json",
   "/lottie/contruction.json",
   "/lottie/angel.json",
-];
+] as const;
 
 interface SectionProps {
   onScrollPastStart?: () => void;
   onScrollPastEnd?: () => void;
   onScrollComplete?: () => void;
   scrollToTop?: () => void;
+  animationData?: any; // Added to pass animation data to sections
 }
 
 interface SectionConfig {
@@ -73,6 +66,52 @@ interface StepWithData {
   animationData: any;
 }
 
+// New asset loading hook with better error handling and loading states
+const useAssetLoader = (paths: readonly string[]) => {
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
+    paths.reduce((acc, path) => ({ ...acc, [path]: true }), {})
+  );
+  const [errorStates, setErrorStates] = useState<Record<string, string>>({});
+  const [animationDataMap, setAnimationDataMap] = useState<Record<string, any>>(
+    {}
+  );
+
+  useEffect(() => {
+    const loadAsset = async (path: string) => {
+      try {
+        const response = await fetch(path);
+        if (!response.ok) {
+          throw new Error(`Failed to load ${path}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setAnimationDataMap((prev) => ({ ...prev, [path]: data }));
+        setLoadingStates((prev) => ({ ...prev, [path]: false }));
+      } catch (error) {
+        console.error(`Error loading ${path}:`, error);
+        setErrorStates((prev) => ({
+          ...prev,
+          [path]: (error as Error).message,
+        }));
+        setLoadingStates((prev) => ({ ...prev, [path]: false }));
+      }
+    };
+
+    paths.forEach((path) => {
+      loadAsset(path);
+    });
+  }, [paths]);
+
+  const isLoading = Object.values(loadingStates).some((state) => state);
+  const hasErrors = Object.keys(errorStates).length > 0;
+
+  return {
+    isLoading,
+    hasErrors,
+    errors: errorStates,
+    animationDataMap,
+  };
+};
+
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state: RootState) => state.menu.isOpen);
@@ -81,12 +120,13 @@ const HomePage: React.FC = () => {
     (state: RootState) => state.ui.contactModalOpen
   );
 
-  // Preload animations
-  const { isLoading, animationDataMap } = useAssetPreloader(JSON_PATHS);
+  // Use the new asset loader
+  const { isLoading, hasErrors, errors, animationDataMap } =
+    useAssetLoader(JSON_PATHS);
   const isMobile = isMobileDevice();
 
   const stepsWithData: StepWithData[] = useMemo(() => {
-    if (isLoading) return [];
+    if (isLoading || hasErrors) return [];
     return [
       {
         id: "smooth-onboarding",
@@ -114,12 +154,8 @@ const HomePage: React.FC = () => {
         animationData: animationDataMap["/lottie/data.json"],
       },
     ];
-  }, [animationDataMap, isLoading]);
+  }, [animationDataMap, isLoading, hasErrors]);
 
-  /**
-   * Our array of sections, each with allowScroll set to true/false.
-   * "solutions" and "how-carousel" are set to true so they can handle internal scrolling.
-   */
   const sections: SectionConfig[] = useMemo(
     () => [
       {
@@ -140,11 +176,17 @@ const HomePage: React.FC = () => {
       {
         id: "robot",
         allowScroll: false,
-        Component: () => <RobotSection id="robot" />,
+        Component: (props: SectionProps) => (
+          <RobotSection
+            id="robot"
+            animationData={animationDataMap["/lottie/robot.json"]}
+            {...props}
+          />
+        ),
       },
       {
         id: "solutions",
-        allowScroll: true, // Let this section handle its scroll
+        allowScroll: true,
         Component: ({
           onScrollPastStart,
           onScrollPastEnd,
@@ -153,7 +195,6 @@ const HomePage: React.FC = () => {
           <HowSection
             id="solutions"
             onScrollProgress={(p: number) => {
-              // This logic is called *inside* the section
               if (isMobile) {
                 if (p <= 0) onScrollPastStart?.();
                 if (p >= 1) onScrollComplete?.();
@@ -167,7 +208,7 @@ const HomePage: React.FC = () => {
       },
       {
         id: "how-carousel",
-        allowScroll: true, // Let this section handle its scroll
+        allowScroll: true,
         Component: ({ onScrollPastStart, onScrollPastEnd }: SectionProps) => (
           <HowSectionCarousel
             id="how-carousel"
@@ -180,7 +221,8 @@ const HomePage: React.FC = () => {
       },
       {
         id: "work",
-        allowScroll: contactModalOpen ? true : false,
+        // Ensure allowScroll is explicitly a boolean
+        allowScroll: Boolean(contactModalOpen),
         Component: () => <WorkSection id="work" />,
       },
       {
@@ -191,10 +233,9 @@ const HomePage: React.FC = () => {
         ),
       },
     ],
-    [stepsWithData, isMobile, contactModalOpen]
+    [stepsWithData, isMobile, contactModalOpen, animationDataMap]
   );
 
-  // -- useScrollHandler now takes the sections array too --
   const { currentPage, scrollDirection, scrollToSection } = useScrollHandler(
     sections.length,
     !!modalOpen,
@@ -206,21 +247,39 @@ const HomePage: React.FC = () => {
     scrollToSection(0);
   }, [scrollToSection]);
 
-  /**
-   * These callbacks are passed to sections that have internal scroll.
-   * Once the user hits the top or bottom, the section calls them to move on.
-   */
   const handleScrollPastStart = useCallback(() => {
-    scrollToSection(currentPage - 1);
+    if (currentPage > 0) {
+      scrollToSection(currentPage - 1);
+    }
   }, [currentPage, scrollToSection]);
 
   const handleScrollPastEnd = useCallback(() => {
-    scrollToSection(currentPage + 1);
-  }, [currentPage, scrollToSection]);
+    if (currentPage < sections.length - 1) {
+      scrollToSection(currentPage + 1);
+    }
+  }, [currentPage, scrollToSection, sections.length]);
 
   const handleScrollComplete = useCallback(() => {
-    scrollToSection(currentPage + 1);
-  }, [currentPage, scrollToSection]);
+    if (currentPage < sections.length - 1) {
+      scrollToSection(currentPage + 1);
+    }
+  }, [currentPage, scrollToSection, sections.length]);
+
+  // Show error state if any assets failed to load
+  if (hasErrors) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white p-4">
+        <h2 className="text-xl mb-4">Failed to load required assets</h2>
+        <ul className="text-red-500">
+          {Object.entries(errors).map(([path, error]) => (
+            <li key={path}>
+              {path}: {error}
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full bg-black">
@@ -242,9 +301,9 @@ const HomePage: React.FC = () => {
       {!isLoading && (
         <motion.div
           key="content"
-          initial={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.3 }}
           className="relative w-full"
         >
           <AnimatePresence mode="wait">

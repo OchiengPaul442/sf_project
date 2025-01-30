@@ -1,42 +1,67 @@
 "use client";
 
-import React, { memo, useRef, useEffect } from "react";
+import React, { memo, useRef, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion, useAnimation } from "framer-motion";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { LottieRefCurrentProps } from "lottie-react";
 
-// Dynamically load Lottie
-const Lottie = dynamic(() => import("lottie-react"), { ssr: false });
+// Optimize Lottie loading with suspense and preload
+const Lottie = dynamic(() => import("lottie-react"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
+    </div>
+  ),
+});
 
-import robotAnimation from "@/public/lottie/robot.json";
-
-// 🌟 Adaptive Futuristic Glow Effect (Works on Mobile & Desktop) 🌟
+// Separate GlowEffect component with optimized rendering
 const GlowEffect = memo(() => {
   const isMobile = isMobileDevice();
 
+  // Simplified mobile glow with reduced blur and size
+  const mobileConfig = {
+    outer: {
+      size: "w-[250px] h-[250px]",
+      blur: "blur-[40px]",
+      opacity: "opacity-20",
+    },
+    inner: {
+      size: "w-[150px] h-[150px]",
+      blur: "blur-[25px]",
+      opacity: "opacity-30",
+    },
+  };
+
+  // Full desktop glow effect
+  const desktopConfig = {
+    outer: {
+      size: "w-[600px] h-[600px]",
+      blur: "blur-[120px]",
+      opacity: "opacity-30",
+    },
+    inner: {
+      size: "w-[350px] h-[350px]",
+      blur: "blur-[80px]",
+      opacity: "opacity-40",
+    },
+  };
+
+  const config = isMobile ? mobileConfig : desktopConfig;
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Outer Glow */}
       <div
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-          ${
-            isMobile
-              ? "w-[350px] h-[350px] blur-[70px]"
-              : "w-[600px] h-[600px] blur-[120px]"
-          } 
-          rounded-full opacity-30 animate-pulse-slow bg-green-500/50`}
+          ${config.outer.size} ${config.outer.blur} ${config.outer.opacity}
+          rounded-full bg-green-500/50`}
         aria-hidden="true"
       />
-      {/* Inner Glow */}
       <div
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-          ${
-            isMobile
-              ? "w-[200px] h-[200px] blur-[40px]"
-              : "w-[350px] h-[350px] blur-[80px]"
-          } 
-          rounded-full opacity-40 animate-pulse-slower bg-green-400/40`}
+          ${config.inner.size} ${config.inner.blur} ${config.inner.opacity}
+          rounded-full bg-green-400/40`}
         aria-hidden="true"
       />
     </div>
@@ -47,38 +72,49 @@ GlowEffect.displayName = "GlowEffect";
 
 type RobotSectionProps = {
   id: string;
+  animationData?: any; // Receives animationData from HomePage
 };
 
-const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
+const RobotSection: React.FC<RobotSectionProps> = ({ id, animationData }) => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const controls = useAnimation();
   const isMobile = isMobileDevice();
+  const [isMounted, setIsMounted] = useState(false); // New state flag
 
-  // Initialize animation controls
+  // Set isMounted to true after component mounts
   useEffect(() => {
-    controls.start({ opacity: 0, y: 30 });
-  }, [controls]);
+    setIsMounted(true);
+  }, []);
 
-  // 🚀 Play Lottie animation and start Framer Motion animation when in view
+  // Desktop-only animations
   useEffect(() => {
-    if (isMobile) return;
+    if (!isMounted) return; // Ensure component is mounted
+    if (isMobile) {
+      controls.set({ opacity: 1, y: 0 });
+      return;
+    }
 
+    const observerCallback: IntersectionObserverCallback = ([entry]) => {
+      if (!isMounted) return; // Double-check mount status
+
+      if (entry.isIntersecting) {
+        lottieRef.current?.animationItem?.play();
+        controls.start({
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.6 },
+        });
+      } else {
+        lottieRef.current?.animationItem?.pause();
+        controls.start({ opacity: 0, y: 30 });
+      }
+    };
+
+    const observerOptions: IntersectionObserverInit = { threshold: 0.3 };
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          lottieRef.current?.animationItem?.play();
-          controls.start({
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.6 },
-          });
-        } else {
-          lottieRef.current?.animationItem?.pause();
-          controls.start({ opacity: 0, y: 30 });
-        }
-      },
-      { threshold: 0.3 }
+      observerCallback,
+      observerOptions
     );
 
     if (sectionRef.current) {
@@ -91,7 +127,7 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
       }
       observer.disconnect();
     };
-  }, [controls, isMobile]);
+  }, [controls, isMobile, isMounted]);
 
   return (
     <section
@@ -102,6 +138,7 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
       <GlowEffect />
 
       <motion.div
+        initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
         animate={controls}
         className="relative z-10 flex flex-col items-center text-center"
       >
@@ -113,22 +150,29 @@ const RobotSection: React.FC<RobotSectionProps> = ({ id }) => {
         </h2>
 
         <div className="w-full max-w-[280px] sm:max-w-[400px] aspect-square">
-          <Lottie
-            animationData={robotAnimation}
-            loop
-            autoplay
-            lottieRef={lottieRef}
-            style={{
-              filter: "brightness(0) invert(1)",
-              width: "100%",
-              height: "100%",
-            }}
-            rendererSettings={{
-              preserveAspectRatio: "xMidYMid slice",
-              progressiveLoad: true,
-              hideOnTransparent: true,
-            }}
-          />
+          {animationData ? (
+            <Lottie
+              animationData={animationData}
+              loop={true}
+              autoplay={true}
+              lottieRef={lottieRef}
+              style={{
+                filter: "brightness(0) invert(1)",
+                width: "100%",
+                height: "100%",
+              }}
+              rendererSettings={{
+                preserveAspectRatio: "xMidYMid slice",
+                progressiveLoad: true,
+                hideOnTransparent: true,
+              }}
+            />
+          ) : (
+            // Optionally, show a fallback loader or placeholder
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
+            </div>
+          )}
         </div>
       </motion.div>
     </section>
