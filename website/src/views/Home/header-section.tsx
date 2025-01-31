@@ -3,7 +3,13 @@
 import type React from "react";
 import { memo, useRef, useEffect, useState } from "react";
 import Image from "next/image";
-import { motion, useAnimation, type Variants } from "framer-motion";
+import {
+  motion,
+  useAnimation,
+  useScroll,
+  useTransform,
+  type Variants,
+} from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
@@ -59,6 +65,19 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const controls = useAnimation();
 
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 45]);
+  const imageOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  // Adjusted gradient transitions to become darker faster
+  const gradientLayer1 = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
+  const bottomGradient = useTransform(scrollYProgress, [0.2, 0.8], [0, 1]);
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
 
@@ -91,20 +110,37 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     <section
       ref={sectionRef}
       id={id}
-      className="relative h-screen w-full bg-white overflow-hidden flex flex-col justify-between"
+      className="relative h-screen w-full overflow-hidden flex flex-col justify-between bg-white"
     >
+      {/* Main gradient overlay */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+        style={{ opacity: gradientLayer1 }}
+      />
+
+      {/* Bottom heavy gradient for seamless transition */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-[150vh] bg-gradient-to-t from-black via-black to-transparent pointer-events-none"
+        style={{ opacity: bottomGradient }}
+      />
+
       <div className="absolute top-0 left-0 right-0 z-50">
         <Nav />
       </div>
 
       <div
-        className={`flex-grow flex items-center justify-center ${SECTION_CONTAINER_CLASS}`}
+        className={`relative flex-grow flex items-center justify-center ${SECTION_CONTAINER_CLASS}`}
       >
         <motion.div
           variants={containerVariants}
           initial="hidden"
           animate={controls}
           className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px]"
+          style={{
+            scale: imageScale,
+            rotate: imageRotate,
+            opacity: imageOpacity,
+          }}
         >
           {!isMobile && (
             <motion.div
@@ -126,9 +162,12 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         </motion.div>
       </div>
 
-      <div className="flex justify-center pb-8">
+      <motion.div
+        className="flex justify-center pb-8 relative z-20"
+        style={{ opacity: useTransform(scrollYProgress, [0, 0.5], [1, 0]) }}
+      >
         <NextButton onClick={onNextSection} />
-      </div>
+      </motion.div>
     </section>
   );
 };
