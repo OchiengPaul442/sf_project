@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { TextReveal } from "@/components/TextReveal";
 import { GradientSeparator } from "@/components/GradientSeparator";
 import { isMobileDevice } from "@/utils/deviceDetection";
@@ -22,34 +21,43 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   }, []);
 
   useEffect(() => {
+    let frameId: number | null = null;
+
     const handleScroll = () => {
       if (sectionRef.current) {
         const rect = sectionRef.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-
         // Calculate progress:
-        // 0 when the section is fully out of view at the bottom
-        // 1 when the section is fully out of view at the top
+        // 0 when the section is fully out of view at the bottom,
+        // 1 when the section is fully out of view at the top.
         const progress = 1 - rect.bottom / (windowHeight + rect.height);
-
-        // Clamp the progress between 0 and 1
+        // Clamp progress between 0 and 1.
         const clampedProgress = Math.min(Math.max(progress, 0), 1);
-
         setCurrentScrollProgress(clampedProgress);
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initial call to set progress
+    const onScroll = () => {
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+      frameId = requestAnimationFrame(handleScroll);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    // Initial call.
+    onScroll();
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", onScroll);
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
     };
   }, []);
 
   const firstParagraph =
     "By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability";
-
   const secondParagraph =
     "Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest";
 
@@ -61,7 +69,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       ref={sectionRef}
       className="w-full h-dvh md:h-[200vh] bg-black snap-start flex items-center justify-center"
     >
-      <div className="container mx-auto px-4 max-w-[90%] sm:max-w-[85%] sticky top-0 h-screen flex items-center">
+      <div className="container mx-auto px-4 max-w-[90%] sm:max-w-[85%] md:max-w-[75%] sticky top-0 h-screen flex items-center">
         <div className="flex flex-col justify-center items-center space-y-4 sm:space-y-24 md:space-y-28">
           <div className="w-full">
             <TextReveal
@@ -71,20 +79,17 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
               align="left"
             />
           </div>
-
           <div className="w-full">
             <GradientSeparator
               progress={Math.max(
                 0,
                 Math.min(
                   1,
-                  (currentScrollProgress - (isMobile ? 0.35 : 0.35)) /
-                    (isMobile ? 0.04 : 0.1)
+                  (currentScrollProgress - 0.35) / (isMobile ? 0.04 : 0.1)
                 )
               )}
             />
           </div>
-
           <div className="w-full">
             <TextReveal
               text={secondParagraph}

@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { memo, useRef, useEffect, useState } from "react";
+import React, { memo, useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import {
   motion,
@@ -34,21 +33,22 @@ const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
 
 OptimizedImage.displayName = "OptimizedImage";
 
+// Container appears quickly with a spring; shorter duration for a snappy effect.
 const containerVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
+  hidden: { opacity: 0, scale: 0.75 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.5, ease: "easeOut" },
+    transition: { type: "spring", stiffness: 500, damping: 30, duration: 0.4 },
   },
 };
 
 const floatingVariants: Variants = {
   float: {
-    y: [-10, 10],
+    y: [-8, 8],
     transition: {
-      duration: 2,
-      repeat: Number.POSITIVE_INFINITY,
+      duration: 1.8,
+      repeat: Infinity,
       repeatType: "reverse",
       ease: "easeInOut",
     },
@@ -65,40 +65,39 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const controls = useAnimation();
 
+  // Using useScroll with the sectionRef to drive image transforms.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
-  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 45]);
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
+  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 30]);
   const imageOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  // Adjusted gradient transitions to become darker faster
+  // Gradient overlays become darker faster.
   const gradientLayer1 = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
   const bottomGradient = useTransform(scrollYProgress, [0.2, 0.8], [0, 1]);
 
+  // Check mobile device on mount and on resize (throttled).
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-
+    let resizeTimeout: number;
     const checkIsMobile = () => {
       setIsMobile(isMobileDevice());
     };
-
-    const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(checkIsMobile, 150);
-    };
-
     checkIsMobile();
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = window.setTimeout(checkIsMobile, 150);
+    };
     window.addEventListener("resize", handleResize, { passive: true });
-
     return () => {
       window.removeEventListener("resize", handleResize);
-      clearTimeout(timeoutId);
+      clearTimeout(resizeTimeout);
     };
   }, []);
 
+  // Start the container animation on mount.
   useEffect(() => {
     controls.start("visible");
     return () => {
@@ -111,27 +110,24 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
       ref={sectionRef}
       id={id}
       className="relative h-dvh md:h-screen w-full overflow-hidden flex flex-col justify-between bg-white"
-      style={{
-        scrollSnapAlign: "start",
-        scrollMarginTop: "100vh",
-      }}
+      style={{ scrollSnapAlign: "start", scrollMarginTop: "100vh" }}
     >
-      {/* Main gradient overlay */}
+      {/* Gradient overlays */}
       <motion.div
         className="absolute z-50 -bottom-5 md:bottom-0 inset-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
         style={{ opacity: gradientLayer1 }}
       />
-
-      {/* Bottom heavy gradient for seamless transition */}
       <motion.div
         className="absolute bottom-0 left-0 right-0 h-[150vh] bg-gradient-to-t from-black via-black to-transparent pointer-events-none"
         style={{ opacity: bottomGradient }}
       />
 
+      {/* Navigation Bar */}
       <div className="absolute top-0 left-0 right-0 z-50">
         <Nav />
       </div>
 
+      {/* Main image container */}
       <div
         className={`relative flex-grow flex items-center justify-center ${SECTION_CONTAINER_CLASS}`}
       >
@@ -146,13 +142,13 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             opacity: imageOpacity,
           }}
         >
+          {/* Optional subtle backdrop for non-mobile */}
           {!isMobile && (
             <motion.div
               className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full"
               aria-hidden="true"
             />
           )}
-
           <motion.div
             variants={!isMobile ? floatingVariants : undefined}
             animate={!isMobile ? "float" : undefined}
@@ -166,6 +162,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         </motion.div>
       </div>
 
+      {/* Next button fades out as you scroll down */}
       <motion.div
         className="flex justify-center pb-8 relative z-20"
         style={{ opacity: useTransform(scrollYProgress, [0, 0.5], [1, 0]) }}
@@ -177,5 +174,4 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
 };
 
 HeaderSection.displayName = "HeaderSection";
-
 export default memo(HeaderSection);

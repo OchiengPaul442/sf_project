@@ -1,17 +1,14 @@
 "use client";
 
-import type React from "react";
-import { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import lottie, { type AnimationItem } from "lottie-web";
 import { ArrowRight, X } from "lucide-react";
-
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
-
 import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
 
 const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
@@ -19,8 +16,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const dispatch = useDispatch();
   const contactModalOpen = useSelector(
     (state) => state.ui.contactModalOpen
-  ) as any;
-
+  ) as boolean;
   const isMobile = isMobileDevice();
 
   const handleOpenForm = useCallback(() => {
@@ -31,6 +27,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
+  // Initialize and clean up Lottie animation.
   useEffect(() => {
     let animation: AnimationItem | null = null;
     if (lottieContainerRef.current && animationData) {
@@ -39,29 +36,24 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
         renderer: "svg",
         loop: true,
         autoplay: true,
-        animationData: animationData,
+        animationData,
       });
-
       animation.setSpeed(1.2);
     }
-
     return () => {
-      if (animation) {
-        animation.destroy();
-      }
+      if (animation) animation.destroy();
     };
   }, [animationData]);
 
+  // Listen for Escape key to close the modal.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && contactModalOpen) {
         handleCloseForm();
       }
     };
-
     document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
@@ -80,18 +72,14 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
         transition={
           isMobile
             ? {}
-            : {
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-              }
+            : { type: "spring", stiffness: 300, damping: 30, duration: 0.5 }
         }
       >
         <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl w-full lg:w-1/2 mb-12 lg:mb-0">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
             Work with us
           </h2>
-          <h3 className="text-3xl sm:text-4xl md:text-[80px] font-extrabold leading-[1.2 md:leading-[1] tracking-normal">
+          <h3 className="text-3xl sm:text-4xl md:text-[80px] font-extrabold leading-[1.2] md:leading-[1] tracking-normal">
             Are you an engineer who&apos;s excited about our{" "}
             <span className="block sm:inline">mission?</span>
           </h3>
@@ -101,7 +89,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
               className="group inline-flex items-center font-bold relative text-sm sm:text-base cursor-pointer"
               aria-label="Open contact form"
             >
-              <span className="relative z-10 mr-2 px-6 font-semibold sm:px-8 py-3 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9] pointer-events-none">
+              <span className="relative z-10 mr-2 px-6 py-3 font-semibold sm:px-8 bg-[#e6e6e6] rounded-full transition-colors group-hover:bg-[#d9d9d9] pointer-events-none">
                 Reach out
               </span>
               <span className="relative z-20 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-black rounded-full text-white transition-transform group-hover:translate-x-1 -ml-5 sm:-ml-7 pointer-events-none">

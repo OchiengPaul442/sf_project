@@ -1,5 +1,3 @@
-// src/pages/index.tsx
-
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
@@ -13,7 +11,7 @@ import { useAnimationData } from "@/hooks/useIntersectionObserver";
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 
-// Dynamic imports
+// Dynamic imports for sections/components
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
   { ssr: false }
@@ -38,6 +36,7 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
   const [pageLoaded, setPageLoaded] = useState(false);
+  // Section refs for smooth scrolling between sections
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
@@ -116,8 +115,8 @@ const HomePage: React.FC = () => {
           ref={(el) => {
             sectionsRef.current[index] = el as HTMLDivElement | null;
           }}
-          className={`w-full min-h-screen snap-start ${
-            section.id === "how" ? "relative" : ""
+          className={`w-full min-h-screen ${
+            section.id === "how-carousel" ? "snap-none" : "snap-start"
           }`}
         >
           {sectionContent()}
@@ -160,7 +159,9 @@ const HomePage: React.FC = () => {
         scrollToSection={(id) => {
           const index = SECTIONS.findIndex((section) => section.id === id);
           if (index !== -1)
-            sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
+            sectionsRef.current[index]?.scrollIntoView({
+              behavior: "smooth",
+            });
         }}
       />
     </div>

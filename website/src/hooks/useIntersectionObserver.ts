@@ -56,6 +56,7 @@ export const useAnimationData = (
 
   useEffect(() => {
     if (animationDataMap) {
+      // (Optional) Mutate the steps with their respective animation data.
       steps.forEach((step, index) => {
         step.animationData = animationDataMap[JSON_PATHS[index]];
       });
