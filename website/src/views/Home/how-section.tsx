@@ -59,7 +59,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     <section
       id={id}
       ref={sectionRef}
-      className="w-full h-[200vh] bg-black snap-start flex items-center justify-center"
+      className="w-full h-dvh md:h-[200vh] bg-black snap-start flex items-center justify-center"
     >
       <div className="container mx-auto px-4 max-w-[90%] sm:max-w-[85%] sticky top-0 h-screen flex items-center">
         <div className="flex flex-col justify-center items-center space-y-4 sm:space-y-24 md:space-y-28">
