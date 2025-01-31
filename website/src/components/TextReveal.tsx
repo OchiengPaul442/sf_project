@@ -31,7 +31,7 @@ export const TextReveal: React.FC<TextRevealProps> = ({
     >
       <p
         className="invisible text-2xl sm:text-3xl md:text-4xl lg:text-[4rem] 
-                   font-medium leading-[1.4] sm:leading-[1.5] md:leading-[1.55] tracking-normal"
+                   font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1.55] tracking-normal"
       >
         {text}
       </p>
@@ -39,7 +39,7 @@ export const TextReveal: React.FC<TextRevealProps> = ({
       <div className="absolute top-0 left-0 right-0">
         <p
           className="text-2xl sm:text-3xl md:text-4xl lg:text-[4rem] 
-                     font-medium leading-[1.4] sm:leading-[1.5] md:leading-[1.55]
+                     font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1.55]
                      tracking-normal"
         >
           <span className="absolute top-0 left-0 right-0 text-white/20">

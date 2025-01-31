@@ -111,10 +111,14 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
       ref={sectionRef}
       id={id}
       className="relative h-screen w-full overflow-hidden flex flex-col justify-between bg-white"
+      style={{
+        scrollSnapAlign: "start",
+        scrollMarginTop: "100vh",
+      }}
     >
       {/* Main gradient overlay */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
+        className="absolute z-50 -bottom-5 md:bottom-0 inset-0 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none"
         style={{ opacity: gradientLayer1 }}
       />
 
