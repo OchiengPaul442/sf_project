@@ -1,11 +1,9 @@
-// src/components/TextReveal.tsx
-
-import React from "react";
+import type React from "react";
 import { isMobileDevice } from "@/utils/deviceDetection";
 
 interface TextRevealProps {
   text: string;
-  scrollYProgress: number; // Correct prop name
+  scrollYProgress: number;
   range: [number, number];
   align?: "left" | "right";
 }
@@ -19,18 +17,10 @@ export const TextReveal: React.FC<TextRevealProps> = ({
   const isMobile = isMobileDevice();
 
   // Calculate progress within the specified range
-  const progress = isMobile
-    ? Math.max(
-        0,
-        Math.min(
-          1,
-          (scrollYProgress - range[0]) / ((range[1] - range[0]) * 0.5)
-        )
-      )
-    : Math.max(
-        0,
-        Math.min(1, (scrollYProgress - range[0]) / (range[1] - range[0]))
-      );
+  const progress = Math.max(
+    0,
+    Math.min(1, (scrollYProgress - range[0]) / (range[1] - range[0]))
+  );
 
   const characters = text.split("");
   const totalChars = characters.length;
@@ -71,7 +61,10 @@ export const TextReveal: React.FC<TextRevealProps> = ({
               // Calculate the reveal progress for each character
               const charRevealProgress = Math.max(
                 0,
-                Math.min(1, (progress * totalChars - i) * (isMobile ? 2 : 1.5))
+                Math.min(
+                  1,
+                  (progress * (totalChars + 10) - i) * (isMobile ? 2 : 1.5)
+                )
               );
 
               return (
@@ -85,7 +78,7 @@ export const TextReveal: React.FC<TextRevealProps> = ({
                   <span
                     className="text-white"
                     style={{
-                      opacity: charRevealProgress >= 1 ? 1 : 0,
+                      opacity: charRevealProgress,
                       transition: "opacity 0.1s ease-out",
                     }}
                   >

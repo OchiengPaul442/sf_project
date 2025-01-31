@@ -1,5 +1,5 @@
 import React from "react";
-import { motion, useTransform, useMotionValue } from "framer-motion";
+import { motion, useTransform, useSpring, useMotionValue } from "framer-motion";
 
 interface GradientSeparatorProps {
   progress: number;
@@ -8,43 +8,39 @@ interface GradientSeparatorProps {
 export const GradientSeparator: React.FC<GradientSeparatorProps> = ({
   progress,
 }) => {
-  const motionProgress = useMotionValue(progress);
-  const rotateY = useTransform(motionProgress, [0, 1], [0, 360]);
-  const rotateX = useTransform(motionProgress, [0, 0.5, 1], [0, 15, 0]);
-  const scale = useTransform(motionProgress, [0, 0.5, 1], [1, 1.1, 1]);
-  const translateZ = useTransform(motionProgress, [0, 0.5, 1], [0, 20, 0]);
+  // Use spring for smoother animation
+  const springConfig = { stiffness: 100, damping: 30, mass: 1 };
+  const smoothProgress = useSpring(useMotionValue(progress), springConfig);
 
+  // Transform values with spring for smoother transitions
+  const rotateY = useTransform(smoothProgress, [0, 1], [0, 360]);
+  const rotateX = useTransform(smoothProgress, [0, 0.5, 1], [0, 15, 0]);
+  const scale = useTransform(smoothProgress, [0, 0.5, 1], [0.95, 1.05, 0.95]);
+
+  // Update progress smoothly
   React.useEffect(() => {
-    motionProgress.set(progress);
-  }, [progress, motionProgress]);
+    smoothProgress.set(progress);
+  }, [progress, smoothProgress]);
 
   return (
-    <div className="relative w-full py-12 perspective-[1000px] overflow-hidden">
-      {/* Background line (low opacity) */}
-      <div className="absolute w-full top-1/2 -translate-y-1/2">
-        <div className="w-full h-[1px] bg-gradient-to-r from-white/20 to-transparent" />
-      </div>
-
-      {/* Animated line that reveals and transforms based on progress */}
+    <div className="relative w-full h-32 flex items-center justify-center perspective-[2000px] overflow-hidden">
       <motion.div
-        className="w-full h-[1px] bg-gradient-to-r from-white to-transparent"
+        className="w-full max-w-[90%] relative"
         style={{
-          opacity: motionProgress,
           rotateY,
           rotateX,
           scale,
-          translateZ,
-          transformOrigin: "center center",
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 60,
-          damping: 20,
-          duration: 0.5,
+          transformStyle: "preserve-3d",
         }}
       >
-        {/* Add a subtle glow effect */}
-        <div className="absolute inset-0 bg-white/30 blur-sm" />
+        {/* Main gradient line */}
+        <div className="relative h-[2px] w-full">
+          {/* Gradient line */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white to-transparent" />
+
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/40 via-white/20 to-transparent blur-[2px] transform -translate-y-[1px]" />
+        </div>
       </motion.div>
     </div>
   );

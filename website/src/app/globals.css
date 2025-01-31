@@ -67,3 +67,13 @@ body {
 .shadow-3d {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
+
+@layer utilities {
+  .perspective-[2000px] {
+    perspective: 2000px;
+  }
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}

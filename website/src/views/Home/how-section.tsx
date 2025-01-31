@@ -1,8 +1,7 @@
-// src/views/Home/how-section.tsx
-
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import type React from "react";
+import { useRef, useEffect, useState } from "react";
 import { TextReveal } from "@/components/TextReveal";
 import { GradientSeparator } from "@/components/GradientSeparator";
 import { isMobileDevice } from "@/utils/deviceDetection";
@@ -31,8 +30,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
         // Calculate progress:
         // 0 when the section is fully out of view at the bottom
         // 1 when the section is fully out of view at the top
-        const progress =
-          1 - (rect.top + rect.height) / (windowHeight + rect.height);
+        const progress = 1 - rect.bottom / (windowHeight + rect.height);
 
         // Clamp the progress between 0 and 1
         const clampedProgress = Math.min(Math.max(progress, 0), 1);
@@ -61,15 +59,15 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     <section
       id={id}
       ref={sectionRef}
-      className="w-full h-dvh md:min-h-screen bg-black snap-start flex items-center justify-center"
+      className="w-full h-[200vh] bg-black snap-start flex items-center justify-center"
     >
-      <div className="container mx-auto px-4 max-w-[90%] sm:max-w-[85%]">
+      <div className="container mx-auto px-4 max-w-[90%] sm:max-w-[85%] sticky top-0 h-screen flex items-center">
         <div className="flex flex-col justify-center items-center space-y-4 sm:space-y-24 md:space-y-28">
           <div className="w-full">
             <TextReveal
               text={firstParagraph}
               scrollYProgress={currentScrollProgress}
-              range={isMobile ? [0.1, 0.3] : [0.1, 0.4]}
+              range={isMobile ? [0.1, 0.3] : [0.25, 0.4]}
               align="left"
             />
           </div>
@@ -80,7 +78,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
                 0,
                 Math.min(
                   1,
-                  (currentScrollProgress - (isMobile ? 0.35 : 0.45)) /
+                  (currentScrollProgress - (isMobile ? 0.35 : 0.35)) /
                     (isMobile ? 0.05 : 0.1)
                 )
               )}
@@ -91,7 +89,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
             <TextReveal
               text={secondParagraph}
               scrollYProgress={currentScrollProgress}
-              range={isMobile ? [0.4, 0.6] : [0.6, 0.9]}
+              range={isMobile ? [0.4, 0.6] : [0.45, 0.65]}
               align="right"
             />
           </div>
