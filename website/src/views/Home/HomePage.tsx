@@ -1,9 +1,9 @@
+// src/pages/index.tsx
+
 "use client";
 
-import type React from "react";
-import { useEffect, useState, useCallback, useRef } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import dynamic from "next/dynamic";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import Loader from "@/components/loader";
@@ -11,8 +11,9 @@ import MenuModal from "@/components/dialog/menu-modal";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { useAnimationData } from "@/hooks/useIntersectionObserver";
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
+import dynamic from "next/dynamic";
 
-// Dynamic imports (unchanged)
+// Dynamic imports
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
   { ssr: false }
@@ -38,7 +39,6 @@ const HomePage: React.FC = () => {
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
   const [pageLoaded, setPageLoaded] = useState(false);
   const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
-
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
 
@@ -52,13 +52,6 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
-  const handleSectionChange = useCallback((index: number) => {
-    const sectionElement = sectionsRef.current[index];
-    if (sectionElement) {
-      sectionElement.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
-
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
       const sectionContent = () => {
@@ -68,7 +61,11 @@ const HomePage: React.FC = () => {
               <HeaderSection
                 {...section}
                 image="/Vector.svg"
-                onNextSection={() => handleSectionChange(index + 1)}
+                onNextSection={() => {
+                  sectionsRef.current[index + 1]?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }}
                 animationData={
                   animationDataMap?.["/lottie/sailing_boat_2.json"]
                 }
@@ -82,7 +79,12 @@ const HomePage: React.FC = () => {
               />
             );
           case "how":
-            return <HowSection {...section} />;
+            return (
+              <HowSection
+                {...section}
+                animationData={animationDataMap?.["/lottie/how.json"]}
+              />
+            );
           case "how-carousel":
             return (
               <HowSectionCarousel
@@ -98,7 +100,7 @@ const HomePage: React.FC = () => {
             return (
               <WorkSection
                 {...section}
-                animationData={animationDataMap?.["/lottie/contruction.json"]}
+                animationData={animationDataMap?.["/lottie/construction.json"]}
               />
             );
           case "footer":
@@ -109,18 +111,20 @@ const HomePage: React.FC = () => {
       };
 
       return (
-        <div
+        <section
           key={section.id}
           ref={(el) => {
-            sectionsRef.current[index] = el;
+            sectionsRef.current[index] = el as HTMLDivElement | null;
           }}
-          className="w-full min-h-screen"
+          className={`w-full min-h-screen snap-start ${
+            section.id === "how" ? "relative" : ""
+          }`}
         >
           {sectionContent()}
-        </div>
+        </section>
       );
     },
-    [animationDataMap, handleSectionChange]
+    [animationDataMap]
   );
 
   if (hasErrors) {
@@ -128,7 +132,7 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full bg-black">
+    <div className="relative w-full bg-black min-h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
       <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
@@ -155,7 +159,8 @@ const HomePage: React.FC = () => {
         onClose={handleMenuClose}
         scrollToSection={(id) => {
           const index = SECTIONS.findIndex((section) => section.id === id);
-          if (index !== -1) handleSectionChange(index);
+          if (index !== -1)
+            sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
         }}
       />
     </div>

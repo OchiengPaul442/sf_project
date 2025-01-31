@@ -110,6 +110,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
 
     return () => {
       if (sectionRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(sectionRef.current);
       }
       observer.disconnect();
@@ -122,7 +123,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
     <section
       id={id}
       ref={sectionRef}
-      className="relative w-full h-dvh md:min-h-screen bg-black flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
+      className="relative w-full h-dvh md:min-h-[screen] bg-black flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
     >
       <GlowEffect />
 

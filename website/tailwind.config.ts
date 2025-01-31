@@ -1,3 +1,5 @@
+// tailwind.config.js
+
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -8,6 +10,12 @@ const config: Config = {
     "./src/views/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  variants: {
+    extend: {
+      scrollSnapType: ["responsive"],
+      scrollSnapAlign: ["responsive"],
+    },
+  },
   theme: {
     extend: {
       fontFamily: {
@@ -63,6 +71,14 @@ const config: Config = {
       animation: {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         "pulse-slower": "pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+      },
+      extend: {
+        scrollSnapType: {
+          y: "y mandatory",
+        },
+        scrollSnapAlign: {
+          start: "start",
+        },
       },
     },
   },
