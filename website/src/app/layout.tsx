@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
+import type { Metadata } from "next";
 import { qanelasSoft } from "@/lib/fonts/fonts";
 import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 import ThemeProvider from "@/components/ThemeProvider";
 import ReduxProvider from "@/components/ReduxProvider";

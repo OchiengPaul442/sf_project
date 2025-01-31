@@ -1,5 +1,3 @@
-// components/dialog/menu-modal.tsx
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
