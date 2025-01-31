@@ -110,7 +110,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     <section
       ref={sectionRef}
       id={id}
-      className="relative h-screen w-full overflow-hidden flex flex-col justify-between bg-white"
+      className="relative h-dvh md:h-screen w-full overflow-hidden flex flex-col justify-between bg-white"
       style={{
         scrollSnapAlign: "start",
         scrollMarginTop: "100vh",

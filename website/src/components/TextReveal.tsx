@@ -30,17 +30,17 @@ export const TextReveal: React.FC<TextRevealProps> = ({
       className={`relative ${align === "right" ? "text-right" : "text-left"}`}
     >
       <p
-        className="invisible text-2xl sm:text-3xl md:text-4xl lg:text-[4rem] 
-                   font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1.55] tracking-normal"
+        className="invisible text-2xl sm:text-3xl md:text-4xl lg:text-[3.38rem] 
+                   font-normal leading-[1.4] sm:leading-[1.45] md:leading-[1.4] tracking-tight break-all"
       >
         {text}
       </p>
 
       <div className="absolute top-0 left-0 right-0">
         <p
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-[4rem] 
-                     font-normal leading-[1.4] sm:leading-[1.5] md:leading-[1.55]
-                     tracking-normal"
+          className="text-2xl sm:text-3xl md:text-4xl lg:text-[3.38rem] 
+                     font-normal leading-[1.35] sm:leading-[1.45] md:leading-[1.4]
+                     tracking-tight break-all"
         >
           <span className="absolute top-0 left-0 right-0 text-white/20">
             {characters.map((char, i) => (
