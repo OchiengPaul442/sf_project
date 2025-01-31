@@ -92,7 +92,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
             Work with us
           </h2>
-          <h3 className="text-3xl sm:text-4xl md:text-[80px] font-extrabold tracking-[-0.02em] leading-[1.1]">
+          <h3 className="text-3xl sm:text-4xl md:text-[80px] font-extrabold leading-[1.2 md:leading-[1] tracking-normal">
             Are you an engineer who&apos;s excited about our{" "}
             <span className="block sm:inline">mission?</span>
           </h3>
