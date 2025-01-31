@@ -7,7 +7,7 @@ import { toggleMenu } from "@/redux-store/slices/menuSlice";
 import Loader from "@/components/loader";
 import MenuModal from "@/components/dialog/menu-modal";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
-import { useAnimationData } from "@/hooks/useIntersectionObserver";
+import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationData";
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 
@@ -36,8 +36,8 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
   const [pageLoaded, setPageLoaded] = useState(false);
-  // Section refs for smooth scrolling between sections
-  const sectionsRef = useRef<(HTMLDivElement | null)[]>([]);
+  // Using HTMLElement for section refs.
+  const sectionsRef = useRef<(HTMLElement | null)[]>([]);
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
 
@@ -51,79 +51,83 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
+  // Helper to scroll smoothly to a section by index.
+  const scrollToSection = useCallback((index: number) => {
+    sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
-      const sectionContent = () => {
-        switch (section.id) {
-          case "home":
-            return (
-              <HeaderSection
-                {...section}
-                image="/Vector.svg"
-                onNextSection={() => {
-                  sectionsRef.current[index + 1]?.scrollIntoView({
-                    behavior: "smooth",
-                  });
-                }}
-                animationData={
-                  animationDataMap?.["/lottie/sailing_boat_2.json"]
-                }
-              />
-            );
-          case "robot":
-            return (
-              <RobotSection
-                {...section}
-                animationData={animationDataMap?.["/lottie/robot.json"]}
-              />
-            );
-          case "how":
-            return (
-              <HowSection
-                {...section}
-                animationData={animationDataMap?.["/lottie/how.json"]}
-              />
-            );
-          case "how-carousel":
-            return (
-              <HowSectionCarousel
-                id={section.id}
-                title={section.title}
-                steps={STEPS_WITH_IDS.map((step, idx) => ({
-                  ...step,
-                  animationData: animationDataMap?.[JSON_PATHS[idx]] || null,
-                }))}
-              />
-            );
-          case "work":
-            return (
-              <WorkSection
-                {...section}
-                animationData={animationDataMap?.["/lottie/contruction.json"]}
-              />
-            );
-          case "footer":
-            return <FooterSection {...section} image="/logo-white.png" />;
-          default:
-            return null;
-        }
-      };
+      let content;
+      switch (section.id) {
+        case "home":
+          content = (
+            <HeaderSection
+              {...section}
+              image="/Vector.svg"
+              onNextSection={() => scrollToSection(index + 1)}
+              animationData={animationDataMap?.["/lottie/sailing_boat_2.json"]}
+            />
+          );
+          break;
+        case "robot":
+          content = (
+            <RobotSection
+              {...section}
+              animationData={animationDataMap?.["/lottie/robot.json"]}
+            />
+          );
+          break;
+        case "how":
+          content = (
+            <HowSection
+              {...section}
+              animationData={animationDataMap?.["/lottie/how.json"]}
+            />
+          );
+          break;
+        case "how-carousel":
+          content = (
+            <HowSectionCarousel
+              id={section.id}
+              title={section.title}
+              steps={STEPS_WITH_IDS.map((step, idx) => ({
+                ...step,
+                animationData: animationDataMap?.[JSON_PATHS[idx]] || null,
+              }))}
+            />
+          );
+          break;
+        case "work":
+          content = (
+            <WorkSection
+              {...section}
+              animationData={animationDataMap?.["/lottie/contruction.json"]}
+            />
+          );
+          break;
+        case "footer":
+          content = <FooterSection {...section} image="/logo-white.png" />;
+          break;
+        default:
+          content = null;
+      }
 
       return (
         <section
           key={section.id}
-          ref={(el) => {
-            sectionsRef.current[index] = el as HTMLDivElement | null;
+          ref={(el: HTMLElement | null): void => {
+            sectionsRef.current[index] = el;
           }}
           className={`w-full min-h-screen ${
             section.id === "how-carousel" ? "snap-none" : "snap-start"
           }`}
         >
-          {sectionContent()}
+          {content}
         </section>
       );
     },
-    [animationDataMap]
+    [animationDataMap, scrollToSection]
   );
 
   if (hasErrors) {
@@ -131,7 +135,10 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <div className="relative w-full bg-black min-h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-hide">
+    <div
+      className="relative w-full bg-black min-h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+      style={{ scrollBehavior: "smooth" }}
+    >
       <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
@@ -158,10 +165,7 @@ const HomePage: React.FC = () => {
         onClose={handleMenuClose}
         scrollToSection={(id) => {
           const index = SECTIONS.findIndex((section) => section.id === id);
-          if (index !== -1)
-            sectionsRef.current[index]?.scrollIntoView({
-              behavior: "smooth",
-            });
+          if (index !== -1) scrollToSection(index);
         }}
       />
     </div>

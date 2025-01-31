@@ -1,5 +1,4 @@
 /* globals.css */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -21,15 +20,18 @@ body {
   background-color: black;
   color: white;
   font-family: var(--font-qanelas-soft), system-ui, sans-serif;
-  overflow: hidden; /* Prevent double scrolling */
+  /* Allow scrolling on the landing page */
+  /* Remove overflow: hidden to enable page scroll */
 }
 
+/* Scroll Container */
 .scroll-container {
   height: 100vh;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
 }
 
+/* Section Styling */
 .section {
   scroll-snap-align: start;
   min-height: 100vh;
@@ -40,7 +42,33 @@ body {
   box-sizing: border-box;
 }
 
-/* Hide scrollbar */
+/* ========================= */
+/* Custom Scrollbar Styles   */
+/* ========================= */
+
+/* Firefox */
+body {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: green white; /* thumb color and track color */
+}
+
+/* WebKit-based browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: white; /* Track background */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: green; /* Thumb color */
+  border-radius: 4px; /* Rounded corners */
+  border: 2px solid white; /* Padding around thumb */
+}
+
+/* Optional: Hide scrollbar utility classes */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -49,7 +77,11 @@ body {
   scrollbar-width: none;
 }
 
-/* Add smooth transitions for opacity changes */
+/* ========================= */
+/* Additional Utilities      */
+/* ========================= */
+
+/* Smooth transitions for opacity changes */
 .section-transition {
   transition: opacity 0.3s ease-in-out;
 }
@@ -57,15 +89,6 @@ body {
 /* Enhanced 3D effect styles */
 .perspective-[1000px] {
   perspective: 1000px;
-}
-
-.section-transition {
-  transition: opacity 0.3s ease-in-out;
-}
-
-/* Add a subtle shadow for depth */
-.shadow-3d {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 @layer utilities {
@@ -76,4 +99,9 @@ body {
 
 .preserve-3d {
   transform-style: preserve-3d;
+}
+
+/* Subtle shadow for depth */
+.shadow-3d {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
 }

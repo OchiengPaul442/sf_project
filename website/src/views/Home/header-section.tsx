@@ -30,10 +30,9 @@ const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
     sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 400px, 480px"
   />
 ));
-
 OptimizedImage.displayName = "OptimizedImage";
 
-// Container appears quickly with a spring; shorter duration for a snappy effect.
+// Short, spring-based transition for a modern, snappy effect.
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.75 },
   visible: {
@@ -65,21 +64,18 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const controls = useAnimation();
 
-  // Using useScroll with the sectionRef to drive image transforms.
+  // Use scroll progress to drive image transforms.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
-
   const imageScale = useTransform(scrollYProgress, [0, 1], [1, 0.85]);
   const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 30]);
   const imageOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
-  // Gradient overlays become darker faster.
   const gradientLayer1 = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
   const bottomGradient = useTransform(scrollYProgress, [0.2, 0.8], [0, 1]);
 
-  // Check mobile device on mount and on resize (throttled).
   useEffect(() => {
     let resizeTimeout: number;
     const checkIsMobile = () => {
@@ -97,7 +93,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     };
   }, []);
 
-  // Start the container animation on mount.
   useEffect(() => {
     controls.start("visible");
     return () => {
@@ -122,12 +117,11 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         style={{ opacity: bottomGradient }}
       />
 
-      {/* Navigation Bar */}
+      {/* Navigation */}
       <div className="absolute top-0 left-0 right-0 z-50">
         <Nav />
       </div>
 
-      {/* Main image container */}
       <div
         className={`relative flex-grow flex items-center justify-center ${SECTION_CONTAINER_CLASS}`}
       >
@@ -142,7 +136,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             opacity: imageOpacity,
           }}
         >
-          {/* Optional subtle backdrop for non-mobile */}
           {!isMobile && (
             <motion.div
               className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full"
@@ -162,7 +155,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         </motion.div>
       </div>
 
-      {/* Next button fades out as you scroll down */}
       <motion.div
         className="flex justify-center pb-8 relative z-20"
         style={{ opacity: useTransform(scrollYProgress, [0, 0.5], [1, 0]) }}

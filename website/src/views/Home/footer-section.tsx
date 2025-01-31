@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import Image from "next/image";
 import { PiArrowULeftUp } from "react-icons/pi";
 import { motion } from "framer-motion";

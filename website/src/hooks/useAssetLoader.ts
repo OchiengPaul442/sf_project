@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 interface AssetLoaderResult {
   isLoading: boolean;
@@ -21,9 +19,8 @@ export const useAssetLoader = (paths: readonly string[]): AssetLoaderResult => {
   const loadAsset = useCallback(async (path: string) => {
     try {
       const response = await fetch(path);
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Failed to load ${path}: ${response.statusText}`);
-      }
       const data = await response.json();
       setAnimationDataMap((prev) => ({ ...prev, [path]: data }));
       setLoadingStates((prev) => ({ ...prev, [path]: false }));
@@ -38,18 +35,11 @@ export const useAssetLoader = (paths: readonly string[]): AssetLoaderResult => {
   }, []);
 
   useEffect(() => {
-    paths.forEach((path) => {
-      loadAsset(path);
-    });
+    paths.forEach((path) => loadAsset(path));
   }, [paths, loadAsset]);
 
   const isLoading = Object.values(loadingStates).some((state) => state);
   const hasErrors = Object.keys(errorStates).length > 0;
 
-  return {
-    isLoading,
-    hasErrors,
-    errors: errorStates,
-    animationDataMap,
-  };
+  return { isLoading, hasErrors, errors: errorStates, animationDataMap };
 };

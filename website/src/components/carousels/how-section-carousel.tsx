@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -5,7 +7,7 @@ import type { LottieRefCurrentProps } from "lottie-react";
 import type { StepWithData } from "@/utils/types/section";
 import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
 
-// Dynamically load Lottie (to avoid SSR issues)
+// Dynamically load Lottie.
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-black" />,
@@ -22,10 +24,7 @@ const carouselVariants = {
     y: direction > 0 ? 80 : -80,
     opacity: 0,
   }),
-  center: {
-    y: 0,
-    opacity: 1,
-  },
+  center: { y: 0, opacity: 1 },
   exit: (direction: number) => ({
     y: direction < 0 ? 80 : -80,
     opacity: 0,
@@ -66,7 +65,6 @@ const NavItem: React.FC<{
     </div>
   </motion.button>
 ));
-
 NavItem.displayName = "NavItem";
 
 const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
@@ -77,17 +75,14 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const [direction, setDirection] = useState(0);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
 
-    // Calculate progress based on section's scroll position.
     const handleScroll = useCallback(() => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const totalScroll = rect.height - window.innerHeight;
-      // Compute progress (clamped between 0 and 1).
       let newProgress = -rect.top / totalScroll;
       newProgress = Math.max(0, Math.min(1, newProgress));
       setProgress(newProgress);
 
-      // Update active carousel item.
       const newIndex = Math.round(newProgress * (steps.length - 1));
       if (newIndex !== activeIndex) {
         setDirection(newIndex > activeIndex ? 1 : -1);
@@ -97,13 +92,12 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
 
     useEffect(() => {
       window.addEventListener("scroll", handleScroll, { passive: true });
-      handleScroll(); // Initial call.
+      handleScroll(); // initial call
       return () => {
         window.removeEventListener("scroll", handleScroll);
       };
     }, [handleScroll]);
 
-    // Determine fixed vs. absolute positioning based on progress.
     let carouselPositionStyle: React.CSSProperties = {};
     if (progress > 0 && progress < 1) {
       carouselPositionStyle = {
@@ -196,8 +190,8 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                           <div className="w-full h-full max-w-[90%] max-h-[90%] lg:max-w-[85%] lg:max-h-[85%]">
                             <Lottie
                               animationData={currentStep.animationData}
-                              loop={true}
-                              autoplay={true}
+                              loop
+                              autoplay
                               lottieRef={lottieRef}
                               className="w-full h-full"
                               renderer="svg"

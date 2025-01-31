@@ -27,7 +27,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
-  // Initialize and clean up Lottie animation.
   useEffect(() => {
     let animation: AnimationItem | null = null;
     if (lottieContainerRef.current && animationData) {
@@ -45,7 +44,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     };
   }, [animationData]);
 
-  // Listen for Escape key to close the modal.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && contactModalOpen) {
