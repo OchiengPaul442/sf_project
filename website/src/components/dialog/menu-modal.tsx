@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowUpRight, Leaf, ChefHat } from "lucide-react";
 import { NAV_SECTIONS } from "@/lib/constants";
@@ -17,22 +17,25 @@ export default function MenuModal({
   scrollToSection,
 }: MenuModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
+  // Use a ref to store the scroll position to avoid re-renders.
+  const scrollPosRef = useRef<number>(0);
 
+  // Lock/unlock scroll when the modal opens/closes.
   useEffect(() => {
     if (isOpen) {
-      setScrollPosition(window.pageYOffset);
+      scrollPosRef.current = window.pageYOffset;
       document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollPosition}px`;
+      document.body.style.top = `-${scrollPosRef.current}px`;
       document.body.style.width = "100%";
     } else {
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.width = "";
-      window.scrollTo(0, scrollPosition);
+      window.scrollTo(0, scrollPosRef.current);
     }
-  }, [isOpen, scrollPosition]);
+  }, [isOpen]);
 
+  // Handle a link click: close the modal and scroll to the section after a short delay.
   const handleLinkClick = (id: string) => {
     onClose();
     setTimeout(() => {
@@ -40,6 +43,7 @@ export default function MenuModal({
     }, 500);
   };
 
+  // Prepare menu items from NAV_SECTIONS.
   const menuItems = NAV_SECTIONS.map((section) => ({
     title: section.title.toUpperCase(),
     id: section.id,
@@ -56,6 +60,7 @@ export default function MenuModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
+          {/* Background gradient overlay */}
           <motion.div
             className="absolute inset-0 bg-gradient-to-br from-green-900/20 to-transparent pointer-events-none"
             initial={{ opacity: 0 }}
@@ -63,6 +68,7 @@ export default function MenuModal({
             transition={{ delay: 0.2, duration: 0.5 }}
           />
           <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen flex flex-col">
+            {/* Header */}
             <div className="flex justify-between items-center mb-6 sm:mb-12">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -82,7 +88,9 @@ export default function MenuModal({
               </button>
             </div>
 
+            {/* Main content */}
             <div className="flex-grow grid sm:grid-cols-2 gap-4 sm:gap-12">
+              {/* Menu Section */}
               <div className="space-y-8">
                 <nav>
                   <motion.h2
@@ -125,6 +133,7 @@ export default function MenuModal({
                 </nav>
               </div>
 
+              {/* How We Help Section */}
               <div className="space-y-7">
                 <motion.div
                   className="space-y-5"
@@ -173,6 +182,7 @@ export default function MenuModal({
               </div>
             </div>
 
+            {/* Footer */}
             <motion.footer
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

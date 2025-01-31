@@ -22,7 +22,7 @@ export const SECTIONS = [
 
 export const NAV_SECTIONS = [
   { id: "home", title: "HOME" },
-  { id: "how-carousel", title: "SOLUTIONS" },
+  { id: "how", title: "SOLUTIONS" },
   { id: "work", title: "WORK WITH US" },
 ] as const;
 
