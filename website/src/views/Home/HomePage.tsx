@@ -100,7 +100,7 @@ const HomePage: React.FC = () => {
             return (
               <WorkSection
                 {...section}
-                animationData={animationDataMap?.["/lottie/construction.json"]}
+                animationData={animationDataMap?.["/lottie/contruction.json"]}
               />
             );
           case "footer":

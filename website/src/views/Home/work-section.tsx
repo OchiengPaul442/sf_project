@@ -10,7 +10,6 @@ import { ArrowRight, X } from "lucide-react";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
-import Image from "next/image";
 import type { SectionProps } from "@/utils/types/section";
 
 import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
@@ -113,21 +112,9 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
         </div>
 
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
-          {isMobile ? (
-            <div className="w-32 h-32 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 relative">
-              <Image
-                src="/build.svg"
-                alt="Under construction"
-                layout="fill"
-                objectFit="contain"
-                priority
-              />
-            </div>
-          ) : (
-            <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative">
-              <div ref={lottieContainerRef} className="w-full h-full" />
-            </div>
-          )}
+          <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative">
+            <div ref={lottieContainerRef} className="w-full h-full" />
+          </div>
         </div>
       </motion.div>
 
