@@ -16,23 +16,18 @@ const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
   { ssr: false }
 );
-
 const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
   ssr: false,
 });
-
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
 });
-
 const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
   ssr: false,
 });
-
 const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
 });
-
 const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
   ssr: false,
 });
@@ -71,6 +66,7 @@ const HomePage: React.FC = () => {
     useAssetLoader(JSON_PATHS);
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
   const [pageLoaded, setPageLoaded] = useState(false);
+  const [currentSection, setCurrentSection] = useState(0);
   const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
@@ -87,8 +83,25 @@ const HomePage: React.FC = () => {
     }
   }, [animationDataMap]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const newSection = Math.round(scrollPosition / windowHeight);
+      if (newSection !== currentSection) {
+        setCurrentSection(newSection);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [currentSection]);
+
   const scrollToSection = (index: number) => {
-    sectionRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
+    window.scrollTo({
+      top: index * window.innerHeight,
+      behavior: "smooth",
+    });
   };
 
   if (hasErrors) {
@@ -124,18 +137,17 @@ const HomePage: React.FC = () => {
       </AnimatePresence>
 
       {pageLoaded && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        <div className="h-screen overflow-hidden">
           {SECTIONS.map((section, index) => (
-            <section
+            <motion.section
               key={section.id}
               ref={(el) => {
                 sectionRefs.current[index] = el;
               }}
-              className="h-screen snap-start"
+              className="h-screen absolute w-full"
+              initial={{ y: "100%" }}
+              animate={{ y: `${(index - currentSection) * 100}%` }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               {section.id === "home" && (
                 <HeaderSection
@@ -163,9 +175,9 @@ const HomePage: React.FC = () => {
               {section.id === "footer" && (
                 <FooterSection {...section} image="/logo-white.png" />
               )}
-            </section>
+            </motion.section>
           ))}
-        </motion.div>
+        </div>
       )}
 
       <MenuModal
