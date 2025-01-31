@@ -67,7 +67,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
             <TextReveal
               text={firstParagraph}
               scrollYProgress={currentScrollProgress}
-              range={isMobile ? [0.1, 0.3] : [0.25, 0.4]}
+              range={isMobile ? [0.25, 0.3] : [0.25, 0.4]}
               align="left"
             />
           </div>
@@ -79,7 +79,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
                 Math.min(
                   1,
                   (currentScrollProgress - (isMobile ? 0.35 : 0.35)) /
-                    (isMobile ? 0.05 : 0.1)
+                    (isMobile ? 0.04 : 0.1)
                 )
               )}
             />
