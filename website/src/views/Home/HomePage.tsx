@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "@/components/loader";
 import { useAssetLoader } from "@/hooks/useAssetLoader";
@@ -60,6 +60,7 @@ const SECTIONS: SectionProps[] = [
   { id: "home", title: "Home" },
   { id: "robot", title: "Robot" },
   { id: "how", title: "How it works" },
+  { id: "how-carousel", title: "How It Works Carousel" },
   { id: "work", title: "Work" },
   { id: "footer", title: "Footer" },
 ];
@@ -70,6 +71,7 @@ const HomePage: React.FC = () => {
     useAssetLoader(JSON_PATHS);
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
   const [pageLoaded, setPageLoaded] = useState(false);
+  const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     if (!isLoading && !hasErrors) {
@@ -85,6 +87,10 @@ const HomePage: React.FC = () => {
     }
   }, [animationDataMap]);
 
+  const scrollToSection = (index: number) => {
+    sectionRefs.current[index]?.scrollIntoView({ behavior: "smooth" });
+  };
+
   if (hasErrors) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white p-4">
@@ -99,13 +105,6 @@ const HomePage: React.FC = () => {
       </div>
     );
   }
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   return (
     <div className="relative w-full bg-black">
@@ -130,24 +129,42 @@ const HomePage: React.FC = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          <HeaderSection id="home" title="Home" image="/Vector.svg" />
-          <RobotSection
-            id="robot"
-            title="Robot"
-            animationData={animationDataMap["/lottie/robot.json"]}
-          />
-          <HowSection id="how" title="How it works" />
-          <HowSectionCarousel
-            id="how-carousel"
-            title="How It Works Carousel"
-            steps={STEPS_WITH_IDS}
-          />
-          <WorkSection
-            id="work"
-            title="Work"
-            animationData={animationDataMap["/lottie/contruction.json"]}
-          />
-          <FooterSection id="footer" title="Footer" image="/logo-white.png" />
+          {SECTIONS.map((section, index) => (
+            <section
+              key={section.id}
+              ref={(el) => {
+                sectionRefs.current[index] = el;
+              }}
+              className="h-screen snap-start"
+            >
+              {section.id === "home" && (
+                <HeaderSection
+                  {...section}
+                  image="/Vector.svg"
+                  onNextSection={() => scrollToSection(index + 1)}
+                />
+              )}
+              {section.id === "robot" && (
+                <RobotSection
+                  {...section}
+                  animationData={animationDataMap["/lottie/robot.json"]}
+                />
+              )}
+              {section.id === "how" && <HowSection {...section} />}
+              {section.id === "how-carousel" && (
+                <HowSectionCarousel {...section} steps={STEPS_WITH_IDS} />
+              )}
+              {section.id === "work" && (
+                <WorkSection
+                  {...section}
+                  animationData={animationDataMap["/lottie/contruction.json"]}
+                />
+              )}
+              {section.id === "footer" && (
+                <FooterSection {...section} image="/logo-white.png" />
+              )}
+            </section>
+          ))}
         </motion.div>
       )}
 
@@ -155,7 +172,12 @@ const HomePage: React.FC = () => {
         isOpen={!!isMenuOpen}
         onClose={() => dispatch(toggleMenu())}
         sections={SECTIONS}
-        scrollToSection={scrollToSection}
+        scrollToSection={(id) => {
+          const index = SECTIONS.findIndex((section) => section.id === id);
+          if (index !== -1) {
+            scrollToSection(index);
+          }
+        }}
       />
     </div>
   );

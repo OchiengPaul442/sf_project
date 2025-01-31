@@ -3,24 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Leaf, ChefHat, ArrowUpRight } from "lucide-react";
+import type { SectionProps } from "@/utils/types/section";
 
 interface MenuModalProps {
   isOpen: boolean;
   onClose: () => void;
-  sections: { id: string }[];
-  scrollToSection: (index: any) => void;
+  sections: SectionProps[];
+  scrollToSection: (id: string) => void;
 }
 
 const menuItems = [
   { title: "HOME", id: "home" },
-  { title: "SOLUTIONS", id: "how-carousel" },
-  { title: "WORK", id: "work" },
+  { title: "HOW IT WORKS", id: "how-carousel" },
+  { title: "WORK WITH US", id: "work" },
 ];
 
 export default function MenuModal({
   isOpen,
   onClose,
-  sections,
   scrollToSection,
 }: MenuModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -43,10 +43,7 @@ export default function MenuModal({
   const handleLinkClick = (id: string) => {
     onClose();
     setTimeout(() => {
-      const index = sections.findIndex((section) => section.id === id);
-      if (index !== -1) {
-        scrollToSection(index);
-      }
+      scrollToSection(id);
     }, 500);
   };
 

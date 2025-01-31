@@ -15,7 +15,7 @@ import type { SectionProps } from "@/utils/types/section";
 
 import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
 
-const WorkSection: React.FC<SectionProps> = ({ id, title, animationData }) => {
+const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const contactModalOpen = useSelector(
@@ -90,9 +90,9 @@ const WorkSection: React.FC<SectionProps> = ({ id, title, animationData }) => {
       >
         <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl w-full lg:w-1/2 mb-12 lg:mb-0">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
-            {title}
+            Work with us
           </h2>
-          <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-[-0.02em] leading-[1.1]">
+          <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-[80px] font-extrabold tracking-[-0.02em] leading-[1.1]">
             Are you an engineer who&apos;s excited about our{" "}
             <span className="block sm:inline">mission?</span>
           </h3>
