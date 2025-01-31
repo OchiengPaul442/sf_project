@@ -7,6 +7,12 @@ import { motion, useAnimation, type Variants } from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
+import NextButton from "@/components/NextButton";
+import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
+
+interface HeaderSectionProps extends SectionProps {
+  onNextSection: () => void;
+}
 
 const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
   <Image
@@ -43,7 +49,12 @@ const floatingVariants: Variants = {
   },
 };
 
-const HeaderSection: React.FC<SectionProps> = ({ id, title, image }) => {
+const HeaderSection: React.FC<HeaderSectionProps> = ({
+  id,
+  title,
+  image,
+  onNextSection,
+}) => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const controls = useAnimation();
@@ -80,13 +91,15 @@ const HeaderSection: React.FC<SectionProps> = ({ id, title, image }) => {
     <section
       ref={sectionRef}
       id={id}
-      className="relative h-dvh md:min-h-screen bg-white overflow-hidden"
+      className="relative h-screen bg-white overflow-hidden flex flex-col justify-between"
     >
       <div className="absolute top-0 left-0 right-0 z-50">
         <Nav />
       </div>
 
-      <div className="sticky top-0 h-screen flex items-center justify-center px-4">
+      <div
+        className={`flex-grow flex items-center justify-center ${SECTION_CONTAINER_CLASS}`}
+      >
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -111,6 +124,10 @@ const HeaderSection: React.FC<SectionProps> = ({ id, title, image }) => {
             />
           </motion.div>
         </motion.div>
+      </div>
+
+      <div className="flex justify-center pb-8">
+        <NextButton onClick={onNextSection} />
       </div>
     </section>
   );

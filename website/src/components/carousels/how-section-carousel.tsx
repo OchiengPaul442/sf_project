@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
 import type { StepWithData } from "@/utils/types/section";
+import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
 
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
@@ -116,11 +117,13 @@ const HowSectionCarousel: React.FC<StepWithData> = memo(
     return (
       <section
         id={id}
-        className="relative w-full h-full bg-black overflow-hidden snap-start"
+        className="relative w-full h-screen bg-black overflow-hidden snap-start flex items-center justify-center"
         aria-label={title}
       >
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col-reverse lg:flex-row lg:items-center lg:justify-between">
+        <div
+          className={`w-full h-full flex items-center justify-center ${SECTION_CONTAINER_CLASS}`}
+        >
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="relative w-full lg:w-[45%] py-6 lg:py-0">
               <div className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
               <nav

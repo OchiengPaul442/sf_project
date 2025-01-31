@@ -7,6 +7,7 @@ import { motion, useAnimation } from "framer-motion";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { LottieRefCurrentProps } from "lottie-react";
 import type { SectionProps } from "@/utils/types/section";
+import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
 
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
@@ -114,7 +115,6 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
 
     return () => {
       if (sectionRef.current) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         observer.unobserve(sectionRef.current);
       }
       observer.disconnect();
@@ -132,7 +132,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
       <motion.div
         initial={isMobile ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
         animate={controls}
-        className="relative z-10 flex flex-col items-center text-center"
+        className={`relative z-10 flex flex-col items-center text-center ${SECTION_CONTAINER_CLASS}`}
       >
         <h2 className="text-white text-3xl sm:text-4xl font-light mb-12 tracking-tight">
           with{" "}

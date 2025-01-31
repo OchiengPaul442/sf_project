@@ -1,16 +1,19 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import type { SectionProps } from "@/utils/types/section";
+import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
 
 const HowSection: React.FC<SectionProps> = ({ id }) => {
   return (
     <section
       id={id}
-      className="relative bg-black text-white min-h-screen flex items-center justify-center px-6"
+      className="relative bg-black text-white h-screen flex items-center justify-center px-6 snap-start"
     >
-      <div className="container mx-auto text-center space-y-12">
+      <div
+        className={`container mx-auto text-center space-y-12 ${SECTION_CONTAINER_CLASS}`}
+      >
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
