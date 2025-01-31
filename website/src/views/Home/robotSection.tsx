@@ -78,36 +78,31 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
 
   useEffect(() => {
     setIsMounted(true);
+    return () => setIsMounted(false);
   }, []);
 
   useEffect(() => {
     if (!isMounted) return;
-    if (isMobile) {
-      controls.set({ opacity: 1, y: 0 });
-      return;
-    }
 
-    const observerCallback: IntersectionObserverCallback = ([entry]) => {
-      if (!isMounted) return;
-
-      if (entry.isIntersecting) {
-        lottieRef.current?.animationItem?.play();
-        controls.start({
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.6 },
-        });
-      } else {
-        lottieRef.current?.animationItem?.pause();
-        controls.start({ opacity: 0, y: 30 });
-      }
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          lottieRef.current?.animationItem?.play();
+          controls.start({
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.6 },
+          });
+        } else {
+          lottieRef.current?.animationItem?.pause();
+          controls.start({ opacity: 0, y: 30 });
+        }
+      });
     };
 
-    const observerOptions: IntersectionObserverInit = { threshold: 0.3 };
-    const observer = new IntersectionObserver(
-      observerCallback,
-      observerOptions
-    );
+    const observer = new IntersectionObserver(handleIntersection, {
+      threshold: 0.3,
+    });
 
     if (sectionRef.current) {
       observer.observe(sectionRef.current);
@@ -119,13 +114,15 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
       }
       observer.disconnect();
     };
-  }, [controls, isMobile, isMounted]);
+  }, [controls, isMounted]);
+
+  if (!isMounted) return null;
 
   return (
     <section
       id={id}
       ref={sectionRef}
-      className="relative h-dvh md:min-h-screen bg-black flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
+      className="relative w-full h-dvh md:min-h-screen bg-black flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
     >
       <GlowEffect />
 

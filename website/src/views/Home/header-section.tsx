@@ -91,7 +91,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     <section
       ref={sectionRef}
       id={id}
-      className="relative h-screen bg-white overflow-hidden flex flex-col justify-between"
+      className="relative h-screen w-full bg-white overflow-hidden flex flex-col justify-between"
     >
       <div className="absolute top-0 left-0 right-0 z-50">
         <Nav />

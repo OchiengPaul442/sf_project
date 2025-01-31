@@ -1,7 +1,6 @@
-"use client";
+// components/carousels/how-section-carousel.tsx
 
-import type React from "react";
-import { useState, useRef, useCallback, memo, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
@@ -12,6 +11,12 @@ const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-black" />,
 });
+
+interface HowSectionCarouselProps {
+  id: string;
+  title: string;
+  steps: StepWithData[];
+}
 
 const carouselVariants = {
   enter: (direction: number) => ({
@@ -28,15 +33,11 @@ const carouselVariants = {
   }),
 };
 
-const NavItem = memo(function NavItem({
-  step,
-  isActive,
-  onClick,
-}: {
+const NavItem: React.FC<{
   step: StepWithData;
   isActive: boolean;
   onClick: () => void;
-}) {
+}> = memo(function NavItem({ step, isActive, onClick }) {
   return (
     <motion.button
       className="relative cursor-pointer focus:outline-none w-full text-left"
@@ -69,14 +70,14 @@ const NavItem = memo(function NavItem({
   );
 });
 
-const HowSectionCarousel: React.FC<StepWithData> = memo(
+const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
   function HowSectionCarousel({ id, title, steps }) {
     const [selectedStepIndex, setSelectedStepIndex] = useState(0);
     const [direction, setDirection] = useState(0);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
     const isVisibleRef = useRef(true);
 
-    const currentStep = steps?.[selectedStepIndex];
+    const currentStep = steps[selectedStepIndex];
 
     useEffect(() => {
       const observer = new IntersectionObserver(

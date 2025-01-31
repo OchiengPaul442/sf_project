@@ -1,22 +1,17 @@
+// components/dialog/menu-modal.tsx
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Leaf, ChefHat, ArrowUpRight } from "lucide-react";
-import type { SectionProps } from "@/utils/types/section";
+import { X, ArrowUpRight, Leaf, ChefHat } from "lucide-react";
+import { NAV_SECTIONS } from "@/lib/constants";
 
 interface MenuModalProps {
   isOpen: boolean;
   onClose: () => void;
-  sections: SectionProps[];
   scrollToSection: (id: string) => void;
 }
-
-const menuItems = [
-  { title: "HOME", id: "home" },
-  { title: "HOW IT WORKS", id: "how-carousel" },
-  { title: "WORK WITH US", id: "work" },
-];
 
 export default function MenuModal({
   isOpen,
@@ -46,6 +41,11 @@ export default function MenuModal({
       scrollToSection(id);
     }, 500);
   };
+
+  const menuItems = NAV_SECTIONS.map((section) => ({
+    title: section.title.toUpperCase(),
+    id: section.id,
+  }));
 
   return (
     <AnimatePresence>
@@ -98,7 +98,7 @@ export default function MenuModal({
                   <ul className="space-y-2 md:space-y-4">
                     {menuItems.map((item, index) => (
                       <motion.li
-                        key={item.title}
+                        key={item.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.5 + index * 0.1, duration: 0.5 }}

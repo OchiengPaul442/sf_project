@@ -29,7 +29,7 @@ const HowSection: React.FC<SectionProps> = ({ id }) => {
   return (
     <section
       id={id}
-      className="relative bg-black text-white h-screen flex items-center justify-center px-6 snap-start"
+      className="relative w-full bg-black text-white h-screen flex items-center justify-center px-6 snap-start"
     >
       <div
         className={`container mx-auto text-center space-y-12 ${SECTION_CONTAINER_CLASS}`}
