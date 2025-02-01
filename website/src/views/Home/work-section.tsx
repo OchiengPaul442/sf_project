@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useDispatch, useSelector } from "@/redux-store/hooks";
+import React, { useRef, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import { useDispatch } from "@/redux-store/hooks";
 import lottie, { type AnimationItem } from "lottie-web";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
-import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
@@ -14,19 +13,14 @@ import { mainConfigs } from "@/utils/configs";
 const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
-  const contactModalOpen = useSelector(
-    (state) => state.ui.contactModalOpen
-  ) as boolean;
+
   const isMobile = isMobileDevice();
 
   const handleOpenForm = useCallback(() => {
     dispatch(setContactModalOpen(true));
   }, [dispatch]);
 
-  const handleCloseForm = useCallback(() => {
-    dispatch(setContactModalOpen(false));
-  }, [dispatch]);
-
+  // Load Lottie animation only once, and destroy on unmount.
   useEffect(() => {
     let animation: AnimationItem | null = null;
     if (lottieContainerRef.current && animationData) {
@@ -44,26 +38,14 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     };
   }, [animationData]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && contactModalOpen) {
-        handleCloseForm();
-      }
-    };
-    document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = "unset";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [contactModalOpen, handleCloseForm]);
-
   return (
     <section
       id={id}
-      className="w-full h-dvh md:min-h-screen overflow-y-scroll bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      // Removed internal scrolling by replacing overflow-y-scroll with overflow-hidden.
+      className="w-full h-dvh md:min-h-screen overflow-hidden bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div
+        // The container is animated only once when the section is mounted.
         className={`container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative ${mainConfigs.SECTION_CONTAINER_CLASS}`}
         initial={isMobile ? {} : { opacity: 0, y: 50 }}
         animate={isMobile ? {} : { opacity: 1, y: 0 }}
@@ -99,40 +81,14 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
 
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
           <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative">
-            <div ref={lottieContainerRef} className="w-full h-full" />
+            {/* Add will-change to optimize transforms */}
+            <div
+              ref={lottieContainerRef}
+              className="w-full h-full will-change-transform"
+            />
           </div>
         </div>
       </motion.div>
-
-      <AnimatePresence>
-        {contactModalOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: "0%" }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-              mass: 0.8,
-            }}
-            className="fixed inset-0 bg-white z-50 overflow-y-scroll md:overflow-hidden"
-          >
-            <div className="relative h-full">
-              <button
-                onClick={handleCloseForm}
-                className="absolute right-4 top-4 p-2 bg-gray-100 text-green-600 hover:bg-gray-200 hover:text-green-700 rounded-full transition-colors z-50"
-                aria-label="Close Contact Form"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <div className="h-full">
-                <ContactForm />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 };

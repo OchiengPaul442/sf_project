@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
-import { mainConfigs } from "@/utils/configs";
 
 export function Nav() {
   const dispatch = useDispatch();
@@ -13,9 +12,7 @@ export function Nav() {
   return (
     <div>
       <nav className="w-full z-50 bg-transparent">
-        <div
-          className={`${mainConfigs.SECTION_CONTAINER_CLASS} flex justify-between items-center`}
-        >
+        <div className="flex justify-between items-center">
           <div></div>
 
           {/* Menu Button */}

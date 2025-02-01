@@ -144,7 +144,9 @@ const HeaderSection: React.FC<HeaderSectionProps> = memo(
         />
 
         {/* Navigation at the top */}
-        <div className="absolute top-0 left-0 right-0 z-40">
+        <div
+          className={` ${mainConfigs.SECTION_CONTAINER_CLASS} absolute top-0 left-0 right-0 z-40`}
+        >
           <Nav />
         </div>
 
