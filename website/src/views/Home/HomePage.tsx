@@ -10,6 +10,7 @@ import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationData";
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
+import NextButton from "@/components/NextButton";
 
 // Dynamic imports for sections/components
 const HowSectionCarousel = dynamic(
@@ -36,6 +37,8 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
   const [pageLoaded, setPageLoaded] = useState(false);
+  // NextButton will be visible only if user is near the top (10px from the top)
+  const [showNextButton, setShowNextButton] = useState(true);
   // Using HTMLElement for section refs.
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
   const { isLoading, hasErrors, errors, animationDataMap } =
@@ -54,6 +57,24 @@ const HomePage: React.FC = () => {
   // Helper to scroll smoothly to a section by index.
   const scrollToSection = useCallback((index: number) => {
     sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  // Listen to scroll events to hide the NextButton once the user scrolls more than 10px.
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.pageYOffset > 10) {
+        setShowNextButton(false);
+      } else {
+        setShowNextButton(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Call it initially in case the page is not at the very top
+    handleScroll();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   const renderSection = useCallback(
@@ -163,6 +184,22 @@ const HomePage: React.FC = () => {
           {SECTIONS.map((section, index) => renderSection(section, index))}
         </div>
       )}
+
+      {/* NextButton fades in only if the user is at the top (< 10px scrolled) */}
+      <AnimatePresence>
+        {showNextButton && (
+          <motion.div
+            key="next-button"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed bottom-2 md:bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-auto"
+          >
+            <NextButton onClick={() => scrollToSection(1)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <MenuModal
         isOpen={Boolean(isMenuOpen)}

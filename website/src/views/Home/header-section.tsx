@@ -12,7 +12,6 @@ import {
 import { Nav } from "@/components/layout/Navs/nav";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
-import NextButton from "@/components/NextButton";
 import { mainConfigs } from "@/utils/configs";
 
 interface HeaderSectionProps extends SectionProps {
@@ -55,12 +54,7 @@ const floatingVariants: Variants = {
   },
 };
 
-const HeaderSection: React.FC<HeaderSectionProps> = ({
-  id,
-  title,
-  image,
-  onNextSection,
-}) => {
+const HeaderSection: React.FC<HeaderSectionProps> = ({ id, title, image }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const controls = useAnimation();
@@ -134,7 +128,8 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
           variants={containerVariants}
           initial="hidden"
           animate={controls}
-          className="relative w-full max-w-[480px] flex items-center justify-center"
+          // Responsive max-width: smaller on mobile, larger on desktop.
+          className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px] flex items-center justify-center"
           style={{
             scale: imageScale,
             translateY: imageTranslateY,
@@ -161,11 +156,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             />
           </motion.div>
         </motion.div>
-      </div>
-
-      {/* Fixed NextButton so it's always visible at the bottom of the viewport */}
-      <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-auto">
-        <NextButton onClick={onNextSection} />
       </div>
     </section>
   );

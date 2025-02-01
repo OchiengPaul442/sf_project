@@ -24,9 +24,7 @@ export default function RootLayout({
       <body className="h-screen">
         <ReduxProvider>
           <ThemeProvider>
-            <main className="h-[calc(100vh*5)] overscroll-none">
-              {children}
-            </main>
+            <main className="overscroll-none">{children}</main>
           </ThemeProvider>
         </ReduxProvider>
         <ToastContainer position="top-center" autoClose={5000} />
