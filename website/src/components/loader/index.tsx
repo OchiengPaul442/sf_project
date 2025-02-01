@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Leaf } from "lucide-react";
-import NextButton from "../NextButton";
 
 const outerRingVariants = {
   animate: {
@@ -127,9 +126,7 @@ const SavingFoodLoader: React.FC = () => {
           <Leaf className="w-full h-full text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.7)]" />
         </motion.div>
       </div>
-      <div className="fixed bottom-2 md:bottom-6 left-0 right-0 w-full flex justify-center z-50">
-        <NextButton />
-      </div>
+
       <div className="sr-only" role="status" aria-live="polite">
         Loading SavingFood.ai, please wait...
       </div>

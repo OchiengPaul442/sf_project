@@ -65,16 +65,21 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({ id, title, image }) => {
     offset: ["start start", "end start"],
   });
 
-  /* 
-    Advanced Zoom Effect:
-    - imageScale: Dramatically scales from 1× to 2.5× at mid-scroll then settles at ~2.2×.
-    - imageTranslateY: Moves upward to enhance the 3D pop.
-    - imageRotate: Adds a slight rotation for extra depth.
-    - imageOpacity: Remains fully visible until 70% of scroll progress then fades out.
-  */
-  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 2.5, 2.2]);
-  const imageTranslateY = useTransform(scrollYProgress, [0, 1], [0, -150]);
-  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 7]);
+  // Use less dramatic values on mobile for a smoother effect.
+  const scaleValues = isMobile ? [1, 1.8, 1.6] : [1, 2.5, 2.2];
+  const translateYValues = isMobile ? [0, -80] : [0, -150];
+  const rotateValues = isMobile ? [0, 3] : [0, 7];
+  // New: tilt (rotateX) effect – less tilt on mobile, more on desktop.
+  const tiltValues = isMobile ? [0, 5] : [0, 10];
+
+  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], scaleValues);
+  const imageTranslateY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    translateYValues
+  );
+  const imageRotate = useTransform(scrollYProgress, [0, 1], rotateValues);
+  const imageTilt = useTransform(scrollYProgress, [0, 1], tiltValues);
   const imageOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
 
   // Gradient overlays for smooth visual transition.
@@ -134,6 +139,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({ id, title, image }) => {
             scale: imageScale,
             translateY: imageTranslateY,
             rotate: imageRotate,
+            rotateX: imageTilt,
             opacity: imageOpacity,
             transformStyle: "preserve-3d",
           }}
