@@ -119,8 +119,12 @@ const HomePage: React.FC = () => {
           ref={(el: HTMLElement | null): void => {
             sectionsRef.current[index] = el;
           }}
-          className={`w-full min-h-screen ${
-            section.id === "how-carousel" ? "snap-none" : "snap-start"
+          className={`w-full ${
+            section.id === "home"
+              ? "min-h-[150vh] snap-none"
+              : section.id === "how-carousel"
+              ? "snap-none"
+              : "min-h-screen snap-start"
           }`}
         >
           {content}

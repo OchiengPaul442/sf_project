@@ -9,7 +9,7 @@ import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
-import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
+import { mainConfigs } from "@/utils/configs";
 
 const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
@@ -64,7 +64,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
       className="w-full h-dvh md:min-h-screen overflow-y-scroll bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div
-        className={`container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative ${SECTION_CONTAINER_CLASS}`}
+        className={`container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative ${mainConfigs.SECTION_CONTAINER_CLASS}`}
         initial={isMobile ? {} : { opacity: 0, y: 50 }}
         animate={isMobile ? {} : { opacity: 1, y: 0 }}
         transition={

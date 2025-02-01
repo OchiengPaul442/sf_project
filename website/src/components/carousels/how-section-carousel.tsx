@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
 import type { StepWithData } from "@/utils/types/section";
-import { SECTION_CONTAINER_CLASS } from "@/utils/configs";
+import { mainConfigs } from "@/utils/configs";
 
 // Dynamically load Lottie.
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -135,9 +135,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         style={{ minHeight: "300vh" }}
       >
         <div className="relative h-full">
+          {/* Use a container with max-w-7xl centered horizontally */}
           <div
             style={carouselPositionStyle}
-            className={SECTION_CONTAINER_CLASS}
+            className={mainConfigs.SECTION_CONTAINER_CLASS}
           >
             <div className="px-4 sm:px-6 lg:px-8 h-full flex flex-col lg:flex-row lg:items-center lg:justify-between">
               {/* Left Navigation */}
