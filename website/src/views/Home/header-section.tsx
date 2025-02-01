@@ -28,26 +28,30 @@ const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
     priority
     className="w-full h-auto"
     sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, (max-width: 1024px) 400px, 480px"
+    loading="eager"
   />
 ));
 OptimizedImage.displayName = "OptimizedImage";
 
-// Entrance animation variant for the image container.
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.75 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { type: "spring", stiffness: 500, damping: 30, duration: 0.4 },
+    transition: {
+      type: "spring",
+      stiffness: 700, // Increased stiffness
+      damping: 35, // Adjusted damping
+      duration: 0.3, // Reduced duration
+    },
   },
 };
 
-// Floating variant for a subtle bobbing effect (only on non-mobile devices).
 const floatingVariants: Variants = {
   float: {
-    y: [-8, 8],
+    y: [-6, 6], // Reduced movement range
     transition: {
-      duration: 1.8,
+      duration: 1.5, // Slightly faster
       repeat: Infinity,
       repeatType: "reverse",
       ease: "easeInOut",
@@ -55,121 +59,121 @@ const floatingVariants: Variants = {
   },
 };
 
-const HeaderSection: React.FC<HeaderSectionProps> = ({
-  id,
-  title,
-  image,
-  onNextSection,
-}) => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const controls = useAnimation();
+const HeaderSection: React.FC<HeaderSectionProps> = memo(
+  ({ id, title, image, onNextSection }) => {
+    const sectionRef = useRef<HTMLElement>(null);
+    const [isMobile] = useState(() => isMobileDevice());
+    const controls = useAnimation();
 
-  // Monitor the scroll progress within this section.
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
+    const { scrollYProgress } = useScroll({
+      target: sectionRef,
+      offset: ["start start", "end start"],
+    });
 
-  /* 
-    Advanced Zoom Effect:
-    - imageScale: Dramatically scales from 1× to 2.5× at mid-scroll then settles at ~2.2×.
-    - imageTranslateY: Moves upward to enhance the 3D pop.
-    - imageRotate: Adds a slight rotation for extra depth.
-    - imageOpacity: Remains fully visible until 70% of scroll progress then fades out.
-  */
-  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 2.5, 2.2]);
-  const imageTranslateY = useTransform(scrollYProgress, [0, 1], [0, -150]);
-  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 7]);
-  const imageOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
+    // Optimized transform calculations
+    const imageScale = useTransform(
+      scrollYProgress,
+      [0, 0.5, 1],
+      [1, 2.3, 2], // Slightly reduced scale values
+      { clamp: true }
+    );
 
-  // Gradient overlays for smooth visual transition.
-  const gradientLayer1 = useTransform(scrollYProgress, [0, 0.4], [0, 1]);
-  const bottomGradient = useTransform(scrollYProgress, [0.2, 0.8], [0, 1]);
+    const imageTranslateY = useTransform(
+      scrollYProgress,
+      [0, 1],
+      [0, -120], // Reduced translation
+      { clamp: true }
+    );
 
-  // Check for mobile devices.
-  useEffect(() => {
-    const checkIsMobile = () => setIsMobile(isMobileDevice());
-    checkIsMobile();
-    const handleResize = () => checkIsMobile();
-    window.addEventListener("resize", handleResize, { passive: true });
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    const imageRotate = useTransform(
+      scrollYProgress,
+      [0, 1],
+      [0, 5], // Reduced rotation
+      { clamp: true }
+    );
 
-  // Start the entrance animation.
-  useEffect(() => {
-    controls.start("visible");
-    return () => controls.stop();
-  }, [controls]);
+    const imageOpacity = useTransform(scrollYProgress, [0.75, 1], [1, 0], {
+      clamp: true,
+    });
 
-  return (
-    <section
-      ref={sectionRef}
-      id={id}
-      // Extended scroll area with a perspective for enhanced depth.
-      className="relative min-h-[150vh] w-full overflow-hidden flex flex-col justify-start bg-white"
-      style={{ perspective: "1500px" }}
-    >
-      {/* Gradient overlays */}
-      <motion.div
-        className="absolute inset-0 z-30 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent"
-        style={{ opacity: gradientLayer1 }}
-      />
-      <motion.div
-        className="absolute bottom-0 left-0 right-0 h-[150vh] z-20 pointer-events-none bg-gradient-to-t from-black via-black to-transparent"
-        style={{ opacity: bottomGradient }}
-      />
+    const gradientLayer1 = useTransform(scrollYProgress, [0, 0.35], [0, 1], {
+      clamp: true,
+    });
 
-      {/* Navigation */}
-      <div className="absolute top-0 left-0 right-0 z-40">
-        <Nav />
-      </div>
+    const bottomGradient = useTransform(scrollYProgress, [0.25, 0.75], [0, 1], {
+      clamp: true,
+    });
 
-      {/* Image container pushed upward (via translateY) so it’s in view on first glance. */}
-      <div
-        className={`relative flex-grow flex items-center justify-center ${mainConfigs.SECTION_CONTAINER_CLASS}`}
-        style={{ transform: "translateY(-10%)" }}
+    useEffect(() => {
+      controls.start("visible");
+      return () => controls.stop();
+    }, [controls]);
+
+    return (
+      <section
+        ref={sectionRef}
+        id={id}
+        className="relative min-h-[150vh] w-full overflow-hidden flex flex-col justify-start bg-white will-change-transform"
+        style={{ perspective: "1000px" }} // Reduced perspective for smoother rendering
       >
         <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate={controls}
-          className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px] flex items-center justify-center"
-          style={{
-            scale: imageScale,
-            translateY: imageTranslateY,
-            rotate: imageRotate,
-            opacity: imageOpacity,
-            transformStyle: "preserve-3d",
-          }}
-        >
-          {/* A subtle blurred overlay on desktop for a futuristic look */}
-          {!isMobile && (
-            <motion.div
-              className="absolute inset-0 bg-black/5 backdrop-blur-md rounded-full"
-              aria-hidden="true"
-            />
-          )}
-          <motion.div
-            variants={!isMobile ? floatingVariants : undefined}
-            animate={!isMobile ? "float" : undefined}
-            className="relative z-10"
-          >
-            <OptimizedImage
-              src={image || "/placeholder.svg"}
-              alt={title || ""}
-            />
-          </motion.div>
-        </motion.div>
-      </div>
+          className="absolute inset-0 z-30 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent will-change-opacity"
+          style={{ opacity: gradientLayer1 }}
+        />
 
-      {/* Fixed NextButton so it's always visible at the bottom of the viewport */}
-      <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-auto">
-        <NextButton onClick={onNextSection} />
-      </div>
-    </section>
-  );
-};
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-[150vh] z-20 pointer-events-none bg-gradient-to-t from-black via-black to-transparent will-change-opacity"
+          style={{ opacity: bottomGradient }}
+        />
+
+        <div className="absolute top-0 left-0 right-0 z-40">
+          <Nav />
+        </div>
+
+        <div
+          className={`relative flex-grow flex items-center justify-center ${mainConfigs.SECTION_CONTAINER_CLASS}`}
+          style={{ transform: "translateY(-10%)" }}
+        >
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate={controls}
+            className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px] flex items-center justify-center will-change-transform"
+            style={{
+              scale: imageScale,
+              translateY: imageTranslateY,
+              rotate: imageRotate,
+              opacity: imageOpacity,
+              transformStyle: "preserve-3d",
+            }}
+          >
+            {!isMobile && (
+              <motion.div
+                className="absolute inset-0 bg-black/5 backdrop-blur-sm rounded-full"
+                aria-hidden="true"
+              />
+            )}
+
+            <motion.div
+              variants={!isMobile ? floatingVariants : undefined}
+              animate={!isMobile ? "float" : undefined}
+              className="relative z-10"
+            >
+              <OptimizedImage
+                src={image || "/placeholder.svg"}
+                alt={title || ""}
+              />
+            </motion.div>
+          </motion.div>
+        </div>
+
+        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-auto">
+          <NextButton onClick={onNextSection} />
+        </div>
+      </section>
+    );
+  }
+);
 
 HeaderSection.displayName = "HeaderSection";
-export default memo(HeaderSection);
+export default HeaderSection;
