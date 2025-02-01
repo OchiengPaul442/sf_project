@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowUpRight, Leaf, ChefHat } from "lucide-react";
 import { NAV_SECTIONS } from "@/lib/constants";
+import { mainConfigs } from "@/utils/configs";
 
 interface MenuModalProps {
   isOpen: boolean;
@@ -67,7 +68,9 @@ export default function MenuModal({
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           />
-          <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen flex flex-col">
+          <div
+            className={`${mainConfigs.SECTION_CONTAINER_CLASS} min-h-screen flex flex-col`}
+          >
             {/* Header */}
             <div className="flex justify-between items-center mb-6 sm:mb-12">
               <motion.div
