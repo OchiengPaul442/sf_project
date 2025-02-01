@@ -11,7 +11,6 @@ import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationDat
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 import { X } from "lucide-react";
-import { ContactForm } from "@/components/forms/contact-form";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 
 // Dynamic imports for sections/components
@@ -32,6 +31,9 @@ const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
 });
 const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
+  ssr: false,
+});
+const ContactForm = dynamic(() => import("@/components/forms/contact-form"), {
   ssr: false,
 });
 
