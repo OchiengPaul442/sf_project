@@ -12,6 +12,7 @@ import {
 import { Nav } from "@/components/layout/Navs/nav";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
+import NextButton from "@/components/NextButton";
 import { mainConfigs } from "@/utils/configs";
 
 interface HeaderSectionProps extends SectionProps {
@@ -54,7 +55,12 @@ const floatingVariants: Variants = {
   },
 };
 
-const HeaderSection: React.FC<HeaderSectionProps> = ({ id, title, image }) => {
+const HeaderSection: React.FC<HeaderSectionProps> = ({
+  id,
+  title,
+  image,
+  onNextSection,
+}) => {
   const sectionRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const controls = useAnimation();
@@ -65,21 +71,16 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({ id, title, image }) => {
     offset: ["start start", "end start"],
   });
 
-  // Use less dramatic values on mobile for a smoother effect.
-  const scaleValues = isMobile ? [1, 1.8, 1.6] : [1, 2.5, 2.2];
-  const translateYValues = isMobile ? [0, -80] : [0, -150];
-  const rotateValues = isMobile ? [0, 3] : [0, 7];
-  // New: tilt (rotateX) effect – less tilt on mobile, more on desktop.
-  const tiltValues = isMobile ? [0, 5] : [0, 10];
-
-  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], scaleValues);
-  const imageTranslateY = useTransform(
-    scrollYProgress,
-    [0, 1],
-    translateYValues
-  );
-  const imageRotate = useTransform(scrollYProgress, [0, 1], rotateValues);
-  const imageTilt = useTransform(scrollYProgress, [0, 1], tiltValues);
+  /* 
+    Advanced Zoom Effect:
+    - imageScale: Dramatically scales from 1× to 2.5× at mid-scroll then settles at ~2.2×.
+    - imageTranslateY: Moves upward to enhance the 3D pop.
+    - imageRotate: Adds a slight rotation for extra depth.
+    - imageOpacity: Remains fully visible until 70% of scroll progress then fades out.
+  */
+  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 2.5, 2.2]);
+  const imageTranslateY = useTransform(scrollYProgress, [0, 1], [0, -150]);
+  const imageRotate = useTransform(scrollYProgress, [0, 1], [0, 7]);
   const imageOpacity = useTransform(scrollYProgress, [0.7, 1], [1, 0]);
 
   // Gradient overlays for smooth visual transition.
@@ -133,13 +134,11 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({ id, title, image }) => {
           variants={containerVariants}
           initial="hidden"
           animate={controls}
-          // Responsive max-width: smaller on mobile, larger on desktop.
           className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px] flex items-center justify-center"
           style={{
             scale: imageScale,
             translateY: imageTranslateY,
             rotate: imageRotate,
-            rotateX: imageTilt,
             opacity: imageOpacity,
             transformStyle: "preserve-3d",
           }}
@@ -162,6 +161,11 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({ id, title, image }) => {
             />
           </motion.div>
         </motion.div>
+      </div>
+
+      {/* Fixed NextButton so it's always visible at the bottom of the viewport */}
+      <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-auto">
+        <NextButton onClick={onNextSection} />
       </div>
     </section>
   );
