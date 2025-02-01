@@ -10,8 +10,6 @@ import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationData";
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
-import { X } from "lucide-react";
-import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 
 // Dynamic imports for sections/components
 const HowSectionCarousel = dynamic(
@@ -33,9 +31,6 @@ const HowSection = dynamic(() => import("@/views/Home/how-section"), {
 const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
   ssr: false,
 });
-const ContactForm = dynamic(() => import("@/components/forms/contact-form"), {
-  ssr: false,
-});
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
@@ -45,28 +40,6 @@ const HomePage: React.FC = () => {
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
-  const contactModalOpen = useSelector(
-    (state) => state.ui.contactModalOpen
-  ) as boolean;
-
-  const handleCloseForm = useCallback(() => {
-    dispatch(setContactModalOpen(false));
-  }, [dispatch]);
-
-  // Close modal on Escape key and manage body scroll.
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && contactModalOpen) {
-        handleCloseForm();
-      }
-    };
-    document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = "unset";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [contactModalOpen, handleCloseForm]);
 
   useEffect(() => {
     if (!isLoading && !hasErrors) {
@@ -210,37 +183,6 @@ const HomePage: React.FC = () => {
           if (index !== -1) scrollToSection(index);
         }}
       />
-
-      {/* Contact modal */}
-      <AnimatePresence>
-        {contactModalOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: "0%" }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-              mass: 0.8,
-            }}
-            className="fixed inset-0 bg-white z-50 overflow-y-auto md:overflow-hidden"
-          >
-            <div className="relative h-full">
-              <button
-                onClick={handleCloseForm}
-                className="absolute right-4 top-4 p-2 bg-gray-100 text-green-600 hover:bg-gray-200 hover:text-green-700 rounded-full transition-colors z-50"
-                aria-label="Close Contact Form"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <div className="h-full text-black">
-                <ContactForm />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

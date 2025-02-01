@@ -54,7 +54,7 @@ const pageTransition = {
   },
 };
 
-const ContactForm = () => {
+export function ContactForm() {
   const [selectedForm, setSelectedForm] = useState<FormType | null>(null);
   const angelContainerRef = useRef<HTMLDivElement>(null);
   const [isAnimationReady, setIsAnimationReady] = useState(false);
@@ -247,6 +247,4 @@ const ContactForm = () => {
       </motion.div>
     </div>
   );
-};
-
-export default ContactForm;
+}
