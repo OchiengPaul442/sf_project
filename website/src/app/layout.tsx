@@ -3,7 +3,6 @@ import "react-toastify/dist/ReactToastify.css";
 import type { Metadata } from "next";
 import { qanelasSoft } from "@/lib/fonts/fonts";
 import { ToastContainer } from "react-toastify";
-
 import ThemeProvider from "@/components/ThemeProvider";
 import ReduxProvider from "@/components/ReduxProvider";
 import React from "react";

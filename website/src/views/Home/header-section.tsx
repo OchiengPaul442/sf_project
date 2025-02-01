@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useRef, useEffect, useState } from "react";
+import React, { memo, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
   motion,
@@ -33,6 +33,7 @@ const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
 ));
 OptimizedImage.displayName = "OptimizedImage";
 
+// Snappy entrance animation.
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.75 },
   visible: {
@@ -40,18 +41,19 @@ const containerVariants: Variants = {
     scale: 1,
     transition: {
       type: "spring",
-      stiffness: 700, // Increased stiffness
-      damping: 35, // Adjusted damping
-      duration: 0.3, // Reduced duration
+      stiffness: 700,
+      damping: 35,
+      duration: 0.3,
     },
   },
 };
 
+// Subtle floating effect on larger screens.
 const floatingVariants: Variants = {
   float: {
-    y: [-6, 6], // Reduced movement range
+    y: [-6, 6],
     transition: {
-      duration: 1.5, // Slightly faster
+      duration: 1.5,
       repeat: Infinity,
       repeatType: "reverse",
       ease: "easeInOut",
@@ -62,45 +64,52 @@ const floatingVariants: Variants = {
 const HeaderSection: React.FC<HeaderSectionProps> = memo(
   ({ id, title, image, onNextSection }) => {
     const sectionRef = useRef<HTMLElement>(null);
-    const [isMobile] = useState(() => isMobileDevice());
+    const isMobile = isMobileDevice();
     const controls = useAnimation();
 
+    // Track scroll progress within this (shorter) section.
     const { scrollYProgress } = useScroll({
       target: sectionRef,
       offset: ["start start", "end start"],
     });
 
-    // Optimized transform calculations
-    const imageScale = useTransform(
-      scrollYProgress,
-      [0, 0.5, 1],
-      [1, 2.3, 2], // Slightly reduced scale values
-      { clamp: true }
-    );
+    /*
+      Compressed Animation Range:
+      We apply most of the transform changes up to ~60% scroll, then keep values steady.
+      This ensures the animation completes sooner, so the user can quickly transition.
+    */
+    const scaleRange = isMobile ? [1, 1.8, 1.8] : [1, 2, 2];
+    const translateRange = isMobile ? [0, -60, -60] : [0, -120, -120];
+    const rotateRange = isMobile ? [0, 3, 3] : [0, 5, 5];
 
+    const imageScale = useTransform(scrollYProgress, [0, 0.6, 1], scaleRange, {
+      clamp: true,
+    });
     const imageTranslateY = useTransform(
       scrollYProgress,
-      [0, 1],
-      [0, -120], // Reduced translation
+      [0, 0.6, 1],
+      translateRange,
       { clamp: true }
     );
-
     const imageRotate = useTransform(
       scrollYProgress,
-      [0, 1],
-      [0, 5], // Reduced rotation
-      { clamp: true }
+      [0, 0.6, 1],
+      rotateRange,
+      {
+        clamp: true,
+      }
     );
 
-    const imageOpacity = useTransform(scrollYProgress, [0.75, 1], [1, 0], {
+    // Fade out between 60% and 100%.
+    const imageOpacity = useTransform(scrollYProgress, [0.6, 1], [1, 0], {
       clamp: true,
     });
 
-    const gradientLayer1 = useTransform(scrollYProgress, [0, 0.35], [0, 1], {
+    // Adjust gradient overlays more tightly.
+    const gradientLayer1 = useTransform(scrollYProgress, [0, 0.3], [0, 1], {
       clamp: true,
     });
-
-    const bottomGradient = useTransform(scrollYProgress, [0.25, 0.75], [0, 1], {
+    const bottomGradient = useTransform(scrollYProgress, [0.2, 0.6], [0, 1], {
       clamp: true,
     });
 
@@ -109,30 +118,40 @@ const HeaderSection: React.FC<HeaderSectionProps> = memo(
       return () => controls.stop();
     }, [controls]);
 
+    // Smoothly scroll to the next section when NextButton is clicked.
+    const handleNextSection = () => {
+      onNextSection?.();
+    };
+
     return (
       <section
         ref={sectionRef}
         id={id}
-        className="relative min-h-[150vh] w-full overflow-hidden flex flex-col justify-start bg-white will-change-transform"
-        style={{ perspective: "1000px" }} // Reduced perspective for smoother rendering
+        className="relative min-h-[120vh] w-full overflow-hidden flex flex-col justify-start bg-white will-change-transform"
+        style={{
+          perspective: "1000px",
+          scrollSnapAlign: "start",
+        }}
       >
+        {/* Gradient overlays */}
         <motion.div
           className="absolute inset-0 z-30 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent will-change-opacity"
           style={{ opacity: gradientLayer1 }}
         />
-
         <motion.div
-          className="absolute bottom-0 left-0 right-0 h-[150vh] z-20 pointer-events-none bg-gradient-to-t from-black via-black to-transparent will-change-opacity"
+          className="absolute bottom-0 left-0 right-0 h-[120vh] z-20 pointer-events-none bg-gradient-to-t from-black via-black to-transparent will-change-opacity"
           style={{ opacity: bottomGradient }}
         />
 
+        {/* Navigation at the top */}
         <div className="absolute top-0 left-0 right-0 z-40">
           <Nav />
         </div>
 
+        {/* Main image container, slightly shifted upward */}
         <div
           className={`relative flex-grow flex items-center justify-center ${mainConfigs.SECTION_CONTAINER_CLASS}`}
-          style={{ transform: "translateY(-10%)" }}
+          style={{ transform: "translateY(-5%)" }}
         >
           <motion.div
             variants={containerVariants}
@@ -147,6 +166,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = memo(
               transformStyle: "preserve-3d",
             }}
           >
+            {/* Slightly blurred backdrop on desktop */}
             {!isMobile && (
               <motion.div
                 className="absolute inset-0 bg-black/5 backdrop-blur-sm rounded-full"
@@ -154,6 +174,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = memo(
               />
             )}
 
+            {/* Floating motion only on non-mobile */}
             <motion.div
               variants={!isMobile ? floatingVariants : undefined}
               animate={!isMobile ? "float" : undefined}
@@ -167,8 +188,9 @@ const HeaderSection: React.FC<HeaderSectionProps> = memo(
           </motion.div>
         </div>
 
+        {/* Next button to scroll to the next section */}
         <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-auto">
-          <NextButton onClick={onNextSection} />
+          <NextButton onClick={handleNextSection} />
         </div>
       </section>
     );

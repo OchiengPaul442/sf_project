@@ -56,11 +56,13 @@ const HomePage: React.FC = () => {
     sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  // Decide how each section should be rendered, including snap classes.
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
       let content;
       switch (section.id) {
         case "home":
+          // Example: The home section is quite tall. We'll skip snap here.
           content = (
             <HeaderSection
               {...section}
@@ -87,6 +89,7 @@ const HomePage: React.FC = () => {
           );
           break;
         case "how-carousel":
+          // The carousel section also skips snapping.
           content = (
             <HowSectionCarousel
               id={section.id}
@@ -113,19 +116,23 @@ const HomePage: React.FC = () => {
           content = null;
       }
 
+      // Determine the snap class based on the section's ID.
+      let snapClass = "snap-start"; // default
+      if (section.id === "home" || section.id === "how-carousel") {
+        snapClass = "snap-none";
+      }
+
+      // Choose a desired min-height. For "home", maybe it's 120vh or 150vh.
+      const minHeight =
+        section.id === "home" ? "min-h-[120vh]" : "min-h-screen";
+
       return (
         <section
           key={section.id}
           ref={(el: HTMLElement | null): void => {
             sectionsRef.current[index] = el;
           }}
-          className={`w-full ${
-            section.id === "home"
-              ? "min-h-[150vh] snap-none"
-              : section.id === "how-carousel"
-              ? "snap-none"
-              : "min-h-screen snap-start"
-          }`}
+          className={`w-full ${snapClass} ${minHeight}`}
         >
           {content}
         </section>
@@ -139,10 +146,12 @@ const HomePage: React.FC = () => {
   }
 
   return (
+    // The snap-container
     <div
       className="relative w-full bg-black min-h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
       style={{ scrollBehavior: "smooth" }}
     >
+      {/* AnimatePresence for the loader */}
       <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
@@ -158,12 +167,14 @@ const HomePage: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* Main content after loading */}
       {pageLoaded && (
         <div className="w-full">
           {SECTIONS.map((section, index) => renderSection(section, index))}
         </div>
       )}
 
+      {/* Menu modal */}
       <MenuModal
         isOpen={Boolean(isMenuOpen)}
         onClose={handleMenuClose}
