@@ -14,7 +14,7 @@ import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
 
-// Optimized image component that prioritizes performance.
+// Optimized image component.
 const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
   <Image
     src={src || "/placeholder.svg"}
@@ -29,7 +29,7 @@ const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
 ));
 OptimizedImage.displayName = "OptimizedImage";
 
-// Entrance animation for the main image container.
+// Entrance animation for the image container.
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.75 },
   visible: {
@@ -57,15 +57,21 @@ const HeaderSection: React.FC<SectionProps> = memo(({ id, title, image }) => {
   const isMobile = isMobileDevice();
   const controls = useAnimation();
 
-  // Use Framer Motion's scroll hook to map scroll progress to animation values.
+  // Using a larger scrollable area for a more pronounced zoom effect.
+  // For example, using 150vh ensures more scroll space.
+  // Adjust your CSS min-height value to control the scroll area.
+  const extendedMinHeight = "min-h-[150vh]";
+
+  // Track scroll progress within this section.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  // Define ranges for the transformation values.
-  const scaleRange = isMobile ? [1, 1.8, 1.8] : [1, 2, 2];
-  const translateRange = isMobile ? [0, -60, -60] : [0, -120, -120];
+  // Define transformation ranges.
+  // More pronounced effect on desktop devices.
+  const scaleRange = isMobile ? [1, 2, 2] : [1, 2.5, 2.5];
+  const translateRange = isMobile ? [0, -90, -90] : [0, -150, -150];
   const rotateRange = isMobile ? [0, 3, 3] : [0, 5, 5];
 
   // Map scroll progress to image transformations.
@@ -82,23 +88,25 @@ const HeaderSection: React.FC<SectionProps> = memo(({ id, title, image }) => {
     clamp: true,
   });
 
-  // Fade out the image smoothly after 60% scroll progress.
+  // Fade out the image smoothly near the end of the scroll.
   const imageOpacity = useTransform(scrollYProgress, [0.6, 1], [1, 0], {
     clamp: true,
   });
 
-  // Gradient overlay opacity values for a smooth, futuristic feel.
+  // Top gradient overlay opacity.
   const topGradientOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1], {
     clamp: true,
   });
+
+  // Bottom gradient now transitions from transparent (white background)
+  // to opaque black to match the next section's background.
   const bottomGradientOpacity = useTransform(
     scrollYProgress,
-    [0.2, 0.6],
+    [0.5, 1],
     [0, 1],
     { clamp: true }
   );
 
-  // Start the entrance animation.
   useEffect(() => {
     controls.start("visible");
     return () => controls.stop();
@@ -108,7 +116,7 @@ const HeaderSection: React.FC<SectionProps> = memo(({ id, title, image }) => {
     <section
       ref={sectionRef}
       id={id}
-      className="relative min-h-[120vh] w-full overflow-hidden flex flex-col bg-white will-change-transform"
+      className={`relative ${extendedMinHeight} w-full overflow-hidden flex flex-col bg-white will-change-transform`}
       style={{ perspective: "1000px", scrollSnapAlign: "start" }}
     >
       {/* Top Gradient Overlay */}
@@ -117,13 +125,13 @@ const HeaderSection: React.FC<SectionProps> = memo(({ id, title, image }) => {
         style={{ opacity: topGradientOpacity }}
       />
 
-      {/* Bottom Gradient Overlay */}
+      {/* Bottom Gradient Overlay for seamless transition to black */}
       <motion.div
-        className="absolute bottom-0 left-0 right-0 h-[120vh] z-20 pointer-events-none bg-gradient-to-t from-black via-black to-transparent will-change-opacity"
+        className="absolute bottom-0 left-0 right-0 h-full z-20 pointer-events-none bg-gradient-to-b from-transparent to-black will-change-opacity"
         style={{ opacity: bottomGradientOpacity }}
       />
 
-      {/* Navigation Bar */}
+      {/* Navigation */}
       <div
         className={`${mainConfigs.SECTION_CONTAINER_CLASS} absolute top-0 left-0 right-0 z-40`}
       >
@@ -148,7 +156,7 @@ const HeaderSection: React.FC<SectionProps> = memo(({ id, title, image }) => {
             transformStyle: "preserve-3d",
           }}
         >
-          {/* Blurred backdrop for desktop devices */}
+          {/* Blurred backdrop on desktop */}
           {!isMobile && (
             <motion.div
               className="absolute inset-0 bg-black/5 backdrop-blur-sm rounded-full"
@@ -156,7 +164,7 @@ const HeaderSection: React.FC<SectionProps> = memo(({ id, title, image }) => {
             />
           )}
 
-          {/* The SVG image with optional floating animation (desktop only) */}
+          {/* The SVG image with optional floating animation on desktop */}
           <motion.div
             variants={!isMobile ? floatingVariants : undefined}
             animate={!isMobile ? "float" : undefined}
