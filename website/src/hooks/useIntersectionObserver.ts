@@ -23,6 +23,7 @@ export const useIntersectionObserver = (
       if (section) observer.observe(section);
     });
     return () => {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       sectionRefs.current.forEach((section) => {
         if (section) observer.unobserve(section);
       });
