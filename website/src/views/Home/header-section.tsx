@@ -12,13 +12,9 @@ import {
 import { Nav } from "@/components/layout/Navs/nav";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
-import NextButton from "@/components/NextButton";
 import { mainConfigs } from "@/utils/configs";
 
-interface HeaderSectionProps extends SectionProps {
-  onNextSection: () => void;
-}
-
+// Optimized image component that prioritizes performance.
 const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
   <Image
     src={src || "/placeholder.svg"}
@@ -33,22 +29,17 @@ const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
 ));
 OptimizedImage.displayName = "OptimizedImage";
 
-// Snappy entrance animation.
+// Entrance animation for the main image container.
 const containerVariants: Variants = {
   hidden: { opacity: 0, scale: 0.75 },
   visible: {
     opacity: 1,
     scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 700,
-      damping: 35,
-      duration: 0.3,
-    },
+    transition: { type: "spring", stiffness: 700, damping: 35, duration: 0.3 },
   },
 };
 
-// Subtle floating effect on larger screens.
+// Floating animation for desktop devices.
 const floatingVariants: Variants = {
   float: {
     y: [-6, 6],
@@ -61,143 +52,126 @@ const floatingVariants: Variants = {
   },
 };
 
-const HeaderSection: React.FC<HeaderSectionProps> = memo(
-  ({ id, title, image, onNextSection }) => {
-    const sectionRef = useRef<HTMLElement>(null);
-    const isMobile = isMobileDevice();
-    const controls = useAnimation();
+const HeaderSection: React.FC<SectionProps> = memo(({ id, title, image }) => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const isMobile = isMobileDevice();
+  const controls = useAnimation();
 
-    // Track scroll progress within this (shorter) section.
-    const { scrollYProgress } = useScroll({
-      target: sectionRef,
-      offset: ["start start", "end start"],
-    });
+  // Use Framer Motion's scroll hook to map scroll progress to animation values.
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
 
-    /*
-      Compressed Animation Range:
-      We apply most of the transform changes up to ~60% scroll, then keep values steady.
-      This ensures the animation completes sooner, so the user can quickly transition.
-    */
-    const scaleRange = isMobile ? [1, 1.8, 1.8] : [1, 2, 2];
-    const translateRange = isMobile ? [0, -60, -60] : [0, -120, -120];
-    const rotateRange = isMobile ? [0, 3, 3] : [0, 5, 5];
+  // Define ranges for the transformation values.
+  const scaleRange = isMobile ? [1, 1.8, 1.8] : [1, 2, 2];
+  const translateRange = isMobile ? [0, -60, -60] : [0, -120, -120];
+  const rotateRange = isMobile ? [0, 3, 3] : [0, 5, 5];
 
-    const imageScale = useTransform(scrollYProgress, [0, 0.6, 1], scaleRange, {
-      clamp: true,
-    });
-    const imageTranslateY = useTransform(
-      scrollYProgress,
-      [0, 0.6, 1],
-      translateRange,
-      { clamp: true }
-    );
-    const imageRotate = useTransform(
-      scrollYProgress,
-      [0, 0.6, 1],
-      rotateRange,
-      {
-        clamp: true,
-      }
-    );
+  // Map scroll progress to image transformations.
+  const imageScale = useTransform(scrollYProgress, [0, 0.6, 1], scaleRange, {
+    clamp: true,
+  });
+  const imageTranslateY = useTransform(
+    scrollYProgress,
+    [0, 0.6, 1],
+    translateRange,
+    { clamp: true }
+  );
+  const imageRotate = useTransform(scrollYProgress, [0, 0.6, 1], rotateRange, {
+    clamp: true,
+  });
 
-    // Fade out between 60% and 100%.
-    const imageOpacity = useTransform(scrollYProgress, [0.6, 1], [1, 0], {
-      clamp: true,
-    });
+  // Fade out the image smoothly after 60% scroll progress.
+  const imageOpacity = useTransform(scrollYProgress, [0.6, 1], [1, 0], {
+    clamp: true,
+  });
 
-    // Adjust gradient overlays more tightly.
-    const gradientLayer1 = useTransform(scrollYProgress, [0, 0.3], [0, 1], {
-      clamp: true,
-    });
-    const bottomGradient = useTransform(scrollYProgress, [0.2, 0.6], [0, 1], {
-      clamp: true,
-    });
+  // Gradient overlay opacity values for a smooth, futuristic feel.
+  const topGradientOpacity = useTransform(scrollYProgress, [0, 0.3], [0, 1], {
+    clamp: true,
+  });
+  const bottomGradientOpacity = useTransform(
+    scrollYProgress,
+    [0.2, 0.6],
+    [0, 1],
+    { clamp: true }
+  );
 
-    useEffect(() => {
-      controls.start("visible");
-      return () => controls.stop();
-    }, [controls]);
+  // Start the entrance animation.
+  useEffect(() => {
+    controls.start("visible");
+    return () => controls.stop();
+  }, [controls]);
 
-    // Smoothly scroll to the next section when NextButton is clicked.
-    const handleNextSection = () => {
-      onNextSection?.();
-    };
+  return (
+    <section
+      ref={sectionRef}
+      id={id}
+      className="relative min-h-[120vh] w-full overflow-hidden flex flex-col bg-white will-change-transform"
+      style={{ perspective: "1000px", scrollSnapAlign: "start" }}
+    >
+      {/* Top Gradient Overlay */}
+      <motion.div
+        className="absolute inset-0 z-30 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent will-change-opacity"
+        style={{ opacity: topGradientOpacity }}
+      />
 
-    return (
-      <section
-        ref={sectionRef}
-        id={id}
-        className="relative min-h-[120vh] w-full overflow-hidden flex flex-col justify-start bg-white will-change-transform"
-        style={{
-          perspective: "1000px",
-          scrollSnapAlign: "start",
-        }}
+      {/* Bottom Gradient Overlay */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-[120vh] z-20 pointer-events-none bg-gradient-to-t from-black via-black to-transparent will-change-opacity"
+        style={{ opacity: bottomGradientOpacity }}
+      />
+
+      {/* Navigation Bar */}
+      <div
+        className={`${mainConfigs.SECTION_CONTAINER_CLASS} absolute top-0 left-0 right-0 z-40`}
       >
-        {/* Gradient overlays */}
+        <Nav />
+      </div>
+
+      {/* Main Image Container */}
+      <div
+        className={`${mainConfigs.SECTION_CONTAINER_CLASS} relative flex-grow flex items-center justify-center`}
+        style={{ transform: "translateY(-5%)" }}
+      >
         <motion.div
-          className="absolute inset-0 z-30 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent will-change-opacity"
-          style={{ opacity: gradientLayer1 }}
-        />
-        <motion.div
-          className="absolute bottom-0 left-0 right-0 h-[120vh] z-20 pointer-events-none bg-gradient-to-t from-black via-black to-transparent will-change-opacity"
-          style={{ opacity: bottomGradient }}
-        />
-
-        {/* Navigation at the top */}
-        <div
-          className={` ${mainConfigs.SECTION_CONTAINER_CLASS} absolute top-0 left-0 right-0 z-40`}
+          variants={containerVariants}
+          initial="hidden"
+          animate={controls}
+          className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px] flex items-center justify-center will-change-transform"
+          style={{
+            scale: imageScale,
+            translateY: imageTranslateY,
+            rotate: imageRotate,
+            opacity: imageOpacity,
+            transformStyle: "preserve-3d",
+          }}
         >
-          <Nav />
-        </div>
-
-        {/* Main image container, slightly shifted upward */}
-        <div
-          className={`relative flex-grow flex items-center justify-center ${mainConfigs.SECTION_CONTAINER_CLASS}`}
-          style={{ transform: "translateY(-5%)" }}
-        >
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate={controls}
-            className="relative w-full max-w-[280px] sm:max-w-[320px] md:max-w-[400px] lg:max-w-[480px] flex items-center justify-center will-change-transform"
-            style={{
-              scale: imageScale,
-              translateY: imageTranslateY,
-              rotate: imageRotate,
-              opacity: imageOpacity,
-              transformStyle: "preserve-3d",
-            }}
-          >
-            {/* Slightly blurred backdrop on desktop */}
-            {!isMobile && (
-              <motion.div
-                className="absolute inset-0 bg-black/5 backdrop-blur-sm rounded-full"
-                aria-hidden="true"
-              />
-            )}
-
-            {/* Floating motion only on non-mobile */}
+          {/* Blurred backdrop for desktop devices */}
+          {!isMobile && (
             <motion.div
-              variants={!isMobile ? floatingVariants : undefined}
-              animate={!isMobile ? "float" : undefined}
-              className="relative z-10"
-            >
-              <OptimizedImage
-                src={image || "/placeholder.svg"}
-                alt={title || ""}
-              />
-            </motion.div>
-          </motion.div>
-        </div>
+              className="absolute inset-0 bg-black/5 backdrop-blur-sm rounded-full"
+              aria-hidden="true"
+            />
+          )}
 
-        {/* Next button to scroll to the next section */}
-        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50 pointer-events-auto">
-          <NextButton onClick={handleNextSection} />
-        </div>
-      </section>
-    );
-  }
-);
+          {/* The SVG image with optional floating animation (desktop only) */}
+          <motion.div
+            variants={!isMobile ? floatingVariants : undefined}
+            animate={!isMobile ? "float" : undefined}
+            className="relative z-10"
+          >
+            <OptimizedImage
+              src={image || "/placeholder.svg"}
+              alt={title || ""}
+            />
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  );
+});
 
 HeaderSection.displayName = "HeaderSection";
 export default HeaderSection;
