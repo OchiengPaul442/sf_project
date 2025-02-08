@@ -5,7 +5,7 @@ export const JSON_PATHS = [
   "/lottie/paper_flying.json",
   "/lottie/spag_json.json",
   "/lottie/mark_json.json",
-  "/lottie/data.json",
+  "/lottie/data2.json",
   "/lottie/robot.json",
   "/lottie/contruction.json",
   "/lottie/angel.json",
