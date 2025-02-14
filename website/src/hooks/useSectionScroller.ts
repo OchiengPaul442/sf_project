@@ -56,6 +56,7 @@ export const useSectionScroller = (
 
       if (currentEl?.id === "header-section") {
         const progress = getHeaderProgress(currentEl);
+        // Allow natural scrolling until the header is almost completely scrolled.
         if (
           (e.deltaY > 0 && progress < HEADER_PROGRESS_THRESHOLD) ||
           (e.deltaY < 0 && progress > 0)
