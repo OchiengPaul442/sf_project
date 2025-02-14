@@ -1,4 +1,3 @@
-// pages/index.tsx
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
@@ -17,20 +16,20 @@ import { useGlobalScrollLock } from "@/hooks/useGlobalScrollLock";
 import { useSectionScroller } from "@/hooks/useSectionScroller";
 
 // Dynamic imports for sections/components.
+const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
+  ssr: false,
+});
+const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
+  ssr: false,
+});
+const HowSection = dynamic(() => import("@/views/Home/how-section"), {
+  ssr: false,
+});
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
   { ssr: false }
 );
-const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
-  ssr: false,
-});
-const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
-  ssr: false,
-});
 const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
-  ssr: false,
-});
-const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
 });
 const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
@@ -74,10 +73,7 @@ const HomePage: React.FC = () => {
           content = (
             <HeaderSection
               {...section}
-              image="/Vector.svg"
               onNextSection={() => scrollToSection(index + 1)}
-              animationData={animationDataMap?.["/lottie/sailing_boat_2.json"]}
-              scrollLockControls={{ lockScroll, unlockScroll }}
             />
           );
           break;
@@ -123,7 +119,7 @@ const HomePage: React.FC = () => {
           content = <FooterSection {...section} image="/logo-white.png" />;
           break;
       }
-      // Use scroll-snap classes (preserving your original design).
+      // Use scroll-snap classes.
       const snapClass = section.id === "home" ? "snap-none" : "snap-start";
       const minHeight =
         section.id === "home" ? "min-h-[120vh]" : "min-h-screen";
@@ -171,6 +167,7 @@ const HomePage: React.FC = () => {
       {pageLoaded && (
         <div className="w-full">{SECTIONS.map(renderSection)}</div>
       )}
+
       <MenuModal
         isOpen={Boolean(isMenuOpen)}
         onClose={handleMenuClose}

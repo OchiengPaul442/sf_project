@@ -9,6 +9,10 @@ import { isMobileDevice } from "@/utils/deviceDetection";
 interface HowSectionProps {
   id: string;
   animationData?: any;
+  scrollLockControls?: {
+    lockScroll: () => void;
+    unlockScroll: () => void;
+  };
   // Optionally, you could add scrollLockControls here if desired.
 }
 

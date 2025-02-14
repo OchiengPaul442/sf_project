@@ -1,10 +1,14 @@
-// hooks/useSectionScroller.ts
 import { useEffect, useCallback, useState, RefObject } from "react";
 
 interface SectionScrollerOptions {
   scrollDuration?: number;
   globalLock?: boolean;
 }
+
+/**
+ * Adjust this constant to control how complete the header scroll must be before snapping.
+ */
+const HEADER_PROGRESS_THRESHOLD = 0.99;
 
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,
@@ -16,7 +20,7 @@ export const useSectionScroller = (
 
   const scrollToSection = useCallback(
     (index: number) => {
-      if (sectionsRef.current?.[index]) {
+      if (sectionsRef.current && sectionsRef.current[index]) {
         sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
         setLocalLock(true);
         setTimeout(() => setLocalLock(false), scrollDuration);
@@ -25,26 +29,55 @@ export const useSectionScroller = (
     [sectionsRef, scrollDuration]
   );
 
+  const getCurrentSectionIndex = useCallback(() => {
+    if (!sectionsRef.current) return 0;
+    const midpoint = window.innerHeight / 2;
+    const sections = sectionsRef.current;
+    const currentIndex = sections.findIndex((el) => {
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.top <= midpoint && rect.bottom >= midpoint;
+    });
+    return currentIndex === -1 ? 0 : currentIndex;
+  }, [sectionsRef]);
+
+  const getHeaderProgress = (el: HTMLElement): number => {
+    const totalScrollable = el.offsetHeight - window.innerHeight;
+    const progress = -el.getBoundingClientRect().top / totalScrollable;
+    return Math.min(1, Math.max(0, progress));
+  };
+
   const handleWheel = useCallback(
     (e: WheelEvent) => {
-      if (localLock || globalLock) {
-        e.preventDefault();
-        return;
+      if (localLock || globalLock || !sectionsRef.current) return;
+
+      const currentIndex = getCurrentSectionIndex();
+      const currentEl = sectionsRef.current[currentIndex];
+
+      if (currentEl?.id === "header-section") {
+        const progress = getHeaderProgress(currentEl);
+        if (
+          (e.deltaY > 0 && progress < HEADER_PROGRESS_THRESHOLD) ||
+          (e.deltaY < 0 && progress > 0)
+        ) {
+          return;
+        }
       }
-      const sections = sectionsRef.current ?? [];
-      let currentIndex = sections.findIndex(
-        (el) => el && el.getBoundingClientRect().top >= 0
-      );
-      if (currentIndex === -1) currentIndex = 0;
-      if (e.deltaY > 0 && currentIndex < sections.length - 1) {
-        e.preventDefault();
+
+      e.preventDefault();
+      if (e.deltaY > 0 && currentIndex < sectionsRef.current.length - 1) {
         scrollToSection(currentIndex + 1);
       } else if (e.deltaY < 0 && currentIndex > 0) {
-        e.preventDefault();
         scrollToSection(currentIndex - 1);
       }
     },
-    [localLock, globalLock, sectionsRef, scrollToSection]
+    [
+      localLock,
+      globalLock,
+      sectionsRef,
+      getCurrentSectionIndex,
+      scrollToSection,
+    ]
   );
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -53,15 +86,31 @@ export const useSectionScroller = (
 
   const handleTouchEnd = useCallback(
     (e: TouchEvent) => {
-      if (localLock || globalLock || touchStartY === null) return;
+      if (
+        localLock ||
+        globalLock ||
+        touchStartY === null ||
+        !sectionsRef.current
+      )
+        return;
+
       const diff = touchStartY - e.changedTouches[0].clientY;
+      const currentIndex = getCurrentSectionIndex();
+      const currentEl = sectionsRef.current[currentIndex];
+
+      if (currentEl?.id === "header-section") {
+        const progress = getHeaderProgress(currentEl);
+        if (
+          (diff > 0 && progress < HEADER_PROGRESS_THRESHOLD) ||
+          (diff < 0 && progress > 0)
+        ) {
+          setTouchStartY(null);
+          return;
+        }
+      }
+
       if (Math.abs(diff) > 50) {
-        const sections = sectionsRef.current ?? [];
-        let currentIndex = sections.findIndex(
-          (el) => el && el.getBoundingClientRect().top >= 0
-        );
-        if (currentIndex === -1) currentIndex = 0;
-        if (diff > 0 && currentIndex < sections.length - 1) {
+        if (diff > 0 && currentIndex < sectionsRef.current.length - 1) {
           scrollToSection(currentIndex + 1);
         } else if (diff < 0 && currentIndex > 0) {
           scrollToSection(currentIndex - 1);
@@ -69,7 +118,14 @@ export const useSectionScroller = (
       }
       setTouchStartY(null);
     },
-    [localLock, globalLock, touchStartY, sectionsRef, scrollToSection]
+    [
+      localLock,
+      globalLock,
+      touchStartY,
+      sectionsRef,
+      getCurrentSectionIndex,
+      scrollToSection,
+    ]
   );
 
   useEffect(() => {
