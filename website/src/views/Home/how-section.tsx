@@ -1,3 +1,4 @@
+// views/Home/how-section.tsx
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
@@ -8,6 +9,7 @@ import { isMobileDevice } from "@/utils/deviceDetection";
 interface HowSectionProps {
   id: string;
   animationData?: any;
+  // Optionally, you could add scrollLockControls here if desired.
 }
 
 const HowSection: React.FC<HowSectionProps> = ({ id }) => {
@@ -27,32 +29,22 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       if (sectionRef.current) {
         const rect = sectionRef.current.getBoundingClientRect();
         const windowHeight = window.innerHeight;
-        // Calculate progress:
-        // 0 when the section is fully out of view at the bottom,
-        // 1 when the section is fully out of view at the top.
         const progress = 1 - rect.bottom / (windowHeight + rect.height);
-        // Clamp progress between 0 and 1.
         const clampedProgress = Math.min(Math.max(progress, 0), 1);
         setCurrentScrollProgress(clampedProgress);
       }
     };
 
     const onScroll = () => {
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId);
-      }
+      if (frameId !== null) cancelAnimationFrame(frameId);
       frameId = requestAnimationFrame(handleScroll);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    // Initial call.
     onScroll();
-
     return () => {
       window.removeEventListener("scroll", onScroll);
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId);
-      }
+      if (frameId !== null) cancelAnimationFrame(frameId);
     };
   }, []);
 

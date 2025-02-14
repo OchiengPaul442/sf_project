@@ -1,10 +1,13 @@
-import type React from "react";
+// components/TextReveal.tsx
+import React from "react";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import { cn } from "@/lib/utils";
 
-interface TextRevealProps {
+export interface TextRevealProps {
   text: string;
+  /** A value between 0 and 1 representing the current scroll progress */
   scrollYProgress: number;
+  /** The progress range within which the text will reveal */
   range: [number, number];
   align?: "left" | "right";
 }
@@ -17,23 +20,23 @@ export const TextReveal: React.FC<TextRevealProps> = ({
 }) => {
   const isMobile = isMobileDevice();
 
-  // Calculate normalized progress within the specified range
+  // Normalize progress within the specified range.
   const normalizedProgress = Math.max(
     0,
     Math.min(1, (scrollYProgress - range[0]) / (range[1] - range[0]))
   );
 
-  // Split text into words instead of characters
+  // Split text into words.
   const words = text.split(" ");
   const totalWords = words.length;
 
-  // Dynamic text alignment - always left on mobile
+  // Set text alignment (always left on mobile).
   const textAlignmentClasses = cn("relative", {
     "text-left sm:text-right": align === "right" && !isMobile,
     "text-left": isMobile || align === "left",
   });
 
-  // Shared text styles with proper word wrapping
+  // Shared text styles.
   const textStyles = cn(
     "text-2xl sm:text-3xl md:text-4xl lg:text-[3.38rem]",
     "font-normal leading-[1.4] sm:leading-[1.45] md:leading-[1.35]",
@@ -50,7 +53,7 @@ export const TextReveal: React.FC<TextRevealProps> = ({
       );
     }
 
-    // Calculate reveal progress for each word
+    // Calculate individual word reveal progress.
     const wordRevealProgress = Math.max(
       0,
       Math.min(
@@ -77,18 +80,14 @@ export const TextReveal: React.FC<TextRevealProps> = ({
 
   return (
     <div className={textAlignmentClasses}>
-      {/* Hidden text for maintaining layout */}
+      {/* Hidden text for layout */}
       <p className={cn("invisible", textStyles)}>{words.join(" ")}</p>
-
-      {/* Visible text container */}
+      {/* Visible text */}
       <div className="absolute top-0 left-0 right-0">
         <p className={textStyles}>
-          {/* Ghost text */}
           <span className="absolute top-0 left-0 right-0 text-white/20">
             {words.map((word, i) => renderWord(word, i, true))}
           </span>
-
-          {/* Revealed text */}
           <span className="relative">
             {words.map((word, i) => renderWord(word, i, false))}
           </span>

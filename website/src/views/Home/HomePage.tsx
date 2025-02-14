@@ -1,3 +1,4 @@
+// pages/index.tsx
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
@@ -11,7 +12,11 @@ import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationDat
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 
-// Dynamic imports for sections/components
+// Import scroll hooks.
+import { useGlobalScrollLock } from "@/hooks/useGlobalScrollLock";
+import { useSectionScroller } from "@/hooks/useSectionScroller";
+
+// Dynamic imports for sections/components.
 const HowSectionCarousel = dynamic(
   () => import("@/components/carousels/how-section-carousel"),
   { ssr: false }
@@ -36,10 +41,19 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
   const [pageLoaded, setPageLoaded] = useState(false);
-  // Using HTMLElement for section refs.
+  // Ref to store each section’s element.
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
+
+  // Global scroll lock.
+  const { lockScroll, unlockScroll } = useGlobalScrollLock();
+
+  // Section scroller hook.
+  const { scrollToSection } = useSectionScroller(sectionsRef, {
+    scrollDuration: 800,
+    globalLock: false,
+  });
 
   useEffect(() => {
     if (!isLoading && !hasErrors) {
@@ -51,24 +65,19 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
-  // Helper to scroll smoothly to a section by index.
-  const scrollToSection = useCallback((index: number) => {
-    sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-
-  // Decide how each section should be rendered, including snap classes.
+  // Render each section.
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
-      let content;
+      let content = null;
       switch (section.id) {
         case "home":
-          // Example: The home section is quite tall. We'll skip snap here.
           content = (
             <HeaderSection
               {...section}
               image="/Vector.svg"
               onNextSection={() => scrollToSection(index + 1)}
               animationData={animationDataMap?.["/lottie/sailing_boat_2.json"]}
+              scrollLockControls={{ lockScroll, unlockScroll }}
             />
           );
           break;
@@ -85,11 +94,11 @@ const HomePage: React.FC = () => {
             <HowSection
               {...section}
               animationData={animationDataMap?.["/lottie/how.json"]}
+              scrollLockControls={{ lockScroll, unlockScroll }}
             />
           );
           break;
         case "how-carousel":
-          // The carousel section also skips snapping.
           content = (
             <HowSectionCarousel
               id={section.id}
@@ -98,6 +107,7 @@ const HomePage: React.FC = () => {
                 ...step,
                 animationData: animationDataMap?.[JSON_PATHS[idx]] || null,
               }))}
+              scrollLockControls={{ lockScroll, unlockScroll }}
             />
           );
           break;
@@ -112,25 +122,19 @@ const HomePage: React.FC = () => {
         case "footer":
           content = <FooterSection {...section} image="/logo-white.png" />;
           break;
-        default:
-          content = null;
       }
-
-      // Determine the snap class based on the section's ID.
-      let snapClass = "snap-start"; // default
-      if (section.id === "home" || section.id === "how-carousel") {
-        snapClass = "snap-none";
-      }
-
-      // Choose a desired min-height. For "home", maybe it's 120vh or 150vh.
+      // Use scroll-snap classes (preserving your original design).
+      const snapClass = section.id === "home" ? "snap-none" : "snap-start";
       const minHeight =
         section.id === "home" ? "min-h-[120vh]" : "min-h-screen";
 
       return (
         <section
           key={section.id}
-          ref={(el: HTMLElement | null): void => {
-            sectionsRef.current[index] = el;
+          ref={(el) => {
+            if (sectionsRef.current) {
+              sectionsRef.current[index] = el;
+            }
           }}
           className={`w-full ${snapClass} ${minHeight}`}
         >
@@ -138,7 +142,7 @@ const HomePage: React.FC = () => {
         </section>
       );
     },
-    [animationDataMap, scrollToSection]
+    [animationDataMap, scrollToSection, lockScroll, unlockScroll]
   );
 
   if (hasErrors) {
@@ -146,12 +150,10 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    // The snap-container
     <div
       className="relative w-full bg-black min-h-screen overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
       style={{ scrollBehavior: "smooth" }}
     >
-      {/* AnimatePresence for the loader */}
       <AnimatePresence mode="wait">
         {isLoading && (
           <motion.div
@@ -166,15 +168,9 @@ const HomePage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Main content after loading */}
       {pageLoaded && (
-        <div className="w-full">
-          {SECTIONS.map((section, index) => renderSection(section, index))}
-        </div>
+        <div className="w-full">{SECTIONS.map(renderSection)}</div>
       )}
-
-      {/* Menu modal */}
       <MenuModal
         isOpen={Boolean(isMenuOpen)}
         onClose={handleMenuClose}

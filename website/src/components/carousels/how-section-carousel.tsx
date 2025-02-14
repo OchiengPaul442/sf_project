@@ -1,6 +1,7 @@
+// views/Home/how-section-carousel.tsx
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, memo } from "react";
+import React, { useState, useRef, useCallback, memo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
@@ -13,10 +14,11 @@ const Lottie = dynamic(() => import("lottie-react"), {
   loading: () => <div className="w-full h-full bg-black" />,
 });
 
-interface HowSectionCarouselProps {
+export interface HowSectionCarouselProps {
   id: string;
   title: string;
   steps: StepWithData[];
+  scrollLockControls?: { lockScroll: () => void; unlockScroll: () => void };
 }
 
 const carouselVariants = {
@@ -68,21 +70,23 @@ const NavItem: React.FC<{
 NavItem.displayName = "NavItem";
 
 const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
-  function HowSectionCarousel({ id, title, steps }) {
+  function HowSectionCarousel({ id, title, steps, scrollLockControls }) {
     const sectionRef = useRef<HTMLDivElement>(null);
-    const [progress, setProgress] = useState(0);
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(0);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
+
+    useEffect(() => {
+      if (scrollLockControls) {
+        scrollLockControls.lockScroll();
+      }
+    }, [scrollLockControls]);
 
     const handleScroll = useCallback(() => {
       if (!sectionRef.current) return;
       const rect = sectionRef.current.getBoundingClientRect();
       const totalScroll = rect.height - window.innerHeight;
-      let newProgress = -rect.top / totalScroll;
-      newProgress = Math.max(0, Math.min(1, newProgress));
-      setProgress(newProgress);
-
+      const newProgress = Math.max(0, Math.min(1, -rect.top / totalScroll));
       const newIndex = Math.round(newProgress * (steps.length - 1));
       if (newIndex !== activeIndex) {
         setDirection(newIndex > activeIndex ? 1 : -1);
@@ -92,38 +96,20 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
 
     useEffect(() => {
       window.addEventListener("scroll", handleScroll, { passive: true });
-      handleScroll(); // initial call
+      handleScroll();
       return () => {
         window.removeEventListener("scroll", handleScroll);
       };
     }, [handleScroll]);
 
-    let carouselPositionStyle: React.CSSProperties = {};
-    if (progress > 0 && progress < 1) {
-      carouselPositionStyle = {
-        position: "fixed",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "100%",
-      };
-    } else if (progress <= 0) {
-      carouselPositionStyle = {
-        position: "absolute",
-        top: 0,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "100%",
-      };
-    } else {
-      carouselPositionStyle = {
-        position: "absolute",
-        bottom: 0,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "100%",
-      };
-    }
+    // Absolute centering container.
+    const carouselPositionStyle: React.CSSProperties = {
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      width: "100%",
+    };
 
     const currentStep = steps[activeIndex] || steps[0];
 
@@ -135,7 +121,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         style={{ minHeight: "300vh" }}
       >
         <div className="relative h-full">
-          {/* Use a container with max-w-7xl centered horizontally */}
           <div
             style={carouselPositionStyle}
             className={mainConfigs.SECTION_CONTAINER_CLASS}
