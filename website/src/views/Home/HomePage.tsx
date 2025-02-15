@@ -11,17 +11,17 @@ import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationDat
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 
-// Scroll hooks.
-import { useGlobalScrollLock } from "@/hooks/useGlobalScrollLock";
+// We no longer need useGlobalScrollLock here.
 import { useSectionScroller } from "@/hooks/useSectionScroller";
 
-// Dynamic imports.
+// Dynamic imports for sections
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
 });
 const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
   ssr: false,
 });
+/** HowSection now relies on its own reveal logic */
 const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
 });
@@ -39,43 +39,21 @@ const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
-  const [pageLoaded, setPageLoaded] = useState(false);
-  // Reference for each section's DOM element.
-  const sectionsRef = useRef<(HTMLElement | null)[]>([]);
+
+  // Animation data state
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
 
-  // Global scroll lock.
-  const { lockScroll, unlockScroll } = useGlobalScrollLock();
+  const [pageLoaded, setPageLoaded] = useState(false);
 
-  // Section scroller.
+  // Reference for each section's DOM node.
+  const sectionsRef = useRef<(HTMLElement | null)[]>([]);
+
+  // Use the section scroller for smooth snapping in other sections.
   const { scrollToSection } = useSectionScroller(sectionsRef, {
     scrollDuration: 800,
     globalLock: false,
   });
-
-  // Track the active section index.
-  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
-  useEffect(() => {
-    const handleScroll = () => {
-      let currentActive = 0;
-      sectionsRef.current.forEach((section, i) => {
-        if (section) {
-          const rect = section.getBoundingClientRect();
-          if (
-            rect.top <= window.innerHeight / 2 &&
-            rect.bottom >= window.innerHeight / 2
-          ) {
-            currentActive = i;
-          }
-        }
-      });
-      setActiveSectionIndex(currentActive);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     if (!isLoading && !hasErrors) {
@@ -87,9 +65,11 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
+  // Render each section.
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
       let content: React.ReactNode = null;
+
       switch (section.id) {
         case "home":
           content = (
@@ -108,24 +88,17 @@ const HomePage: React.FC = () => {
           );
           break;
         case "how":
-          content = (
-            <HowSection
-              {...section}
-              scrollLockControls={{ lockScroll, unlockScroll }}
-              onTransitionNext={() => scrollToSection(index + 1)}
-              onTransitionPrev={() => scrollToSection(index - 1)}
-              isActive={activeSectionIndex === index}
-            />
-          );
+          // Pass only the id to HowSection.
+          content = <HowSection id={section.id} />;
           break;
         case "how-carousel":
           content = (
             <HowSectionCarousel
               id={section.id}
               title={section.title}
-              steps={STEPS_WITH_IDS.map((step, idx) => ({
+              steps={STEPS_WITH_IDS.map((step, stepIdx) => ({
                 ...step,
-                animationData: animationDataMap?.[JSON_PATHS[idx]] || null,
+                animationData: animationDataMap?.[JSON_PATHS[stepIdx]] || null,
               }))}
             />
           );
@@ -142,12 +115,13 @@ const HomePage: React.FC = () => {
           content = <FooterSection {...section} image="/logo-white.png" />;
           break;
         default:
-          break;
+          content = null;
       }
-      // For "home" we avoid snap so the header can be taller.
-      const snapClass = section.id === "home" ? "snap-none" : "snap-start";
-      const minHeight =
-        section.id === "home" ? "min-h-[120vh]" : "min-h-screen";
+
+      // For "home", we disable snapping so that header can be taller.
+      const isHome = section.id === "home";
+      const snapClass = isHome ? "snap-none" : "snap-start";
+      const minHeight = isHome ? "min-h-[120vh]" : "min-h-screen";
 
       return (
         <section
@@ -161,13 +135,7 @@ const HomePage: React.FC = () => {
         </section>
       );
     },
-    [
-      animationDataMap,
-      scrollToSection,
-      lockScroll,
-      unlockScroll,
-      activeSectionIndex,
-    ]
+    [scrollToSection, animationDataMap]
   );
 
   if (hasErrors) {
@@ -193,11 +161,13 @@ const HomePage: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
       {pageLoaded && (
         <div className="w-full">
           {SECTIONS.map((section, index) => renderSection(section, index))}
         </div>
       )}
+
       <MenuModal
         isOpen={Boolean(isMenuOpen)}
         onClose={handleMenuClose}

@@ -31,7 +31,6 @@ export const useSectionScroller = (
   const handleScroll = useCallback(
     (delta: number) => {
       if (localLock || globalLock || !sectionsRef.current) return;
-
       const currentSection = sectionsRef.current.findIndex((section) => {
         if (!section) return false;
         const rect = section.getBoundingClientRect();
@@ -40,22 +39,7 @@ export const useSectionScroller = (
           rect.bottom >= window.innerHeight / 2
         );
       });
-
       if (currentSection === -1) return;
-
-      const currentElement = sectionsRef.current[currentSection];
-      if (!currentElement) return;
-
-      // Allow natural scrolling in the header section if not near its end.
-      if (currentElement.id === "header-section") {
-        const scrollHeight = currentElement.scrollHeight - window.innerHeight;
-        const scrollTop = -currentElement.getBoundingClientRect().top;
-        const progress = scrollTop / scrollHeight;
-        if (progress < 0.98 || (delta < 0 && progress > 0)) {
-          return;
-        }
-      }
-
       if (delta > 0 && currentSection < sectionsRef.current.length - 1) {
         scrollToSection(currentSection + 1);
       } else if (delta < 0 && currentSection > 0) {
