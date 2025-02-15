@@ -39,7 +39,7 @@ const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
-  const [pageLoaded, setPageLoaded] = useState(false);
+  const [pageLoaded, setPageLoaded] = useState<boolean>(false);
   // Ref to store each section’s element.
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
   const { isLoading, hasErrors, errors, animationDataMap } =
@@ -64,10 +64,9 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
-  // Render each section.
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
-      let content = null;
+      let content: React.ReactNode = null;
       switch (section.id) {
         case "home":
           content = (
@@ -118,6 +117,8 @@ const HomePage: React.FC = () => {
         case "footer":
           content = <FooterSection {...section} image="/logo-white.png" />;
           break;
+        default:
+          break;
       }
       // Use scroll-snap classes.
       const snapClass = section.id === "home" ? "snap-none" : "snap-start";
@@ -128,9 +129,7 @@ const HomePage: React.FC = () => {
         <section
           key={section.id}
           ref={(el) => {
-            if (sectionsRef.current) {
-              sectionsRef.current[index] = el;
-            }
+            sectionsRef.current[index] = el;
           }}
           className={`w-full ${snapClass} ${minHeight}`}
         >
@@ -171,7 +170,7 @@ const HomePage: React.FC = () => {
       <MenuModal
         isOpen={Boolean(isMenuOpen)}
         onClose={handleMenuClose}
-        scrollToSection={(id) => {
+        scrollToSection={(id: string) => {
           const index = SECTIONS.findIndex((section) => section.id === id);
           if (index !== -1) scrollToSection(index);
         }}

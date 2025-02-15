@@ -5,80 +5,72 @@ interface SectionScrollerOptions {
   globalLock?: boolean;
 }
 
-/**
- * Adjust this constant to control how complete the header scroll must be before snapping.
- */
-const HEADER_PROGRESS_THRESHOLD = 0.99;
-
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,
   options: SectionScrollerOptions = {}
 ) => {
   const { scrollDuration = 800, globalLock = false } = options;
-  const [localLock, setLocalLock] = useState(false);
+  const [localLock, setLocalLock] = useState<boolean>(false);
   const [touchStartY, setTouchStartY] = useState<number | null>(null);
+  const [lastScrollTime, setLastScrollTime] = useState<number>(0);
 
   const scrollToSection = useCallback(
     (index: number) => {
+      const now = Date.now();
+      if (now - lastScrollTime < scrollDuration) return;
       if (sectionsRef.current && sectionsRef.current[index]) {
         sectionsRef.current[index]?.scrollIntoView({ behavior: "smooth" });
+        setLastScrollTime(now);
         setLocalLock(true);
         setTimeout(() => setLocalLock(false), scrollDuration);
       }
     },
-    [sectionsRef, scrollDuration]
+    [sectionsRef, scrollDuration, lastScrollTime]
   );
 
-  const getCurrentSectionIndex = useCallback(() => {
-    if (!sectionsRef.current) return 0;
-    const midpoint = window.innerHeight / 2;
-    const sections = sectionsRef.current;
-    const currentIndex = sections.findIndex((el) => {
-      if (!el) return false;
-      const rect = el.getBoundingClientRect();
-      return rect.top <= midpoint && rect.bottom >= midpoint;
-    });
-    return currentIndex === -1 ? 0 : currentIndex;
-  }, [sectionsRef]);
-
-  const getHeaderProgress = (el: HTMLElement): number => {
-    const totalScrollable = el.offsetHeight - window.innerHeight;
-    const progress = -el.getBoundingClientRect().top / totalScrollable;
-    return Math.min(1, Math.max(0, progress));
-  };
-
-  const handleWheel = useCallback(
-    (e: WheelEvent) => {
+  const handleScroll = useCallback(
+    (delta: number) => {
       if (localLock || globalLock || !sectionsRef.current) return;
 
-      const currentIndex = getCurrentSectionIndex();
-      const currentEl = sectionsRef.current[currentIndex];
+      const currentSection = sectionsRef.current.findIndex((section) => {
+        if (!section) return false;
+        const rect = section.getBoundingClientRect();
+        return (
+          rect.top <= window.innerHeight / 2 &&
+          rect.bottom >= window.innerHeight / 2
+        );
+      });
 
-      if (currentEl?.id === "header-section") {
-        const progress = getHeaderProgress(currentEl);
-        // Allow natural scrolling until the header is almost completely scrolled.
-        if (
-          (e.deltaY > 0 && progress < HEADER_PROGRESS_THRESHOLD) ||
-          (e.deltaY < 0 && progress > 0)
-        ) {
+      if (currentSection === -1) return;
+
+      const currentElement = sectionsRef.current[currentSection];
+      if (!currentElement) return;
+
+      // Allow natural scrolling in the header section if not near its end.
+      if (currentElement.id === "header-section") {
+        const scrollHeight = currentElement.scrollHeight - window.innerHeight;
+        const scrollTop = -currentElement.getBoundingClientRect().top;
+        const progress = scrollTop / scrollHeight;
+        if (progress < 0.98 || (delta < 0 && progress > 0)) {
           return;
         }
       }
 
-      e.preventDefault();
-      if (e.deltaY > 0 && currentIndex < sectionsRef.current.length - 1) {
-        scrollToSection(currentIndex + 1);
-      } else if (e.deltaY < 0 && currentIndex > 0) {
-        scrollToSection(currentIndex - 1);
+      if (delta > 0 && currentSection < sectionsRef.current.length - 1) {
+        scrollToSection(currentSection + 1);
+      } else if (delta < 0 && currentSection > 0) {
+        scrollToSection(currentSection - 1);
       }
     },
-    [
-      localLock,
-      globalLock,
-      sectionsRef,
-      getCurrentSectionIndex,
-      scrollToSection,
-    ]
+    [localLock, globalLock, sectionsRef, scrollToSection]
+  );
+
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      e.preventDefault();
+      handleScroll(e.deltaY);
+    },
+    [handleScroll]
   );
 
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -87,46 +79,14 @@ export const useSectionScroller = (
 
   const handleTouchEnd = useCallback(
     (e: TouchEvent) => {
-      if (
-        localLock ||
-        globalLock ||
-        touchStartY === null ||
-        !sectionsRef.current
-      )
-        return;
-
-      const diff = touchStartY - e.changedTouches[0].clientY;
-      const currentIndex = getCurrentSectionIndex();
-      const currentEl = sectionsRef.current[currentIndex];
-
-      if (currentEl?.id === "header-section") {
-        const progress = getHeaderProgress(currentEl);
-        if (
-          (diff > 0 && progress < HEADER_PROGRESS_THRESHOLD) ||
-          (diff < 0 && progress > 0)
-        ) {
-          setTouchStartY(null);
-          return;
-        }
-      }
-
-      if (Math.abs(diff) > 50) {
-        if (diff > 0 && currentIndex < sectionsRef.current.length - 1) {
-          scrollToSection(currentIndex + 1);
-        } else if (diff < 0 && currentIndex > 0) {
-          scrollToSection(currentIndex - 1);
-        }
+      if (touchStartY === null) return;
+      const delta = touchStartY - e.changedTouches[0].clientY;
+      if (Math.abs(delta) > 50) {
+        handleScroll(delta);
       }
       setTouchStartY(null);
     },
-    [
-      localLock,
-      globalLock,
-      touchStartY,
-      sectionsRef,
-      getCurrentSectionIndex,
-      scrollToSection,
-    ]
+    [touchStartY, handleScroll]
   );
 
   useEffect(() => {

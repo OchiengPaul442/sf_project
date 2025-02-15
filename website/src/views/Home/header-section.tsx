@@ -1,133 +1,142 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import React, { useRef, useEffect } from "react";
+import { motion, useScroll, useTransform, MotionValue } from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
-import { useRef, useEffect, useState } from "react";
 import { useWindowSize } from "@/hooks/useWindowSize";
+import NextButton from "@/components/NextButton"; // adjust import path as needed
+import { mainConfigs } from "@/utils/configs";
 
 export interface HeaderSectionProps {
   onNextSection?: () => void;
+  onScrollProgress?: (progress: number) => void;
 }
 
-export default function HeaderSection({ onNextSection }: HeaderSectionProps) {
+const HeaderSection: React.FC<HeaderSectionProps> = ({
+  onNextSection,
+  onScrollProgress,
+}) => {
   const sectionRef = useRef<HTMLElement>(null);
   const { width } = useWindowSize();
   const isMobile = width < 768;
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // Set the header height to 450vh for a longer scroll area.
+  // Monitor scroll progress of the header section.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  // Define thresholds:
-  // - SCALE_COMPLETE_THRESHOLD: when the scaling should be fully reached.
-  // - TRANSITION_THRESHOLD: when the tunnel effect and snapping begin.
-  const SCALE_COMPLETE_THRESHOLD = 0.9;
-  const TRANSITION_THRESHOLD = 0.99;
+  // Define thresholds.
+  const SCALE_START = 0.1;
+  const SCALE_PEAK = 0.5;
+  const TEXT_FADE_START = 0.6;
+  const TEXT_FADE_END = 0.8;
+  const TRANSITION_TRIGGER = 0.95; // trigger a bit later to ensure bg is fully black
 
-  // Control points are stretched to provide gradual scaling and movement.
   const progressRange = [
     0,
-    0.5,
-    SCALE_COMPLETE_THRESHOLD,
-    TRANSITION_THRESHOLD,
+    SCALE_START,
+    SCALE_PEAK,
+    TEXT_FADE_START,
+    TEXT_FADE_END,
     1,
   ];
 
-  // Helper for choosing mobile or desktop values.
-  const getAnimationValues = (
-    mobileValues: number[],
-    desktopValues: number[]
-  ) => (isMobile ? mobileValues : desktopValues);
+  // Increase the text scale ranges for a modern, “popping” look.
+  const getResponsiveValue = (mobile: number[], desktop: number[]) =>
+    isMobile ? mobile : desktop;
 
-  // Increase scaling further:
-  const textScale = useTransform(
+  // For example, desktop scaling ramps from 1 to 12.
+  const textScale: MotionValue<number> = useTransform(
     scrollYProgress,
     progressRange,
-    getAnimationValues(
-      [1, 2.2, 4, 4, 4], // Mobile: scale up to 4×
-      [1, 4, 8, 8, 8] // Desktop: scale up to 8×
-    )
+    getResponsiveValue([1, 2, 5, 7, 9, 12], [1, 3, 8, 12, 14, 16])
   );
 
-  // Keep text fully opaque until near the end.
-  const textOpacity = useTransform(
+  const textOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
-    [0, SCALE_COMPLETE_THRESHOLD, TRANSITION_THRESHOLD, 1],
-    [1, 1, 0.8, 0]
+    [0, TEXT_FADE_START, TEXT_FADE_END],
+    [1, 1, 0]
   );
 
-  // Slight horizontal and vertical movement.
-  const xMovePercent = useTransform(
+  const xMove: MotionValue<number> = useTransform(
     scrollYProgress,
     progressRange,
-    getAnimationValues([0, -5, -10, -10, -10], [0, -10, -20, -20, -20])
-  );
-  const yMovePercent = useTransform(
-    scrollYProgress,
-    progressRange,
-    getAnimationValues([0, -3, -6, -6, -6], [0, -6, -12, -12, -12])
+    getResponsiveValue([0, -2, -5, -8, -10, -12], [0, -5, -10, -15, -20, -25])
   );
 
-  // Navigation and intro text opacity.
-  const navOpacity = useTransform(
+  const yMove: MotionValue<number> = useTransform(
+    scrollYProgress,
+    progressRange,
+    getResponsiveValue([0, -1, -3, -4, -5, -6], [0, -3, -6, -9, -12, -15])
+  );
+
+  const navOpacity: MotionValue<number> = useTransform(
+    scrollYProgress,
+    [0, 0.2, 0.3],
+    [1, 0.7, 0]
+  );
+
+  const introTextOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.15, 0.25],
-    [1, 0.7, 0]
+    [1, 0.5, 0]
   );
-  const introTextOpacity = useTransform(
+
+  // Animate the background color from white to black.
+  // The header becomes fully black at 0.7 scroll progress and remains black.
+  const backgroundColor = useTransform(
     scrollYProgress,
-    [0, 0.1, 0.2],
-    [1, 0.7, 0]
+    [0, 0.7, 1],
+    ["#ffffff", "#000000", "#000000"]
   );
 
-  // FUTURISTIC TUNNEL OVERLAY:
-  // A full-screen radial gradient that simulates a tunnel effect.
-  // Here, we use a radial gradient that starts fading in at 85% progress
-  // and is fully visible by the time the header scroll completes.
-  const tunnelOpacity = useTransform(scrollYProgress, [0.85, 1], [0, 1]);
+  // Next button opacity fades out as scroll nears the end.
+  const nextButtonOpacity = useTransform(
+    scrollYProgress,
+    [0, TEXT_FADE_END, 1],
+    [1, 0.3, 0]
+  );
 
-  // Trigger the transition to the next section only when near the end.
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (value) => {
-      if (value >= TRANSITION_THRESHOLD && !isTransitioning && onNextSection) {
-        setIsTransitioning(true);
-        // A slight delay allows the tunnel effect to fully display.
-        setTimeout(() => {
-          onNextSection();
-          setTimeout(() => setIsTransitioning(false), 1000);
-        }, 300);
+      if (onScrollProgress) {
+        onScrollProgress(value);
+      }
+      // When progress nears the end, trigger next section.
+      if (value >= TRANSITION_TRIGGER && onNextSection) {
+        onNextSection();
       }
     });
     return () => unsubscribe();
-  }, [scrollYProgress, onNextSection, isTransitioning]);
+  }, [scrollYProgress, onScrollProgress, onNextSection]);
 
   return (
-    <section
+    // motion.section lets us animate the background.
+    <motion.section
       ref={sectionRef}
       id="header-section"
-      className="relative h-[450vh] bg-white"
+      style={{ backgroundColor }}
+      className="relative h-[450vh] overflow-hidden"
     >
-      {/* Tunnel Overlay – full screen futuristic tunnel effect */}
-      <motion.div
-        className="fixed inset-0 pointer-events-none z-30"
-        style={{
-          opacity: tunnelOpacity,
-          background:
-            "radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.95) 100%)",
-        }}
-      />
-      <div className="sticky top-0 h-screen overflow-hidden relative z-20">
-        {/* Navigation */}
+      <div
+        className={`sticky top-0 h-screen ${mainConfigs.SECTION_CONTAINER_CLASS}`}
+      >
         <motion.div
           style={{ opacity: navOpacity }}
-          className="absolute top-4 right-4 z-40 transition-opacity duration-300"
+          className="absolute top-4 right-4 z-40"
         >
           <Nav />
         </motion.div>
-        {/* Content Container */}
+
+        {/* Next Button at bottom center */}
+        <motion.div
+          style={{ opacity: nextButtonOpacity }}
+          className="fixed bottom-12 left-1/2 -translate-x-1/2 z-40"
+        >
+          <NextButton onClick={onNextSection} />
+        </motion.div>
+
         <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center z-40">
           <motion.h2
             style={{ opacity: introTextOpacity }}
@@ -139,15 +148,17 @@ export default function HeaderSection({ onNextSection }: HeaderSectionProps) {
             style={{
               scale: textScale,
               opacity: textOpacity,
-              x: xMovePercent,
-              y: yMovePercent,
+              x: xMove,
+              y: yMove,
             }}
-            className="font-bold tracking-tight text-black text-[8vw] md:text-[10vh] transform-gpu"
+            className="font-bold tracking-tight text-black text-[8vw] md:text-[10vh]"
           >
             Saving Food.
           </motion.h1>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
-}
+};
+
+export default HeaderSection;
