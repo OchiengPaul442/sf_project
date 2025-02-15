@@ -26,7 +26,7 @@ const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
 });
 const HowSectionCarousel = dynamic(
-  () => import("@/components/carousels/how-section-carousel"),
+  () => import("@/views/Home/how-section-carousel"),
   { ssr: false }
 );
 const WorkSection = dynamic(() => import("@/views/Home/work-section"), {
@@ -127,7 +127,6 @@ const HomePage: React.FC = () => {
                 ...step,
                 animationData: animationDataMap?.[JSON_PATHS[idx]] || null,
               }))}
-              scrollLockControls={{ lockScroll, unlockScroll }}
             />
           );
           break;
