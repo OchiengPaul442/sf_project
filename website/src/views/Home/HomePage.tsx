@@ -11,11 +11,11 @@ import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationDat
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 
-// Import scroll hooks.
+// Scroll hooks.
 import { useGlobalScrollLock } from "@/hooks/useGlobalScrollLock";
 import { useSectionScroller } from "@/hooks/useSectionScroller";
 
-// Dynamic imports for sections/components.
+// Dynamic imports.
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
 });
@@ -39,8 +39,8 @@ const FooterSection = dynamic(() => import("@/views/Home/footer-section"), {
 const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
-  const [pageLoaded, setPageLoaded] = useState<boolean>(false);
-  // Ref to store each section’s element.
+  const [pageLoaded, setPageLoaded] = useState(false);
+  // Reference for each section's DOM element.
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
@@ -48,11 +48,34 @@ const HomePage: React.FC = () => {
   // Global scroll lock.
   const { lockScroll, unlockScroll } = useGlobalScrollLock();
 
-  // Section scroller hook.
+  // Section scroller.
   const { scrollToSection } = useSectionScroller(sectionsRef, {
     scrollDuration: 800,
     globalLock: false,
   });
+
+  // Track the active section index.
+  const [activeSectionIndex, setActiveSectionIndex] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      let currentActive = 0;
+      sectionsRef.current.forEach((section, i) => {
+        if (section) {
+          const rect = section.getBoundingClientRect();
+          if (
+            rect.top <= window.innerHeight / 2 &&
+            rect.bottom >= window.innerHeight / 2
+          ) {
+            currentActive = i;
+          }
+        }
+      });
+      setActiveSectionIndex(currentActive);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && !hasErrors) {
@@ -88,8 +111,10 @@ const HomePage: React.FC = () => {
           content = (
             <HowSection
               {...section}
-              animationData={animationDataMap?.["/lottie/how.json"]}
               scrollLockControls={{ lockScroll, unlockScroll }}
+              onTransitionNext={() => scrollToSection(index + 1)}
+              onTransitionPrev={() => scrollToSection(index - 1)}
+              isActive={activeSectionIndex === index}
             />
           );
           break;
@@ -120,7 +145,7 @@ const HomePage: React.FC = () => {
         default:
           break;
       }
-      // Use scroll-snap classes.
+      // For "home" we avoid snap so the header can be taller.
       const snapClass = section.id === "home" ? "snap-none" : "snap-start";
       const minHeight =
         section.id === "home" ? "min-h-[120vh]" : "min-h-screen";
@@ -137,7 +162,13 @@ const HomePage: React.FC = () => {
         </section>
       );
     },
-    [animationDataMap, scrollToSection, lockScroll, unlockScroll]
+    [
+      animationDataMap,
+      scrollToSection,
+      lockScroll,
+      unlockScroll,
+      activeSectionIndex,
+    ]
   );
 
   if (hasErrors) {
@@ -164,9 +195,10 @@ const HomePage: React.FC = () => {
         )}
       </AnimatePresence>
       {pageLoaded && (
-        <div className="w-full">{SECTIONS.map(renderSection)}</div>
+        <div className="w-full">
+          {SECTIONS.map((section, index) => renderSection(section, index))}
+        </div>
       )}
-
       <MenuModal
         isOpen={Boolean(isMenuOpen)}
         onClose={handleMenuClose}

@@ -1,4 +1,3 @@
-// hooks/useGlobalScrollLock.ts
 import { useState, useCallback } from "react";
 
 export const useGlobalScrollLock = () => {
