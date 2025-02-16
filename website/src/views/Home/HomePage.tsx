@@ -10,8 +10,6 @@ import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationData";
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
-
-// We no longer need useGlobalScrollLock here.
 import { useSectionScroller } from "@/hooks/useSectionScroller";
 
 // Dynamic imports for sections
@@ -21,7 +19,7 @@ const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
 const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
   ssr: false,
 });
-/** HowSection now relies on its own reveal logic */
+/** HowSection now relies on its own reveal logic and native scrolling */
 const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
 });
@@ -40,16 +38,16 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
 
-  // Animation data state
+  // Animation data state.
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
 
   const [pageLoaded, setPageLoaded] = useState(false);
 
-  // Reference for each section's DOM node.
+  // References for each section’s DOM node.
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
 
-  // Use the section scroller for smooth snapping in other sections.
+  // Use our section scroller hook.
   const { scrollToSection } = useSectionScroller(sectionsRef, {
     scrollDuration: 800,
     globalLock: false,
@@ -65,7 +63,7 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
-  // Render each section.
+  // Render each section with appropriate snapping behavior.
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
       let content: React.ReactNode = null;
@@ -88,7 +86,6 @@ const HomePage: React.FC = () => {
           );
           break;
         case "how":
-          // Pass only the id to HowSection.
           content = <HowSection id={section.id} />;
           break;
         case "how-carousel":
@@ -118,10 +115,10 @@ const HomePage: React.FC = () => {
           content = null;
       }
 
-      // For "home", we disable snapping so that header can be taller.
-      const isHome = section.id === "home";
-      const snapClass = isHome ? "snap-none" : "snap-start";
-      const minHeight = isHome ? "min-h-[120vh]" : "min-h-screen";
+      // For sections that should not snap (e.g. home and how), disable snapping.
+      const noSnap = section.id === "home" || section.id === "how";
+      const snapClass = noSnap ? "snap-none" : "snap-start";
+      const minHeight = noSnap ? "min-h-[120vh]" : "min-h-screen";
 
       return (
         <section
@@ -129,6 +126,7 @@ const HomePage: React.FC = () => {
           ref={(el) => {
             sectionsRef.current[index] = el;
           }}
+          data-section-id={section.id}
           className={`w-full ${snapClass} ${minHeight}`}
         >
           {content}

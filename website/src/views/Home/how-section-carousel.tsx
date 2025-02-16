@@ -87,8 +87,8 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     return (
       <section
         id={id}
-        className="relative bg-black flex items-center justify-center py-12"
-        style={{ minHeight: "100vh" }} // Ensures the section takes the full screen height.
+        className="relative min-h-screen bg-black flex items-center justify-center py-12"
+        style={{ minHeight: "100vh" }}
       >
         <div
           className={`${mainConfigs.SECTION_CONTAINER_CLASS} flex flex-col lg:flex-row items-center justify-between`}

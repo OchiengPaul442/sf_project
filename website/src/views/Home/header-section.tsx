@@ -42,23 +42,25 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     1,
   ];
 
-  // Increase the text scale ranges for a modern, “popping” look.
+  // Utility to choose responsive transform ranges.
   const getResponsiveValue = (mobile: number[], desktop: number[]) =>
     isMobile ? mobile : desktop;
 
-  // For example, desktop scaling ramps from 1 to 12.
+  // Animate text scaling.
   const textScale: MotionValue<number> = useTransform(
     scrollYProgress,
     progressRange,
     getResponsiveValue([1, 2, 5, 7, 9, 12], [1, 3, 8, 12, 14, 16])
   );
 
+  // Instead of fading out the text, we now keep it fully visible.
   const textOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
-    [0, TEXT_FADE_START, TEXT_FADE_END],
-    [1, 1, 0]
+    [0, 1],
+    [1, 1]
   );
 
+  // Adjust x/y movement (feel free to fine-tune these values).
   const xMove: MotionValue<number> = useTransform(
     scrollYProgress,
     progressRange,
@@ -71,12 +73,14 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     getResponsiveValue([0, -1, -3, -4, -5, -6], [0, -3, -6, -9, -12, -15])
   );
 
+  // Animate navigation opacity.
   const navOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.2, 0.3],
     [1, 0.7, 0]
   );
 
+  // Intro text opacity (if you wish to tweak, you can adjust this too).
   const introTextOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.15, 0.25],
@@ -84,7 +88,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   );
 
   // Animate the background color from white to black.
-  // The header becomes fully black at 0.7 scroll progress and remains black.
   const backgroundColor = useTransform(
     scrollYProgress,
     [0, 0.7, 1],
@@ -103,7 +106,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
       if (onScrollProgress) {
         onScrollProgress(value);
       }
-      // When progress nears the end, trigger next section.
+      // When progress nears the end, trigger the next section.
       if (value >= TRANSITION_TRIGGER && onNextSection) {
         onNextSection();
       }
@@ -112,7 +115,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   }, [scrollYProgress, onScrollProgress, onNextSection]);
 
   return (
-    // motion.section lets us animate the background.
+    // motion.section animates the background.
     <motion.section
       ref={sectionRef}
       id="header-section"
