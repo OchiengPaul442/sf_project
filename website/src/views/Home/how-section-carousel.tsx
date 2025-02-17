@@ -1,27 +1,21 @@
 "use client";
 
-import React, { useState, memo, useRef } from "react";
+import React, { useState, useRef, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
 import type { StepWithData } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
 
-// Dynamically load Lottie.
+// Dynamically load Lottie with a fallback spinner.
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
-  loading: () => <div className="w-full h-full bg-black" />,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
+    </div>
+  ),
 });
-
-// ----------------------------------------------------------------
-// Types & Interfaces
-// ----------------------------------------------------------------
-
-export interface HowSectionCarouselProps {
-  id: string;
-  title: string;
-  steps: StepWithData[];
-}
 
 // ----------------------------------------------------------------
 // Carousel Variants for Framer Motion
@@ -100,9 +94,10 @@ const CarouselNav: React.FC<CarouselNavProps> = ({
 }) => (
   <div className="relative">
     {/*
-      The separator line is now positioned so that its left edge is at:
-      - 1.7rem on mobile (pl-6 + ~half of dot width)
-      - 3.25rem on larger screens (pl-12 + ~half of dot width)
+      Position the separator line so that its left edge aligns with the center
+      of the dot indicator:
+        - Mobile: pl-6 (1.5rem) + half of dot width (~0.1875rem) ≈ 1.7rem.
+        - Larger screens: pl-12 (3rem) + half of dot width (~0.25rem) ≈ 3.25rem.
     */}
     <div className="absolute left-[1.7rem] sm:left-[3.25rem] top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
     <nav
@@ -125,11 +120,23 @@ const CarouselNav: React.FC<CarouselNavProps> = ({
 // HowSectionCarousel Component
 // ----------------------------------------------------------------
 
+export interface HowSectionCarouselProps {
+  id: string;
+  title: string;
+  steps: StepWithData[];
+}
+
 const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
   function HowSectionCarousel({ id, title, steps }) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(0);
+    const [animationLoaded, setAnimationLoaded] = useState(false);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
+
+    // Reset the animation loaded state when the active index changes.
+    useEffect(() => {
+      setAnimationLoaded(false);
+    }, [activeIndex]);
 
     const handleNavItemClick = (index: number) => {
       if (index !== activeIndex) {
@@ -147,11 +154,11 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       >
         <div
           className={`
-            ${mainConfigs.SECTION_CONTAINER_CLASS}
-            grid grid-cols-1 lg:grid-cols-3
-            items-center gap-8
-            w-full max-w-6xl px-4
-          `}
+          ${mainConfigs.SECTION_CONTAINER_CLASS}
+          grid grid-cols-1 lg:grid-cols-3
+          items-center gap-8
+          w-full max-w-6xl px-4
+        `}
         >
           {/* Navigation */}
           <div className="lg:col-span-1 flex flex-col items-center justify-center">
@@ -178,13 +185,14 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                   transition={{ duration: 0.5, ease: "easeInOut" }}
                 >
                   {currentStep.animationData ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-[90%] h-[90%] lg:w-[85%] lg:h-[85%]">
+                    <div className="w-full h-full relative">
+                      <div className="w-[90%] h-[90%] lg:w-[85%] lg:h-[85%] mx-auto">
                         <Lottie
                           animationData={currentStep.animationData}
                           loop
                           autoplay
                           lottieRef={lottieRef}
+                          onDOMLoaded={() => setAnimationLoaded(true)}
                           className="w-full h-full"
                           renderer="svg"
                           rendererSettings={{
@@ -194,6 +202,12 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                           style={{ objectFit: "contain" }}
                         />
                       </div>
+                      {/* Loading state overlay */}
+                      {!animationLoaded && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-white text-center" aria-live="polite">
