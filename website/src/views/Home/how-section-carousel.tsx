@@ -117,7 +117,7 @@ const CarouselNav: React.FC<CarouselNavProps> = ({
 );
 
 // ----------------------------------------------------------------
-// HowSectionCarousel Component
+// HowSectionCarousel Component with Auto‑Rotation
 // ----------------------------------------------------------------
 
 export interface HowSectionCarouselProps {
@@ -138,12 +138,30 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       setAnimationLoaded(false);
     }, [activeIndex]);
 
+    // Handler for manual navigation via nav items.
     const handleNavItemClick = (index: number) => {
       if (index !== activeIndex) {
         setDirection(index > activeIndex ? 1 : -1);
         setActiveIndex(index);
       }
     };
+
+    // Auto-rotate every 2 seconds.
+    useEffect(() => {
+      // Make sure there is more than one step.
+      if (steps.length <= 1) return;
+
+      const autoRotateTimer = setInterval(() => {
+        setActiveIndex((prevIndex) => {
+          const nextIndex = (prevIndex + 1) % steps.length;
+          // Always rotate forward.
+          setDirection(1);
+          return nextIndex;
+        });
+      }, 2000); // 5000ms delay, adjust as needed
+
+      return () => clearInterval(autoRotateTimer);
+    }, [steps.length]);
 
     const currentStep = steps[activeIndex] || steps[0];
 
@@ -154,11 +172,11 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       >
         <div
           className={`
-          ${mainConfigs.SECTION_CONTAINER_CLASS}
-          grid grid-cols-1 lg:grid-cols-3
-          items-center gap-8
-          w-full max-w-6xl px-4
-        `}
+            ${mainConfigs.SECTION_CONTAINER_CLASS}
+            grid grid-cols-1 lg:grid-cols-3
+            items-center gap-8
+            w-full max-w-6xl px-4
+          `}
         >
           {/* Navigation */}
           <div className="lg:col-span-1 flex flex-col items-center justify-center">

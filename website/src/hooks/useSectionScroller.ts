@@ -1,3 +1,4 @@
+// useSectionScroller.ts
 import { useEffect, useCallback, useState, useRef, RefObject } from "react";
 
 interface SectionScrollerOptions {
@@ -6,10 +7,14 @@ interface SectionScrollerOptions {
 }
 
 /**
- * Custom hook to smoothly scroll between sections.
- * - For the "how" section, native scrolling is allowed until its bottom nears the viewport.
- * - For the "work" section, native scrolling is allowed—but when its bottom nears the viewport (using a higher threshold), a snap to the footer occurs.
- * - For other sections, a snapping effect is applied.
+ * A custom hook for snapping smoothly between sections.
+ *
+ * Enhancements:
+ * - Uses a timestamp lock and timeout (cleared on unmount) to prevent too‑rapid triggering.
+ * - Uses special handling for the "how", "how-carousel", and "work" sections so that when scrolling
+ *   upward from "work" the "how-carousel" is always snapped to.
+ * - Uses appropriate passive options for event listeners and checks event.cancelable before calling preventDefault.
+ * - Cleans up all timeouts and event listeners to avoid memory leaks.
  */
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,
@@ -19,23 +24,36 @@ export const useSectionScroller = (
   const [localLock, setLocalLock] = useState<boolean>(false);
   const lastScrollTimeRef = useRef<number>(0);
   const touchStartYRef = useRef<number | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
 
-  // Smoothly scroll to a given section index.
+  // Scrolls smoothly to the section at the given index.
   const scrollToSection = useCallback(
     (index: number) => {
       const sections = sectionsRef.current || [];
-      if (!sections[index]) return;
+      const targetSection = sections[index];
+      if (!targetSection) return;
+
       const now = Date.now();
       if (now - lastScrollTimeRef.current < scrollDuration) return;
-      sections[index]?.scrollIntoView({ behavior: "smooth" });
+
+      // Use native smooth scrolling.
+      targetSection.scrollIntoView({ behavior: "smooth" });
       lastScrollTimeRef.current = now;
       setLocalLock(true);
-      setTimeout(() => setLocalLock(false), scrollDuration);
+
+      // Clear any pending timeout.
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        setLocalLock(false);
+      }, scrollDuration);
     },
     [sectionsRef, scrollDuration]
   );
 
-  // Get the index of the section whose center is closest to the viewport center.
+  // Returns the index of the section whose center is closest to the viewport center.
   const getCenteredSectionIndex = useCallback(() => {
     const sections = sectionsRef.current || [];
     let centeredIndex = 0;
@@ -43,8 +61,9 @@ export const useSectionScroller = (
     sections.forEach((section, index) => {
       if (section) {
         const rect = section.getBoundingClientRect();
-        const center = (rect.top + rect.bottom) / 2;
-        const diff = Math.abs(center - window.innerHeight / 2);
+        const sectionCenter = (rect.top + rect.bottom) / 2;
+        const viewportCenter = window.innerHeight / 2;
+        const diff = Math.abs(sectionCenter - viewportCenter);
         if (diff < smallestDiff) {
           smallestDiff = diff;
           centeredIndex = index;
@@ -54,7 +73,7 @@ export const useSectionScroller = (
     return centeredIndex;
   }, [sectionsRef]);
 
-  // Handle a scroll delta by snapping to the next/previous section.
+  // Given a scroll delta, decide which section to snap to.
   const handleDelta = useCallback(
     (delta: number) => {
       if (localLock || globalLock) return;
@@ -63,23 +82,24 @@ export const useSectionScroller = (
       const currentSection = sections[currentIndex];
       if (!currentSection) return;
 
-      // For "how": if scrolling down and the bottom is nearly reached, snap.
-      if (currentSection.dataset.sectionId === "how") {
-        const rect = currentSection.getBoundingClientRect();
+      const sectionId = currentSection.dataset.sectionId;
+      const rect = currentSection.getBoundingClientRect();
+
+      // Special snapping for the "how" section.
+      if (sectionId === "how") {
         if (delta > 0 && rect.bottom <= window.innerHeight + 40) {
           scrollToSection(currentIndex + 1);
         }
         return;
       }
-      // For "work": allow native scrolling but if its bottom nears the viewport, use a higher threshold.
-      if (currentSection.dataset.sectionId === "work") {
-        const rect = currentSection.getBoundingClientRect();
+      // Special snapping for the "work" section when scrolling down.
+      if (sectionId === "work") {
         if (delta > 0 && rect.bottom <= window.innerHeight + 60) {
           scrollToSection(currentIndex + 1);
         }
         return;
       }
-      // For all other sections, snap up or down.
+      // For all other cases, use general snapping.
       if (delta > 0 && currentIndex < sections.length - 1) {
         scrollToSection(currentIndex + 1);
       } else if (delta < 0 && currentIndex > 0) {
@@ -98,45 +118,65 @@ export const useSectionScroller = (
   // Handle wheel events.
   const handleWheel = useCallback(
     (e: WheelEvent) => {
-      const sections = sectionsRef.current || [];
-      const currentIndex = getCenteredSectionIndex();
-      const currentSection = sections[currentIndex];
-      if (!currentSection) return;
+      // Only call preventDefault if allowed.
+      if (e.cancelable && !e.defaultPrevented) {
+        // Determine current section by its center.
+        const sections = sectionsRef.current || [];
+        const currentIndex = getCenteredSectionIndex();
+        const currentSection = sections[currentIndex];
+        if (!currentSection) return;
 
-      // For "how": if scrolling down and near its bottom, prevent default and snap.
-      if (currentSection.dataset.sectionId === "how") {
+        const sectionId = currentSection.dataset.sectionId;
         const rect = currentSection.getBoundingClientRect();
-        if (e.deltaY > 0 && rect.bottom <= window.innerHeight + 40) {
-          e.preventDefault();
-          scrollToSection(currentIndex + 1);
+
+        // Special case: when scrolling up from "work", always snap to "how-carousel" if it exists.
+        if (e.deltaY < 0 && sectionId === "work") {
+          const prevIndex = currentIndex - 1;
+          if (
+            prevIndex >= 0 &&
+            sections[prevIndex] &&
+            sections[prevIndex].dataset.sectionId === "how-carousel"
+          ) {
+            e.preventDefault();
+            scrollToSection(prevIndex);
+            return;
+          }
+        }
+
+        // Special handling for the "how" section when scrolling down.
+        if (sectionId === "how") {
+          if (e.deltaY > 0 && rect.bottom <= window.innerHeight + 40) {
+            e.preventDefault();
+            scrollToSection(currentIndex + 1);
+            return;
+          }
+          return; // Allow native scrolling otherwise.
+        }
+        // Special handling for the "work" section when scrolling down.
+        if (sectionId === "work") {
+          if (e.deltaY > 0 && rect.bottom <= window.innerHeight + 60) {
+            e.preventDefault();
+            scrollToSection(currentIndex + 1);
+            return;
+          }
           return;
         }
-        return; // Otherwise, allow native scrolling.
-      }
-      // For "work": if scrolling down and near its bottom (using higher threshold), snap.
-      if (currentSection.dataset.sectionId === "work") {
-        const rect = currentSection.getBoundingClientRect();
-        if (e.deltaY > 0 && rect.bottom <= window.innerHeight + 60) {
+        // For all other sections, always prevent native scrolling and handle snapping.
+        if (Math.abs(e.deltaY) > 40) {
           e.preventDefault();
-          scrollToSection(currentIndex + 1);
-          return;
+          handleDelta(e.deltaY);
         }
-        return;
-      }
-      // For other sections, prevent default and use our snapping.
-      e.preventDefault();
-      if (Math.abs(e.deltaY) > 40) {
-        handleDelta(e.deltaY);
       }
     },
     [getCenteredSectionIndex, scrollToSection, handleDelta, sectionsRef]
   );
 
-  // Handle touch events.
+  // Record the starting touch position.
   const handleTouchStart = useCallback((e: TouchEvent) => {
     touchStartYRef.current = e.touches[0].clientY;
   }, []);
 
+  // Handle touch end events.
   const handleTouchEnd = useCallback(
     (e: TouchEvent) => {
       if (touchStartYRef.current === null) return;
@@ -145,9 +185,26 @@ export const useSectionScroller = (
       const currentIndex = getCenteredSectionIndex();
       const currentSection = sections[currentIndex];
       if (!currentSection) return;
-      // For "how": if scrolling down and near its bottom, snap.
-      if (currentSection.dataset.sectionId === "how") {
-        const rect = currentSection.getBoundingClientRect();
+
+      const sectionId = currentSection.dataset.sectionId;
+      const rect = currentSection.getBoundingClientRect();
+
+      // Special case: scrolling up from "work" should snap to "how-carousel".
+      if (delta < 0 && sectionId === "work") {
+        const prevIndex = currentIndex - 1;
+        if (
+          prevIndex >= 0 &&
+          sections[prevIndex] &&
+          sections[prevIndex].dataset.sectionId === "how-carousel"
+        ) {
+          scrollToSection(prevIndex);
+          touchStartYRef.current = null;
+          return;
+        }
+      }
+
+      // Special snapping for the "how" section.
+      if (sectionId === "how") {
         if (delta > 30 && rect.bottom <= window.innerHeight + 40) {
           scrollToSection(currentIndex + 1);
           touchStartYRef.current = null;
@@ -156,9 +213,8 @@ export const useSectionScroller = (
         touchStartYRef.current = null;
         return;
       }
-      // For "work": if scrolling down and near its bottom (with higher threshold), snap.
-      if (currentSection.dataset.sectionId === "work") {
-        const rect = currentSection.getBoundingClientRect();
+      // Special snapping for the "work" section when scrolling down.
+      if (sectionId === "work") {
         if (delta > 30 && rect.bottom <= window.innerHeight + 60) {
           scrollToSection(currentIndex + 1);
           touchStartYRef.current = null;
@@ -167,6 +223,7 @@ export const useSectionScroller = (
         touchStartYRef.current = null;
         return;
       }
+      // For other sections, if the gesture is significant, use our snapping logic.
       if (Math.abs(delta) > 30) {
         handleDelta(delta);
       }
@@ -175,16 +232,31 @@ export const useSectionScroller = (
     [getCenteredSectionIndex, scrollToSection, handleDelta, sectionsRef]
   );
 
+  // Set up event listeners and clean up on unmount.
   useEffect(() => {
-    window.addEventListener("wheel", handleWheel, { passive: false });
+    const wheelOptions: AddEventListenerOptions = { passive: false };
+    window.addEventListener("wheel", handleWheel, wheelOptions);
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, [handleWheel, handleTouchStart, handleTouchEnd]);
+
+  // Clear any pending timeout when the hook unmounts.
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   return { scrollToSection };
 };
