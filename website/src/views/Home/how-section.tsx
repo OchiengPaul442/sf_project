@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { useScroll, useSpring } from "framer-motion";
 import { TextReveal } from "@/components/TextReveal";
 import { GradientSeparator } from "@/components/GradientSeparator";
+import { mainConfigs } from "@/utils/configs";
 
 export interface HowSectionProps {
   id: string;
@@ -66,7 +67,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
           • A fixed height of 75vh so that the content is centered vertically.
       */}
       <div className="sticky top-1/4 flex items-center justify-center h-[75vh]">
-        <div className="container mx-auto px-4 space-y-40">
+        <div className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-40`}>
           <div>
             <TextReveal
               text={paragraphs.first}

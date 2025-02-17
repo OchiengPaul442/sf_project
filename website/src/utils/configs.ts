@@ -3,5 +3,5 @@ interface MainConfigs {
 }
 
 export const mainConfigs: MainConfigs = {
-  SECTION_CONTAINER_CLASS: "max-w-7xl mx-auto w-full px-4 pt-6 pb-8",
+  SECTION_CONTAINER_CLASS: "container mx-auto w-full px-4 pt-6 pb-8",
 };

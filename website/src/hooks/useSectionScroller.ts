@@ -7,8 +7,8 @@ interface SectionScrollerOptions {
 
 /**
  * Custom hook to smoothly scroll between sections for all except "how".
- * While in "how", we allow normal (native) scrolling so the user can see
- * the sticky scrollytelling effect.
+ * While in "how", we allow native scrolling for most of the section, but if the user
+ * scrolls near its bottom, we snap to the next section.
  */
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,
@@ -56,8 +56,13 @@ export const useSectionScroller = (
 
       const currentSection = sections[currentSectionIndex];
 
-      // If we’re inside the "how" section, allow normal scrolling (no snap).
+      // Special case: if current section is "how", only snap if its bottom is near the viewport bottom.
       if (currentSection?.dataset.sectionId === "how") {
+        const rect = currentSection.getBoundingClientRect();
+        // If scrolling down and the bottom of "how" is close to the viewport bottom, snap to next.
+        if (delta > 0 && rect.bottom <= window.innerHeight + 50) {
+          scrollToSection(currentSectionIndex + 1);
+        }
         return;
       }
 
@@ -71,7 +76,7 @@ export const useSectionScroller = (
     [localLock, globalLock, sectionsRef, scrollToSection]
   );
 
-  // Listen for wheel events and accumulate the delta; skip snapping if in "how".
+  // Listen for wheel events and accumulate the delta; adjust snapping for "how".
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       const sections = sectionsRef.current || [];
@@ -85,14 +90,21 @@ export const useSectionScroller = (
           rect.bottom >= window.innerHeight / 2
         );
       });
-
       const currentSection = sections[currentSectionIndex];
-      // If "how", do NOT prevent default; let normal scroll proceed
+
+      // For "how" section, if scrolling down and nearing its bottom, prevent default and snap.
       if (currentSection?.dataset.sectionId === "how") {
+        const rect = currentSection.getBoundingClientRect();
+        if (e.deltaY > 0 && rect.bottom <= window.innerHeight + 50) {
+          e.preventDefault();
+          scrollToSection(currentSectionIndex + 1);
+          return;
+        }
+        // Otherwise, allow native scrolling inside "how"
         return;
       }
 
-      // Otherwise, we do want to snap, so prevent default
+      // For other sections, prevent default and accumulate delta.
       e.preventDefault();
       wheelDeltaRef.current += e.deltaY;
       const threshold = 50;
@@ -101,7 +113,7 @@ export const useSectionScroller = (
         wheelDeltaRef.current = 0;
       }
     },
-    [handleScroll, sectionsRef]
+    [handleScroll, sectionsRef, scrollToSection]
   );
 
   // Touch events for mobile
@@ -126,20 +138,27 @@ export const useSectionScroller = (
       });
       const currentSection = sections[currentSectionIndex];
 
-      // If "how", let normal scrolling happen
+      // For "how", if scrolling down and nearing the bottom, snap.
       if (currentSection?.dataset.sectionId === "how") {
+        const rect = currentSection.getBoundingClientRect();
+        if (delta > 50 && rect.bottom <= window.innerHeight + 50) {
+          scrollToSection(currentSectionIndex + 1);
+          touchStartYRef.current = null;
+          return;
+        }
+        // Otherwise, allow native scrolling.
         touchStartYRef.current = null;
         return;
       }
 
-      // Otherwise, snap
+      // Otherwise, if delta is significant, snap accordingly.
       if (Math.abs(delta) > 50) {
         handleScroll(delta);
       }
 
       touchStartYRef.current = null;
     },
-    [handleScroll, sectionsRef]
+    [handleScroll, sectionsRef, scrollToSection]
   );
 
   useEffect(() => {
