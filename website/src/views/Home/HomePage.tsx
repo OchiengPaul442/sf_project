@@ -84,6 +84,7 @@ const HomePage: React.FC = () => {
           content = (
             <HeaderSection
               {...section}
+              image="/Vector.svg"
               onNextSection={() => scrollToSection(index + 1)}
             />
           );
