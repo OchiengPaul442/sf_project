@@ -143,6 +143,12 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       setAnimationLoaded(false);
     }, [activeIndex]);
 
+    // Fallback effect: if onDOMLoaded/onDataReady never fire, mark as loaded after 500ms.
+    useEffect(() => {
+      const timer = setTimeout(() => setAnimationLoaded(true), 500);
+      return () => clearTimeout(timer);
+    }, [activeIndex]);
+
     // Use Framer Motion’s scroll hook to track progress in the container.
     const { scrollYProgress } = useScroll({ container: containerRef });
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
@@ -240,10 +246,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           {/* Sticky container positioned 150px from the top */}
           <div className="sticky top-[150px]">
             <div
-              className={`${mainConfigs.SECTION_CONTAINER_CLASS} grid grid-cols-1 lg:grid-cols-3 items-start gap-8 w-full`}
+              className={`${mainConfigs.SECTION_CONTAINER_CLASS} grid grid-cols-1 lg:grid-cols-3 items-center gap-8 w-full`}
             >
               {/* Navigation */}
-              <div className="lg:col-span-1 flex flex-col items-center justify-start">
+              <div className="lg:col-span-1 flex flex-col items-center justify-center">
                 <CarouselNav
                   title={title}
                   steps={steps}
@@ -251,6 +257,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                   onNavItemClick={handleNavItemClick}
                 />
               </div>
+
               {/* Carousel Content */}
               <div className="lg:col-span-2 flex items-center justify-center">
                 <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl overflow-hidden">
@@ -274,6 +281,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                               autoplay
                               lottieRef={lottieRef}
                               onDOMLoaded={() => setAnimationLoaded(true)}
+                              onDataReady={() => setAnimationLoaded(true)}
                               className="w-full h-full"
                               renderer="svg"
                               rendererSettings={{
@@ -283,9 +291,9 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                               style={{ objectFit: "contain" }}
                             />
                           </div>
-                          {/* Loading overlay */}
+                          {/* Loading overlay: only shown when animation is not loaded */}
                           {!animationLoaded && (
-                            <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="absolute inset-0 flex items-center justify-center z-20">
                               <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
                             </div>
                           )}
