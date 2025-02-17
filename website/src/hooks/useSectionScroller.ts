@@ -10,12 +10,9 @@ interface SectionScrollerOptions {
 /**
  * A custom hook for snapping smoothly between sections.
  *
- * On mobile devices, most sections allow native scrolling except:
- * - The header ("home") section can force snapping.
- * - When in the "robot" section, if the user swipes downward (scrolling up),
- *   it automatically snaps back to the header.
- *
- * Desktop behavior retains special cases for "how" and "work" sections.
+ * On mobile devices (or when a touchpad is detected on desktop), native scrolling
+ * is used for most sections except the header ("home"). On desktop with a mouse wheel,
+ * snapping is preserved for non-header sections (with special cases for "how" and "work").
  */
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,
@@ -41,7 +38,6 @@ export const useSectionScroller = (
       const now = Date.now();
       if (now - lastScrollTimeRef.current < scrollDuration) return;
 
-      // Use native smooth scrolling.
       targetSection.scrollIntoView({ behavior: "smooth" });
       lastScrollTimeRef.current = now;
       setLocalLock(true);
@@ -77,13 +73,11 @@ export const useSectionScroller = (
   /**
    * Decide which section to scroll to given a scroll delta.
    *
-   * Mobile:
-   * - When in the header ("home") section, a swipe (up or down) triggers snapping.
-   * - When in the robot section, a **downward swipe** (delta < -threshold)
-   *   triggers snapping to the previous section (the header).
+   * On mobile (or when a touchpad is detected), only the header ("home")
+   * forces snapping; other sections use native scrolling.
    *
-   * Desktop:
-   * - Retains special snapping for the "how" and "work" sections.
+   * On desktop with a mouse wheel, special snapping is applied for "how" and "work"
+   * and general snapping is applied for non-header sections.
    */
   const handleDelta = useCallback(
     (delta: number) => {
@@ -92,19 +86,10 @@ export const useSectionScroller = (
       const currentIndex = getCenteredSectionIndex();
       const currentSection = sections[currentIndex];
       if (!currentSection) return;
-
       const sectionId = currentSection.dataset.sectionId;
 
+      // For mobile or when touchpad scrolling is active, we force snapping only on the header.
       if (isMobile) {
-        // --- MOBILE LOGIC ---
-        // When in "robot", if user swipes downward (finger moves down; delta < 0),
-        // then snap to previous section (the header).
-        if (sectionId === "robot" && delta < -30 && currentIndex > 0) {
-          scrollToSection(currentIndex - 1);
-          return;
-        }
-        // For the header ("home"), if the swipe is upward (delta > 30) or downward (delta < -30)
-        // then snap appropriately.
         if (sectionId === "home") {
           if (delta > 30 && currentIndex < sections.length - 1) {
             scrollToSection(currentIndex + 1);
@@ -115,11 +100,11 @@ export const useSectionScroller = (
             return;
           }
         }
-        // For other mobile sections, let native scrolling occur.
+        // Otherwise, let native scrolling occur.
         return;
       }
 
-      // --- DESKTOP LOGIC ---
+      // Desktop mouse wheel snapping for non-touchpad scrolling.
       if (sectionId === "how") {
         if (
           delta > 0 &&
@@ -160,16 +145,21 @@ export const useSectionScroller = (
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       if (e.cancelable && !e.defaultPrevented) {
+        // Detect touchpad scrolling by a small deltaY (adjust threshold as needed)
+        const isTouchpad = Math.abs(e.deltaY) < 20;
         const sections = sectionsRef.current || [];
         const currentIndex = getCenteredSectionIndex();
         const currentSection = sections[currentIndex];
         if (!currentSection) return;
         const sectionId = currentSection.dataset.sectionId;
 
-        // For mobile, we process snapping only when in "home" or "robot".
-        if (isMobile && !["home", "robot"].includes(sectionId || "")) return;
+        // If using touchpad (or on mobile), only snap for the header.
+        if ((isMobile || isTouchpad) && sectionId !== "home") {
+          // Let native scrolling occur.
+          return;
+        }
 
-        // Desktop special case: when scrolling up from "work", always snap to "how-carousel" if it exists.
+        // Desktop (mouse wheel) special handling:
         if (e.deltaY < 0 && sectionId === "work") {
           const prevIndex = currentIndex - 1;
           if (
@@ -182,7 +172,6 @@ export const useSectionScroller = (
             return;
           }
         }
-        // Desktop special handling for "how" and "work".
         if (sectionId === "how") {
           if (
             e.deltaY > 0 &&
@@ -238,16 +227,8 @@ export const useSectionScroller = (
       if (!currentSection) return;
       const sectionId = currentSection.dataset.sectionId;
 
+      // On mobile, apply snapping only for the header.
       if (isMobile) {
-        // --- MOBILE LOGIC ---
-        // If in the robot section and user swiped downward (finger moved down => delta < 0),
-        // then snap to the previous section (assumed to be "home").
-        if (sectionId === "robot" && delta < -30 && currentIndex > 0) {
-          scrollToSection(currentIndex - 1);
-          touchStartYRef.current = null;
-          return;
-        }
-        // For the header ("home"), trigger snapping if the swipe is significant.
         if (sectionId === "home") {
           if (delta > 30 && currentIndex < sections.length - 1) {
             scrollToSection(currentIndex + 1);
@@ -259,16 +240,13 @@ export const useSectionScroller = (
             touchStartYRef.current = null;
             return;
           }
-          // Otherwise, let native scrolling occur.
-          touchStartYRef.current = null;
-          return;
         }
-        // For other mobile sections, let native scrolling occur.
+        // Otherwise, let native scrolling occur.
         touchStartYRef.current = null;
         return;
       }
 
-      // --- DESKTOP LOGIC ---
+      // Desktop logic remains the same.
       if (sectionId === "how") {
         if (
           delta > 30 &&
