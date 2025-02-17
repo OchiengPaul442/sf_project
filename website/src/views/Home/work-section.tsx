@@ -7,11 +7,8 @@ import lottie, { type AnimationItem } from "lottie-web";
 import { ArrowRight, X } from "lucide-react";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
-import { isMobileDevice } from "@/utils/deviceDetection";
 import type { SectionProps } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
-import BuildSvgImage from "@/public/build.svg";
-import Image from "next/image";
 
 const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
@@ -19,8 +16,8 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const contactModalOpen = useSelector(
     (state) => state.ui.contactModalOpen
   ) as boolean;
-  const isMobile = isMobileDevice();
 
+  // Open and close the contact form modal
   const handleOpenForm = useCallback(() => {
     dispatch(setContactModalOpen(true));
   }, [dispatch]);
@@ -29,8 +26,10 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
+  // Initialize Lottie animation and clean up on unmount
   useEffect(() => {
     let animation: AnimationItem | null = null;
+
     if (lottieContainerRef.current && animationData) {
       animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
@@ -41,19 +40,23 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
       });
       animation.setSpeed(1.2);
     }
+
     return () => {
-      if (animation) animation.destroy();
+      animation?.destroy();
     };
   }, [animationData]);
 
+  // Add keydown listener for Escape to close modal and control body overflow
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && contactModalOpen) {
         handleCloseForm();
       }
     };
+
     document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
     window.addEventListener("keydown", handleKeyDown);
+
     return () => {
       document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
@@ -67,13 +70,14 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     >
       <motion.div
         className={`container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative ${mainConfigs.SECTION_CONTAINER_CLASS}`}
-        initial={isMobile ? {} : { opacity: 0, y: 50 }}
-        animate={isMobile ? {} : { opacity: 1, y: 0 }}
-        transition={
-          isMobile
-            ? {}
-            : { type: "spring", stiffness: 300, damping: 30, duration: 0.5 }
-        }
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+          duration: 0.5,
+        }}
       >
         <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl w-full lg:w-1/2 mb-12 lg:mb-0">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
@@ -100,21 +104,9 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
         </div>
 
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
-          {isMobile ? (
-            <div className="relative w-[150px] h-[150px] sm:w-[180px] sm:h-[180px] md:w-[220px] md:h-[220px] lg:w-[300px] lg:h-[300px] flex items-center justify-center">
-              <Image
-                src={BuildSvgImage}
-                alt="Build"
-                width={300}
-                height={300}
-                className="w-full h-full max-w-[180px] max-h-[180px] sm:max-w-[220px] sm:max-h-[220px] md:max-w-[280px] md:max-h-[280px] lg:max-w-[350px] lg:max-h-[350px] object-contain"
-              />
-            </div>
-          ) : (
-            <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative">
-              <div ref={lottieContainerRef} className="w-full h-full" />
-            </div>
-          )}
+          <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative">
+            <div ref={lottieContainerRef} className="w-full h-full" />
+          </div>
         </div>
       </motion.div>
 
