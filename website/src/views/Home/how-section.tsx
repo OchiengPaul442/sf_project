@@ -5,6 +5,7 @@ import { useScroll, useSpring } from "framer-motion";
 import { TextReveal } from "@/components/TextReveal";
 import { GradientSeparator } from "@/components/GradientSeparator";
 import { mainConfigs } from "@/utils/configs";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export interface HowSectionProps {
   id: string;
@@ -12,9 +13,11 @@ export interface HowSectionProps {
 
 const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
-  // Set a fixed section height.
-  const sectionHeight = "150vh";
+  // Adjust the section height and sticky container offset based on the device.
+  const sectionHeight = isMobile ? "200vh" : "150vh";
+  const stickyTop = isMobile ? "top-0" : "top-1/4";
 
   // Compute scroll progress over this section.
   const { scrollYProgress } = useScroll({
@@ -31,11 +34,9 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     return () => unsubscribe();
   }, [smoothProgress]);
 
-  // Define a breakpoint where the first paragraph ends and second begins.
+  // Define breakpoints and reveal ranges.
   const revealBreak = 0.5;
   const gradientBuffer = 0.05;
-
-  // Define reveal ranges for sequential effect.
   const paragraphRanges = {
     first: [0, revealBreak] as [number, number],
     gradient: [revealBreak - gradientBuffer, revealBreak + gradientBuffer] as [
@@ -61,16 +62,14 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       className="relative snap-start w-full bg-black overflow-hidden"
       style={{ height: sectionHeight }}
     >
-      {/*
-        The sticky container is confined to this section and uses:
-          • CSS sticky with a top offset of 25% (top-1/4)
-          • A fixed height of 75vh so that the content is centered vertically.
-      */}
-      <div className="sticky top-1/4 flex items-center justify-center h-[75vh]">
+      {/* The sticky container adapts its top offset based on the device. */}
+      <div
+        className={`sticky ${stickyTop} flex items-center justify-center h-[75vh]`}
+      >
         <div
           className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-10 md:space-y-40`}
         >
-          <div>
+          <div className="mb-8 md:mb-0">
             <TextReveal
               text={paragraphs.first}
               progress={progress}

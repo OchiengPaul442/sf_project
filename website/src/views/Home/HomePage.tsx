@@ -11,6 +11,7 @@ import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationDat
 import { SECTIONS, JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 import { useSectionScroller } from "@/hooks/useSectionScroller";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 // Dynamic imports for sections
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
@@ -42,6 +43,8 @@ const HomePage: React.FC = () => {
     useAnimationData(STEPS_WITH_IDS);
 
   const [pageLoaded, setPageLoaded] = useState(false);
+  // Determine if we are on a mobile device.
+  const isMobile = useIsMobile();
 
   // References for each section’s DOM node.
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
@@ -62,9 +65,16 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
-  // Render each section.
-  // For sections that allow native scrolling ("home", "how", "work"),
-  // we apply "snap-none"; others use "snap-start".
+  /**
+   * Render each section.
+   *
+   * On desktop the original logic applies:
+   * - "home", "how", "work" use native scrolling (snap-none).
+   * - Others use snapping (snap-start).
+   *
+   * On mobile, we only want snapping for the header ("home")
+   * and robot sections. All other sections use native smooth scrolling.
+   */
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
       let content: React.ReactNode = null;
@@ -116,13 +126,27 @@ const HomePage: React.FC = () => {
           content = null;
       }
 
-      // Allow native scrolling for "home", "how", and "work"
-      const nativeScrollIds = ["home", "how", "work"];
-      const noSnap = nativeScrollIds.includes(section.id);
-      // For native-scroll sections, we use extra height if needed.
-      // For snapping sections (including footer) we use the full viewport height.
-      const minHeight = noSnap ? "min-h-[120vh]" : "min-h-screen";
-      const snapClass = noSnap ? "snap-none" : "snap-start";
+      // Determine snapping behavior.
+      // On mobile, only header and robot sections snap (others use native smooth scrolling).
+      // On desktop, preserve the original logic:
+      //   "home", "how", and "work" have native scroll (snap-none), and others snap (snap-start).
+      let snapClass = "";
+      if (isMobile) {
+        snapClass = ["home", "robot"].includes(section.id)
+          ? "snap-start"
+          : "snap-none";
+      } else {
+        const nativeScrollIds = ["home", "how", "work"];
+        snapClass = nativeScrollIds.includes(section.id)
+          ? "snap-none"
+          : "snap-start";
+      }
+
+      // For sections that allow native scrolling, we might need extra height.
+      const minHeight =
+        !isMobile && ["home", "how", "work"].includes(section.id)
+          ? "min-h-[120vh]"
+          : "min-h-screen";
 
       return (
         <section
@@ -137,7 +161,7 @@ const HomePage: React.FC = () => {
         </section>
       );
     },
-    [scrollToSection, animationDataMap]
+    [scrollToSection, animationDataMap, isMobile]
   );
 
   if (hasErrors) {

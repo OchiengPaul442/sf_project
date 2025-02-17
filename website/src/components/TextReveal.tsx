@@ -18,6 +18,7 @@ const TextReveal = React.memo(
     align = "left",
     className,
   }: TextRevealProps) => {
+    // Determine whether the device is mobile.
     const isMobile = isMobileDevice();
     const containerRef = useRef<HTMLDivElement>(null);
     const [lineBreaks, setLineBreaks] = useState<number[]>([]);
@@ -45,7 +46,7 @@ const TextReveal = React.memo(
 
       const detectLineBreaks = () => {
         const container = containerRef.current;
-        if (!container) return;
+        if (!container) return; // Guard against container being null
 
         const spans = container.querySelectorAll<HTMLSpanElement>(".word-span");
         const breaks: number[] = [];
@@ -72,10 +73,7 @@ const TextReveal = React.memo(
       return () => window.removeEventListener("resize", detectLineBreaks);
     }, [words]);
 
-    /**
-     * Group the words into lines based on lineBreaks.
-     * Each group represents a line and contains the words in that line.
-     */
+    // Group words into lines based on the detected line breaks.
     const linesGrouped = useMemo(() => {
       if (lineBreaks.length < 2) return [];
       const lines = [];
@@ -83,10 +81,11 @@ const TextReveal = React.memo(
         const start = lineBreaks[i];
         const end = lineBreaks[i + 1];
         const lineWords = words.slice(start, end);
-        // Calculate the total number of letters (ignoring whitespace) in the line.
-        const totalLetters = lineWords.reduce((acc, word) => {
-          return acc + (word.isSpace ? 0 : word.text.length);
-        }, 0);
+        // Calculate the total number of letters (ignoring whitespace).
+        const totalLetters = lineWords.reduce(
+          (acc, word) => acc + (word.isSpace ? 0 : word.text.length),
+          0
+        );
         lines.push({ lineWords, totalLetters });
       }
       return lines;
@@ -97,16 +96,11 @@ const TextReveal = React.memo(
     // Each line occupies an equal fraction of the normalized progress.
     const lineSlot = 1 / totalLines;
 
-    /**
-     * Renders the reveal layer by grouping letters per line.
-     * For each line, the reveal is computed so that as lineProgress increases
-     * (from 0 to 1), letters are revealed sequentially from left to right.
-     */
+    // Renders the reveal layer by grouping letters per line.
     const renderRevealLayer = () => {
       if (linesGrouped.length === 0) {
-        // Fallback: if no grouping is available yet, simply render words.
+        // Fallback if grouping isn’t ready yet.
         return words.map((word) => {
-          // For whitespace, just show the text.
           if (word.isSpace) {
             return (
               <span
@@ -117,11 +111,9 @@ const TextReveal = React.memo(
               </span>
             );
           }
-          // Otherwise, split into letters with a basic reveal.
-          const letters = word.text.split("");
           return (
             <span key={`reveal-${word.id}`} className="inline-block word-span">
-              {letters.map((letter, j) => (
+              {word.text.split("").map((letter, j) => (
                 <span
                   key={`reveal-${word.id}-letter-${j}`}
                   style={{
@@ -138,19 +130,16 @@ const TextReveal = React.memo(
       }
 
       return linesGrouped.map((line, lineIndex) => {
-        // Calculate the reveal progress for this line.
+        // Calculate reveal progress for the line.
         const lineProgress = Math.max(
           0,
           Math.min(1, (normalizedProgress - lineIndex * lineSlot) / lineSlot)
         );
-        // For each line, we need a running counter of letters (ignoring whitespace)
         let letterCounter = 0;
         return (
-          // Use a span for each line.
           <span key={`line-${lineIndex}`} className="inline-block">
             {line.lineWords.map((word) => {
               if (word.isSpace) {
-                // Render spaces normally.
                 return (
                   <span
                     key={`reveal-${word.id}`}
@@ -160,7 +149,6 @@ const TextReveal = React.memo(
                   </span>
                 );
               }
-              // Split the word into letters.
               const letters = word.text.split("");
               return (
                 <span
@@ -168,8 +156,6 @@ const TextReveal = React.memo(
                   className="inline-block word-span"
                 >
                   {letters.map((letter, letterIndex) => {
-                    // Compute a reveal value that starts at the first letter and progresses smoothly.
-                    // Here, we treat the entire line as a sequence of letters.
                     const revealAmount = Math.max(
                       0,
                       Math.min(
@@ -198,7 +184,7 @@ const TextReveal = React.memo(
       });
     };
 
-    // Base text styles.
+    // Base text styles with responsive typography.
     const textStyles = cn(
       "text-2xl sm:text-3xl md:text-4xl lg:text-[3.38rem]",
       "font-normal leading-[1.4] sm:leading-[1.45] md:leading-[1.35]",
@@ -217,15 +203,11 @@ const TextReveal = React.memo(
 
     return (
       <div className={containerClasses} ref={containerRef}>
-        {/*
-          Render an invisible placeholder to preserve layout.
-        */}
+        {/* Invisible placeholder to preserve layout */}
         <p className={cn("invisible", textStyles)}>{text}</p>
         <div className="absolute top-0 left-0 right-0">
           <p className={textStyles}>
-            {/*
-              Ghost Layer: Shows the full text in low opacity.
-            */}
+            {/* Ghost layer (full text in low opacity) */}
             <span className="absolute top-0 left-0 right-0 text-white/20">
               {words.map((word) => (
                 <span
@@ -238,9 +220,7 @@ const TextReveal = React.memo(
                 </span>
               ))}
             </span>
-            {/*
-              Reveal Layer: Animates letters by line.
-            */}
+            {/* Reveal layer (animated letter-by-letter) */}
             <span className="relative">{renderRevealLayer()}</span>
           </p>
         </div>
