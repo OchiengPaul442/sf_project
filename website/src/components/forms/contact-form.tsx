@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Code2, Store, Wallet } from "lucide-react";
 import { EngineerForm } from "./engineer-form";
 import { RestaurantForm } from "./restaurant-form";
 import { InvestorForm } from "./investor-form";
-import lottie from "lottie-web";
+import lottie, { AnimationItem } from "lottie-web"; // Import the type AnimationItem here
 import AngelAnimation from "@/public/lottie/angel.json";
 
 type FormType = "engineer" | "restaurant" | "investor";
@@ -54,35 +54,33 @@ const pageTransition = {
   },
 };
 
-export function ContactForm() {
+export const ContactForm = memo(function ContactForm() {
   const [selectedForm, setSelectedForm] = useState<FormType | null>(null);
   const angelContainerRef = useRef<HTMLDivElement>(null);
   const [isAnimationReady, setIsAnimationReady] = useState(false);
 
+  // Initialize the Lottie animation only if the investor option is selected.
   useEffect(() => {
-    let animation: any = null;
+    let animation: AnimationItem | null = null; // Use the imported AnimationItem type
 
-    const initAnimation = () => {
-      if (angelContainerRef.current && selectedForm === "investor") {
-        animation = lottie.loadAnimation({
-          container: angelContainerRef.current,
-          renderer: "svg",
-          loop: true,
-          autoplay: true,
-          animationData: AngelAnimation,
-        });
-
-        animation.addEventListener("DOMLoaded", () => {
-          setIsAnimationReady(true);
-        });
-      }
-    };
-
-    setIsAnimationReady(false);
-    const timer = setTimeout(initAnimation, 100);
+    // Only initialize when investor form is selected.
+    if (selectedForm === "investor" && angelContainerRef.current) {
+      animation = lottie.loadAnimation({
+        container: angelContainerRef.current,
+        renderer: "canvas", // Use canvas renderer for improved performance
+        loop: true,
+        autoplay: true,
+        animationData: AngelAnimation,
+      });
+      // When the DOM is loaded, mark the animation as ready.
+      animation.addEventListener("DOMLoaded", () => {
+        setIsAnimationReady(true);
+      });
+    } else {
+      setIsAnimationReady(false);
+    }
 
     return () => {
-      clearTimeout(timer);
       if (animation) {
         animation.destroy();
         setIsAnimationReady(false);
@@ -93,7 +91,10 @@ export function ContactForm() {
   const isInvestorSelected = selectedForm === "investor";
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f5f5f5] p-4">
+    <div
+      className="min-h-screen flex items-center justify-center bg-[#f5f5f5] p-4"
+      style={{ transform: "translateZ(0)" }} // trigger GPU acceleration
+    >
       <motion.div
         className="w-full max-w-6xl bg-white rounded-3xl shadow-xl overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
@@ -108,7 +109,7 @@ export function ContactForm() {
             }`}
             layout
           >
-            {/* Animation Container */}
+            {/* Animation Container (only shown for investor) */}
             <AnimatePresence mode="wait">
               {isInvestorSelected && (
                 <motion.div
@@ -126,7 +127,7 @@ export function ContactForm() {
               )}
             </AnimatePresence>
 
-            {/* Content */}
+            {/* Left Panel Content */}
             <div className="relative z-10 h-full flex flex-col justify-between p-6 md:p-8">
               <AnimatePresence mode="wait">
                 {!isInvestorSelected && (
@@ -189,7 +190,13 @@ export function ContactForm() {
             }`}
             layout
           >
-            <div className="h-full overflow-x-hidden custom-scrollbar">
+            <div
+              className="h-full overflow-y-auto custom-scrollbar"
+              style={{
+                WebkitOverflowScrolling: "touch",
+                transform: "translateZ(0)",
+              }}
+            >
               <AnimatePresence mode="wait">
                 {!selectedForm ? (
                   <motion.div
@@ -233,7 +240,11 @@ export function ContactForm() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="h-full p-6 md:p-8 overflow-y-scroll custom-scrollbar"
+                    className="h-full p-6 md:p-8 overflow-y-auto custom-scrollbar"
+                    style={{
+                      WebkitOverflowScrolling: "touch",
+                      transform: "translateZ(0)",
+                    }}
                   >
                     {selectedForm === "engineer" && <EngineerForm />}
                     {selectedForm === "restaurant" && <RestaurantForm />}
@@ -247,4 +258,6 @@ export function ContactForm() {
       </motion.div>
     </div>
   );
-}
+});
+
+export default ContactForm;

@@ -52,6 +52,7 @@ GlowEffect.displayName = "GlowEffect";
 const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const controls = useAnimation();
+  const isMobile = isMobileDevice();
 
   // Start the fade-in animation when the section is in view.
   useEffect(() => {
@@ -80,6 +81,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
         variants={variants}
         viewport={{ once: true, amount: 0.3 }}
         className="relative z-10 flex flex-col items-center text-center"
+        style={{ willChange: "transform" }}
       >
         <h2 className="text-white text-3xl sm:text-4xl font-light mb-12 tracking-tight">
           with{" "}
@@ -91,17 +93,18 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
           {animationData ? (
             <Lottie
               animationData={animationData}
-              loop={true}
-              autoplay={true}
+              loop
+              autoplay
               lottieRef={lottieRef}
               style={{
                 filter: "brightness(0) invert(1)",
                 width: "100%",
                 height: "100%",
               }}
+              renderer={isMobile ? ("canvas" as any) : "svg"}
               rendererSettings={{
                 preserveAspectRatio: "xMidYMid slice",
-                progressiveLoad: true,
+                progressiveLoad: isMobile ? false : true,
                 hideOnTransparent: true,
               }}
             />

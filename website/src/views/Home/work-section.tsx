@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
 import lottie, { type AnimationItem } from "lottie-web";
@@ -9,6 +9,7 @@ import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { ContactForm } from "@/components/forms/contact-form";
 import type { SectionProps } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
@@ -16,6 +17,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const contactModalOpen = useSelector(
     (state) => state.ui.contactModalOpen
   ) as boolean;
+  const isMobile = useIsMobile();
 
   // Open and close the contact form modal
   const handleOpenForm = useCallback(() => {
@@ -26,25 +28,23 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
-  // Initialize Lottie animation and clean up on unmount
+  // Initialize Lottie animation (using canvas renderer on mobile for performance)
   useEffect(() => {
     let animation: AnimationItem | null = null;
-
     if (lottieContainerRef.current && animationData) {
       animation = lottie.loadAnimation({
         container: lottieContainerRef.current,
-        renderer: "svg",
+        renderer: isMobile ? "canvas" : "svg",
         loop: true,
         autoplay: true,
         animationData,
       });
       animation.setSpeed(1.2);
     }
-
     return () => {
       animation?.destroy();
     };
-  }, [animationData]);
+  }, [animationData, isMobile]);
 
   // Add keydown listener for Escape to close modal and control body overflow
   useEffect(() => {
@@ -56,7 +56,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
 
     document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
     window.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.body.style.overflow = "unset";
       window.removeEventListener("keydown", handleKeyDown);
@@ -78,6 +77,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
           damping: 30,
           duration: 0.5,
         }}
+        style={{ willChange: "transform" }}
       >
         <div className="text-center lg:text-left space-y-6 lg:space-y-8 max-w-3xl w-full lg:w-1/2 mb-12 lg:mb-0">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-normal">
@@ -143,4 +143,4 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   );
 };
 
-export default WorkSection;
+export default memo(WorkSection);

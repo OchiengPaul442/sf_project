@@ -258,7 +258,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         // Disable custom touch handling on mobile devices.
         if (isMobile) return;
         touchStartY.current = e.touches[0].clientY;
-        // On mobile, let native panning occur by not preventing default.
       },
       [isMobile]
     );
@@ -285,13 +284,11 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         }
         // Otherwise, update active index.
         if (deltaY > 0) {
-          // Swipe up.
           if (activeIndex < steps.length - 1) {
             setDirection(1);
             setActiveIndex((prev) => prev + 1);
           }
         } else {
-          // Swipe down.
           if (activeIndex > 0) {
             setDirection(-1);
             setActiveIndex((prev) => prev - 1);
@@ -365,10 +362,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                               onDOMLoaded={() => setAnimationLoaded(true)}
                               onDataReady={() => setAnimationLoaded(true)}
                               className="w-full h-full"
-                              renderer="svg"
+                              renderer={isMobile ? ("canvas" as any) : "svg"}
                               rendererSettings={{
                                 preserveAspectRatio: "xMidYMid meet",
-                                progressiveLoad: true,
+                                progressiveLoad: isMobile ? false : true,
                               }}
                               style={{ objectFit: "contain" }}
                             />
