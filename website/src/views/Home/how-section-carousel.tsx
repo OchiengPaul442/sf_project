@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect, memo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useRef, useEffect, memo, useCallback } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useMotionValueEvent,
+} from "framer-motion";
 import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
 import type { StepWithData } from "@/utils/types/section";
@@ -76,7 +81,7 @@ const NavItem: React.FC<NavItemProps> = memo(({ step, isActive, onClick }) => (
 NavItem.displayName = "NavItem";
 
 // ----------------------------------------------------------------
-// CarouselNav Component (wraps NavItems with the separator line)
+// CarouselNav Component (wraps NavItems with a separator line)
 // ----------------------------------------------------------------
 
 interface CarouselNavProps {
@@ -93,12 +98,7 @@ const CarouselNav: React.FC<CarouselNavProps> = ({
   title,
 }) => (
   <div className="relative">
-    {/*
-      Position the separator line so that its left edge aligns with the center
-      of the dot indicator:
-        - Mobile: pl-6 (1.5rem) + half of dot width (~0.1875rem) ≈ 1.7rem.
-        - Larger screens: pl-12 (3rem) + half of dot width (~0.25rem) ≈ 3.25rem.
-    */}
+    {/* Separator line */}
     <div className="absolute left-[1.7rem] sm:left-[3.25rem] top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
     <nav
       className="space-y-6 sm:space-y-8 lg:space-y-10"
@@ -117,123 +117,191 @@ const CarouselNav: React.FC<CarouselNavProps> = ({
 );
 
 // ----------------------------------------------------------------
-// HowSectionCarousel Component with Auto‑Rotation
+// HowSectionCarousel Component with Scroll‑Based Navigation
 // ----------------------------------------------------------------
 
 export interface HowSectionCarouselProps {
   id: string;
   title: string;
   steps: StepWithData[];
+  /** Callback to trigger outer-section navigation when scrolling past the carousel */
+  onExitCarousel?: (direction: "up" | "down") => void;
 }
 
 const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
-  function HowSectionCarousel({ id, title, steps }) {
+  function HowSectionCarousel({ id, title, steps, onExitCarousel }) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(0);
     const [animationLoaded, setAnimationLoaded] = useState(false);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
 
-    // Reset the animation loaded state when the active index changes.
+    // Reference to the outer scrollable container (200vh).
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    // Reset animation loaded state on slide change.
     useEffect(() => {
       setAnimationLoaded(false);
     }, [activeIndex]);
 
-    // Handler for manual navigation via nav items.
+    // Use Framer Motion’s scroll hook to track progress in the container.
+    const { scrollYProgress } = useScroll({ container: containerRef });
+    useMotionValueEvent(scrollYProgress, "change", (latest) => {
+      // When near the boundaries, do nothing so that the outer scroller can take over.
+      if (latest < 0.05 || latest > 0.95) return;
+
+      // Map progress to an index.
+      const segment = 1 / steps.length;
+      const newIndex = Math.min(steps.length - 1, Math.floor(latest / segment));
+      if (newIndex !== activeIndex) {
+        setDirection(newIndex > activeIndex ? 1 : -1);
+        setActiveIndex(newIndex);
+      }
+    });
+
+    // Handler for manual navigation clicks.
     const handleNavItemClick = (index: number) => {
-      if (index !== activeIndex) {
-        setDirection(index > activeIndex ? 1 : -1);
-        setActiveIndex(index);
+      if (index === activeIndex) return;
+      setDirection(index > activeIndex ? 1 : -1);
+      setActiveIndex(index);
+      if (containerRef.current) {
+        // Scroll the container to the corresponding offset.
+        const scrollableHeight =
+          containerRef.current.scrollHeight - containerRef.current.clientHeight;
+        const targetScroll = (scrollableHeight * index) / steps.length;
+        containerRef.current.scrollTo({
+          top: targetScroll,
+          behavior: "smooth",
+        });
       }
     };
 
-    // Auto-rotate every 2 seconds.
+    // Custom wheel handler for the carousel container.
+    const handleWheel = useCallback(
+      (e: WheelEvent) => {
+        if (!containerRef.current) return;
+
+        const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+        const atTop = scrollTop < 10;
+        const atBottom = scrollTop > scrollHeight - clientHeight - 10;
+
+        // If we're at the top of the carousel (first slide) and the user scrolls up,
+        // let the event bubble to trigger the previous outer section.
+        if (activeIndex === 0 && e.deltaY < 0 && atTop) {
+          if (onExitCarousel) onExitCarousel("up");
+          return;
+        }
+        // If we're at the bottom of the carousel (last slide) and the user scrolls down,
+        // let the event bubble to trigger the next outer section.
+        if (activeIndex === steps.length - 1 && e.deltaY > 0 && atBottom) {
+          if (onExitCarousel) onExitCarousel("down");
+          return;
+        }
+
+        // Otherwise, prevent the event from bubbling.
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Update the slide index based on scroll direction.
+        if (e.deltaY > 0) {
+          if (activeIndex < steps.length - 1) {
+            setDirection(1);
+            setActiveIndex((prev) => prev + 1);
+          }
+        } else if (e.deltaY < 0) {
+          if (activeIndex > 0) {
+            setDirection(-1);
+            setActiveIndex((prev) => prev - 1);
+          }
+        }
+      },
+      [activeIndex, steps.length, onExitCarousel]
+    );
+
+    // Attach the wheel handler to the scrollable container.
     useEffect(() => {
-      // Make sure there is more than one step.
-      if (steps.length <= 1) return;
-
-      const autoRotateTimer = setInterval(() => {
-        setActiveIndex((prevIndex) => {
-          const nextIndex = (prevIndex + 1) % steps.length;
-          // Always rotate forward.
-          setDirection(1);
-          return nextIndex;
-        });
-      }, 3000); // 3000ms delay, adjust as needed
-
-      return () => clearInterval(autoRotateTimer);
-    }, [steps.length]);
+      const container = containerRef.current;
+      if (!container) return;
+      container.addEventListener("wheel", handleWheel, { passive: false });
+      return () => {
+        container.removeEventListener("wheel", handleWheel);
+      };
+    }, [handleWheel]);
 
     const currentStep = steps[activeIndex] || steps[0];
 
     return (
-      <section
-        id={id}
-        className="min-h-screen bg-black flex items-center justify-center py-12"
-      >
+      <section id={id} className="bg-black">
+        {/* The scrollable container is 200vh tall */}
         <div
-          className={`
-            ${mainConfigs.SECTION_CONTAINER_CLASS}
-            grid grid-cols-1 lg:grid-cols-3
-            items-center gap-8
-            w-full max-w-6xl px-4
-          `}
+          ref={containerRef}
+          className="relative h-[200vh] overflow-y-scroll"
+          style={{ scrollBehavior: "smooth" }}
         >
-          {/* Navigation */}
-          <div className="lg:col-span-1 flex flex-col items-center justify-center">
-            <CarouselNav
-              title={title}
-              steps={steps}
-              activeIndex={activeIndex}
-              onNavItemClick={handleNavItemClick}
-            />
-          </div>
-
-          {/* Carousel Content */}
-          <div className="lg:col-span-2 flex items-center justify-center">
-            <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl">
-              <AnimatePresence mode="wait" custom={direction}>
-                <motion.div
-                  key={currentStep.id}
-                  className="absolute inset-0 flex items-center justify-center"
-                  custom={direction}
-                  variants={carouselVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                >
-                  {currentStep.animationData ? (
-                    <div className="w-full h-full relative">
-                      <div className="w-[90%] h-[90%] lg:w-[85%] lg:h-[85%] mx-auto">
-                        <Lottie
-                          animationData={currentStep.animationData}
-                          loop
-                          autoplay
-                          lottieRef={lottieRef}
-                          onDOMLoaded={() => setAnimationLoaded(true)}
-                          className="w-full h-full"
-                          renderer="svg"
-                          rendererSettings={{
-                            preserveAspectRatio: "xMidYMid meet",
-                            progressiveLoad: true,
-                          }}
-                          style={{ objectFit: "contain" }}
-                        />
-                      </div>
-                      {/* Loading state overlay */}
-                      {!animationLoaded && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
+          {/* Sticky container positioned 150px from the top */}
+          <div className="sticky top-[150px]">
+            <div
+              className={`${mainConfigs.SECTION_CONTAINER_CLASS} grid grid-cols-1 lg:grid-cols-3 items-start gap-8 w-full`}
+            >
+              {/* Navigation */}
+              <div className="lg:col-span-1 flex flex-col items-center justify-start">
+                <CarouselNav
+                  title={title}
+                  steps={steps}
+                  activeIndex={activeIndex}
+                  onNavItemClick={handleNavItemClick}
+                />
+              </div>
+              {/* Carousel Content */}
+              <div className="lg:col-span-2 flex items-center justify-center">
+                <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl overflow-hidden">
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div
+                      key={currentStep.id}
+                      className="absolute inset-0 flex items-center justify-center"
+                      custom={direction}
+                      variants={carouselVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                    >
+                      {currentStep.animationData ? (
+                        <div className="w-full h-full relative">
+                          <div className="w-[90%] h-[90%] lg:w-[85%] lg:h-[85%] mx-auto">
+                            <Lottie
+                              animationData={currentStep.animationData}
+                              loop
+                              autoplay
+                              lottieRef={lottieRef}
+                              onDOMLoaded={() => setAnimationLoaded(true)}
+                              className="w-full h-full"
+                              renderer="svg"
+                              rendererSettings={{
+                                preserveAspectRatio: "xMidYMid meet",
+                                progressiveLoad: true,
+                              }}
+                              style={{ objectFit: "contain" }}
+                            />
+                          </div>
+                          {/* Loading overlay */}
+                          {!animationLoaded && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div
+                          className="text-white text-center"
+                          aria-live="polite"
+                        >
+                          No animation available for this step
                         </div>
                       )}
-                    </div>
-                  ) : (
-                    <div className="text-white text-center" aria-live="polite">
-                      No animation available for this step
-                    </div>
-                  )}
-                </motion.div>
-              </AnimatePresence>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
             </div>
           </div>
         </div>
