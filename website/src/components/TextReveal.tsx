@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useIsMobile } from "@/hooks/useIsMobile"; // Import your hook here
 import { cn } from "@/lib/utils";
 
 export interface TextRevealProps {
@@ -18,20 +17,15 @@ const TextReveal = React.memo(
     align = "left",
     className,
   }: TextRevealProps) => {
-    // Always call the hook at the top level.
-    const isMobile = useIsMobile();
-
     const containerRef = useRef<HTMLDivElement>(null);
     const [lineBreaks, setLineBreaks] = useState<number[]>([]);
 
-    // Normalize the progress value based on the provided range.
     const normalizedProgress = useMemo(
       () =>
         Math.max(0, Math.min(1, (progress - range[0]) / (range[1] - range[0]))),
       [progress, range]
     );
 
-    // Split text into words and spaces while preserving whitespace.
     const words = useMemo(() => {
       const matches = text.match(/\S+|\s+/g) || [];
       return matches.map((word, index) => ({
@@ -41,18 +35,7 @@ const TextReveal = React.memo(
       }));
     }, [text]);
 
-    // Debounce function to limit how often the line break detection runs.
-    const debounce = (func: () => void, delay: number) => {
-      let timeoutId: NodeJS.Timeout;
-      return () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => {
-          func();
-        }, delay);
-      };
-    };
-
-    // Detect line breaks by checking the top position of each word span.
+    // Improved line break detection with ResizeObserver
     useEffect(() => {
       if (!containerRef.current) return;
 
@@ -66,27 +49,29 @@ const TextReveal = React.memo(
 
         spans.forEach((span, index) => {
           const rect = span.getBoundingClientRect();
-          if (previousTop !== null && rect.top > previousTop + 1) {
-            // A new line has started.
+          if (previousTop !== null && Math.abs(rect.top - previousTop) > 2) {
             breaks.push(index);
           }
           previousTop = rect.top;
         });
 
-        // Include 0 and the total word count as breakpoints.
         setLineBreaks([0, ...breaks, spans.length]);
       };
 
-      // Run initial detection.
+      // Use ResizeObserver for more reliable layout detection
+      const resizeObserver = new ResizeObserver(detectLineBreaks);
+      resizeObserver.observe(containerRef.current);
+
+      // Initial detection
       detectLineBreaks();
 
-      // Re-run detection on window resize with debouncing.
-      const debouncedDetect = debounce(detectLineBreaks, 100);
-      window.addEventListener("resize", debouncedDetect);
-      return () => window.removeEventListener("resize", debouncedDetect);
+      return () => {
+        if (containerRef.current) {
+          resizeObserver.unobserve(containerRef.current);
+        }
+      };
     }, [words]);
 
-    // Group words into lines based on the detected line breaks.
     const linesGrouped = useMemo(() => {
       if (lineBreaks.length < 2) return [];
       const lines = [];
@@ -94,7 +79,6 @@ const TextReveal = React.memo(
         const start = lineBreaks[i];
         const end = lineBreaks[i + 1];
         const lineWords = words.slice(start, end);
-        // Calculate the total number of letters (ignoring whitespace).
         const totalLetters = lineWords.reduce(
           (acc, word) => acc + (word.isSpace ? 0 : word.text.length),
           0
@@ -104,51 +88,43 @@ const TextReveal = React.memo(
       return lines;
     }, [lineBreaks, words]);
 
-    // Determine the total number of lines.
     const totalLines = linesGrouped.length || 1;
-    // Each line occupies an equal fraction of the normalized progress.
     const lineSlot = 1 / totalLines;
 
-    // Renders the reveal layer by grouping letters per line.
     const renderRevealLayer = () => {
       if (linesGrouped.length === 0) {
-        // Fallback if grouping isn’t ready yet.
-        return words.map((word) => {
-          if (word.isSpace) {
-            return (
-              <span
-                key={`reveal-${word.id}`}
-                className="inline-block word-span whitespace-pre"
-              >
-                {word.text}
-              </span>
-            );
-          }
-          return (
-            <span key={`reveal-${word.id}`} className="inline-block word-span">
-              {word.text.split("").map((letter, j) => (
-                <span
-                  key={`reveal-${word.id}-letter-${j}`}
-                  style={{
-                    opacity: normalizedProgress,
-                    transition: "opacity 0.3s ease-out",
-                  }}
-                >
-                  {letter}
-                </span>
-              ))}
-            </span>
-          );
-        });
+        return words.map((word) => (
+          <span
+            key={`reveal-${word.id}`}
+            className={cn("inline-block word-span", {
+              "whitespace-pre": word.isSpace,
+            })}
+          >
+            {word.isSpace
+              ? word.text
+              : word.text.split("").map((letter, j) => (
+                  <span
+                    key={`reveal-${word.id}-letter-${j}`}
+                    style={{
+                      opacity: normalizedProgress,
+                      transition: "opacity 0.3s ease-out",
+                    }}
+                  >
+                    {letter}
+                  </span>
+                ))}
+          </span>
+        ));
       }
 
       return linesGrouped.map((line, lineIndex) => {
-        // Calculate reveal progress for the line.
         const lineProgress = Math.max(
           0,
           Math.min(1, (normalizedProgress - lineIndex * lineSlot) / lineSlot)
         );
+
         let letterCounter = 0;
+
         return (
           <span key={`line-${lineIndex}`} className="inline-block">
             {line.lineWords.map((word) => {
@@ -162,6 +138,7 @@ const TextReveal = React.memo(
                   </span>
                 );
               }
+
               const letters = word.text.split("");
               return (
                 <span
@@ -197,30 +174,25 @@ const TextReveal = React.memo(
       });
     };
 
-    // Base text styles with responsive typography.
+    // Improved responsive typography
     const textStyles = cn(
-      "text-2xl sm:text-3xl md:text-4xl lg:text-[3.38rem]",
-      "font-normal leading-[1.4] sm:leading-[1.45] md:leading-[1.35]",
+      "text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-[3.38rem]",
+      "font-normal leading-[1.3] sm:leading-[1.35] md:leading-[1.4] lg:leading-[1.35]",
       "tracking-tight break-words"
     );
 
-    // Container alignment: force left alignment on mobile.
+    // Apply text alignment based on the 'align' prop
     const containerClasses = cn(
       "relative",
-      {
-        "text-left": isMobile || align === "left",
-        "text-right": !isMobile && align === "right",
-      },
+      align === "right" ? "text-right" : "text-left",
       className
     );
 
     return (
       <div className={containerClasses} ref={containerRef}>
-        {/* Invisible placeholder to preserve layout */}
         <p className={cn("invisible", textStyles)}>{text}</p>
         <div className="absolute top-0 left-0 right-0">
           <p className={textStyles}>
-            {/* Ghost layer (full text in low opacity) */}
             <span className="absolute top-0 left-0 right-0 text-white/20">
               {words.map((word) => (
                 <span
@@ -233,7 +205,6 @@ const TextReveal = React.memo(
                 </span>
               ))}
             </span>
-            {/* Reveal layer (animated letter-by-letter) */}
             <span className="relative">{renderRevealLayer()}</span>
           </p>
         </div>

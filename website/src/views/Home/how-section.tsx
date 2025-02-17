@@ -15,27 +15,32 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  // Adjust the section height based on the device.
-  const sectionHeight = isMobile ? "200vh" : "150vh";
+  // For mobile, use a reduced dynamic viewport height (dvh) value.
+  // For desktop, keep the current vh value.
+  const sectionHeight = isMobile ? "150dvh" : "150vh";
 
-  // Compute scroll progress over this section.
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
+
+  // Improve animation smoothness with a spring
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
+    stiffness: 50, // Reduced for smoother animation
+    damping: 20, // Adjusted for better response
+    mass: 0.5, // Added for more natural movement
   });
+
   const [progress, setProgress] = useState(0);
   useEffect(() => {
     const unsubscribe = smoothProgress.onChange((v) => setProgress(v));
     return () => unsubscribe();
   }, [smoothProgress]);
 
-  // Define breakpoints and reveal ranges.
-  const revealBreak = 0.5;
-  const gradientBuffer = 0.05;
+  // Adjusted reveal timing for better mobile experience
+  const revealBreak = isMobile ? 0.4 : 0.5;
+  const gradientBuffer = isMobile ? 0.08 : 0.05;
+
   const paragraphRanges = {
     first: [0, revealBreak] as [number, number],
     gradient: [revealBreak - gradientBuffer, revealBreak + gradientBuffer] as [
@@ -45,7 +50,6 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     second: [revealBreak, 1] as [number, number],
   };
 
-  // Text content.
   const paragraphs = {
     first:
       "By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability.",
@@ -61,20 +65,20 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       className="relative snap-start w-full bg-black overflow-hidden"
       style={{ height: sectionHeight }}
     >
-      {/* Sticky container centered vertically and horizontally */}
-      <div className="sticky top-1/2 transform -translate-y-1/2 flex items-center justify-center w-full">
+      <div className="sticky top-1/2 transform -translate-y-1/2 flex items-center justify-center w-full px-4 md:px-0">
         <div
-          className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-10 md:space-y-40`}
+          className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-8 md:space-y-40`}
         >
-          <div className="mb-8 md:mb-0">
+          <div className="mb-6 md:mb-0">
             <TextReveal
               text={paragraphs.first}
               progress={progress}
               range={paragraphRanges.first}
               align="left"
+              className="text-left md:text-left"
             />
           </div>
-          <div>
+          <div className="my-8 md:my-0">
             <GradientSeparator
               progress={Math.max(
                 0,
@@ -91,7 +95,8 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
               text={paragraphs.second}
               progress={progress}
               range={paragraphRanges.second}
-              align={isMobile ? "left" : "right"}
+              align="right"
+              className="text-left md:text-right"
             />
           </div>
         </div>
