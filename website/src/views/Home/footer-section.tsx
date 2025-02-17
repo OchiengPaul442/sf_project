@@ -15,7 +15,7 @@ const FooterSection: React.FC<SectionProps> = ({ id, title, image }) => {
   return (
     <footer
       id={id}
-      className="h-dvh w-full md:min-h-screen bg-transparent flex flex-col justify-end relative p-4 sm:p-6 md:p-8 lg:p-12"
+      className="snap-start w-full bg-transparent flex flex-col justify-end relative p-4 sm:p-6 md:p-8 lg:p-12 min-h-screen"
     >
       <div className={`${mainConfigs.SECTION_CONTAINER_CLASS}`}>
         <motion.button

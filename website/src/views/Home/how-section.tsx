@@ -67,7 +67,9 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
           • A fixed height of 75vh so that the content is centered vertically.
       */}
       <div className="sticky top-1/4 flex items-center justify-center h-[75vh]">
-        <div className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-40`}>
+        <div
+          className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-10 md:space-y-40`}
+        >
           <div>
             <TextReveal
               text={paragraphs.first}

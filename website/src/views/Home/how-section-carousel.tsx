@@ -51,7 +51,7 @@ interface NavItemProps {
 
 const NavItem: React.FC<NavItemProps> = memo(({ step, isActive, onClick }) => (
   <motion.button
-    className="relative cursor-pointer focus:outline-none w-full text-left"
+    className="relative cursor-pointer focus:outline-none w-full"
     onClick={onClick}
     initial={false}
     animate={{ opacity: isActive ? 1 : 0.5 }}
@@ -59,10 +59,10 @@ const NavItem: React.FC<NavItemProps> = memo(({ step, isActive, onClick }) => (
     aria-pressed={isActive}
     aria-label={step.title}
   >
-    <div className="relative pl-6 sm:pl-12">
+    <div className="flex items-center pl-6 sm:pl-12 whitespace-nowrap">
       <motion.div
-        className={`absolute left-[5px] sm:left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${
-          isActive ? "bg-white" : "border border-white/30"
+        className={`mr-2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${
+          isActive ? "bg-white" : ""
         }`}
         animate={{ scale: isActive ? 1 : 0.8 }}
         transition={{ duration: 0.3 }}
@@ -99,8 +99,12 @@ const CarouselNav: React.FC<CarouselNavProps> = ({
   title,
 }) => (
   <div className="relative">
-    {/* Separator Line */}
-    <div className="absolute left-2 sm:left-5 top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
+    {/*
+      The separator line is now positioned so that its left edge is at:
+      - 1.7rem on mobile (pl-6 + ~half of dot width)
+      - 3.25rem on larger screens (pl-12 + ~half of dot width)
+    */}
+    <div className="absolute left-[1.7rem] sm:left-[3.25rem] top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
     <nav
       className="space-y-6 sm:space-y-8 lg:space-y-10"
       aria-label={`${title} navigation`}
@@ -142,10 +146,15 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         className="min-h-screen bg-black flex items-center justify-center py-12"
       >
         <div
-          className={`${mainConfigs.SECTION_CONTAINER_CLASS} flex flex-col lg:flex-row items-center justify-center gap-8 w-full max-w-6xl px-4`}
+          className={`
+            ${mainConfigs.SECTION_CONTAINER_CLASS}
+            grid grid-cols-1 lg:grid-cols-3
+            items-center gap-8
+            w-full max-w-6xl px-4
+          `}
         >
-          {/* Navigation with Separator */}
-          <div className="w-full lg:w-1/3 flex items-center justify-center">
+          {/* Navigation */}
+          <div className="lg:col-span-1 flex flex-col items-center justify-center">
             <CarouselNav
               title={title}
               steps={steps}
@@ -155,8 +164,8 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           </div>
 
           {/* Carousel Content */}
-          <div className="w-full lg:w-2/3 flex items-center justify-center">
-            <div className="relative w-full h-[50vh] lg:h-[70vh]">
+          <div className="lg:col-span-2 flex items-center justify-center">
+            <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl">
               <AnimatePresence mode="wait" custom={direction}>
                 <motion.div
                   key={currentStep.id}

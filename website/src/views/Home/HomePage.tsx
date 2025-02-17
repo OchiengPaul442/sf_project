@@ -19,7 +19,6 @@ const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
 const RobotSection = dynamic(() => import("@/views/Home/robotSection"), {
   ssr: false,
 });
-/** HowSection now relies on its own reveal logic and native scrolling */
 const HowSection = dynamic(() => import("@/views/Home/how-section"), {
   ssr: false,
 });
@@ -47,7 +46,7 @@ const HomePage: React.FC = () => {
   // References for each section’s DOM node.
   const sectionsRef = useRef<(HTMLElement | null)[]>([]);
 
-  // Use our section scroller hook.
+  // Use our improved section scroller hook.
   const { scrollToSection } = useSectionScroller(sectionsRef, {
     scrollDuration: 800,
     globalLock: false,
@@ -63,7 +62,9 @@ const HomePage: React.FC = () => {
     dispatch(toggleMenu());
   }, [dispatch]);
 
-  // Render each section with appropriate snapping behavior.
+  // Render each section.
+  // For sections that allow native scrolling ("home", "how", "work"),
+  // we apply "snap-none"; others use "snap-start".
   const renderSection = useCallback(
     (section: (typeof SECTIONS)[number], index: number) => {
       let content: React.ReactNode = null;
@@ -115,10 +116,13 @@ const HomePage: React.FC = () => {
           content = null;
       }
 
-      // For sections that should not snap (e.g. home and how), disable snapping.
-      const noSnap = section.id === "home" || section.id === "how";
-      const snapClass = noSnap ? "snap-none" : "snap-start";
+      // Allow native scrolling for "home", "how", and "work"
+      const nativeScrollIds = ["home", "how", "work"];
+      const noSnap = nativeScrollIds.includes(section.id);
+      // For native-scroll sections, we use extra height if needed.
+      // For snapping sections (including footer) we use the full viewport height.
       const minHeight = noSnap ? "min-h-[120vh]" : "min-h-screen";
+      const snapClass = noSnap ? "snap-none" : "snap-start";
 
       return (
         <section
