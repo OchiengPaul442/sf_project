@@ -91,11 +91,14 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
           {animationData ? (
             <Lottie
               animationData={animationData}
-              loop
-              autoplay
+              loop={true}
+              autoplay={true}
               lottieRef={lottieRef}
-              // Removed the filter so that the robot animation shows in its natural colors.
-              style={{ width: "100%", height: "100%" }}
+              style={{
+                filter: "brightness(0) invert(1)",
+                width: "100%",
+                height: "100%",
+              }}
               rendererSettings={{
                 preserveAspectRatio: "xMidYMid slice",
                 progressiveLoad: true,
