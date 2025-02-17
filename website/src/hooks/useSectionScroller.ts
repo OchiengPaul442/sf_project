@@ -10,8 +10,6 @@ interface SectionScrollerOptions {
  * - For the "how" section, native scrolling is allowed until its bottom nears the viewport.
  * - For the "work" section, native scrolling is allowed—but when its bottom nears the viewport (using a higher threshold), a snap to the footer occurs.
  * - For other sections, a snapping effect is applied.
- *
- * This version uses centered-section detection and refined thresholds for improved smoothness.
  */
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,

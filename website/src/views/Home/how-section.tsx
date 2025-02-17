@@ -32,8 +32,8 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   }, [smoothProgress]);
 
   // Define a breakpoint where the first paragraph ends and second begins.
-  const revealBreak = 0.5; // adjust as needed
-  const gradientBuffer = 0.05; // a short buffer range for the gradient
+  const revealBreak = 0.5;
+  const gradientBuffer = 0.05;
 
   // Define reveal ranges for sequential effect.
   const paragraphRanges = {
@@ -74,7 +74,6 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
             <TextReveal
               text={paragraphs.first}
               progress={progress}
-              // Reveal only during the first half of the scroll.
               range={paragraphRanges.first}
               align="left"
             />
@@ -95,7 +94,6 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
             <TextReveal
               text={paragraphs.second}
               progress={progress}
-              // Reveal during the second half of the scroll.
               range={paragraphRanges.second}
               align="right"
             />
