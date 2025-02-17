@@ -321,6 +321,7 @@ export const useSectionScroller = (
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchend", handleTouchEnd);
       if (animationFrameRef.current)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         cancelAnimationFrame(animationFrameRef.current);
     };
   }, [handleWheel, handleTouchStart, handleTouchEnd]);
