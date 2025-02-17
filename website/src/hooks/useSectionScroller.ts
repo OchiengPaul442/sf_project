@@ -6,9 +6,9 @@ interface SectionScrollerOptions {
 }
 
 /**
- * Custom hook to smoothly scroll between sections.
- * When the active section is flagged as non-snapping (via data-section-id, e.g. "how"),
- * the hook will let native scrolling occur.
+ * Custom hook to smoothly scroll between sections for all except "how".
+ * While in "how", we allow normal (native) scrolling so the user can see
+ * the sticky scrollytelling effect.
  */
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,
@@ -23,20 +23,11 @@ export const useSectionScroller = (
 
   const scrollToSection = useCallback(
     (index: number) => {
-      // Use non-null assertion since we initialize sectionsRef.current as an array.
-      const sections = sectionsRef.current!;
+      const sections = sectionsRef.current || [];
       if (!sections[index]) return;
 
-      // Always allow immediate scrolling when targeting section 0.
-      if (index === 0) {
-        sections[index]?.scrollIntoView({ behavior: "smooth" });
-        lastScrollTimeRef.current = Date.now();
-        setLocalLock(true);
-        setTimeout(() => setLocalLock(false), scrollDuration);
-        return;
-      }
-
       const now = Date.now();
+      // Ensure we don’t trigger another snap too soon
       if (now - lastScrollTimeRef.current < scrollDuration) return;
 
       sections[index]?.scrollIntoView({ behavior: "smooth" });
@@ -51,8 +42,8 @@ export const useSectionScroller = (
     (delta: number) => {
       if (localLock || globalLock) return;
 
-      const sections = sectionsRef.current!;
-      // Determine which section is roughly centered.
+      const sections = sectionsRef.current || [];
+      // Find which section is roughly centered
       const currentSectionIndex = sections.findIndex((section) => {
         if (!section) return false;
         const rect = section.getBoundingClientRect();
@@ -64,11 +55,13 @@ export const useSectionScroller = (
       if (currentSectionIndex === -1) return;
 
       const currentSection = sections[currentSectionIndex];
-      // If the current section is flagged as non-snapping (e.g. "how"), do nothing.
+
+      // If we’re inside the "how" section, allow normal scrolling (no snap).
       if (currentSection?.dataset.sectionId === "how") {
         return;
       }
 
+      // Otherwise, snap to the next/previous section
       if (delta > 0 && currentSectionIndex < sections.length - 1) {
         scrollToSection(currentSectionIndex + 1);
       } else if (delta < 0 && currentSectionIndex > 0) {
@@ -78,11 +71,12 @@ export const useSectionScroller = (
     [localLock, globalLock, sectionsRef, scrollToSection]
   );
 
-  // Accumulate wheel delta and only prevent default if we’re not in a non-snapping section.
+  // Listen for wheel events and accumulate the delta; skip snapping if in "how".
   const handleWheel = useCallback(
     (e: WheelEvent) => {
-      const sections = sectionsRef.current!;
-      // First, determine the currently centered section.
+      const sections = sectionsRef.current || [];
+
+      // Determine which section is roughly centered
       const currentSectionIndex = sections.findIndex((section) => {
         if (!section) return false;
         const rect = section.getBoundingClientRect();
@@ -91,12 +85,14 @@ export const useSectionScroller = (
           rect.bottom >= window.innerHeight / 2
         );
       });
+
       const currentSection = sections[currentSectionIndex];
-      // If we’re inside the "how" section, let native scrolling happen.
+      // If "how", do NOT prevent default; let normal scroll proceed
       if (currentSection?.dataset.sectionId === "how") {
         return;
       }
-      // For other sections, prevent default and handle snapping.
+
+      // Otherwise, we do want to snap, so prevent default
       e.preventDefault();
       wheelDeltaRef.current += e.deltaY;
       const threshold = 50;
@@ -108,7 +104,7 @@ export const useSectionScroller = (
     [handleScroll, sectionsRef]
   );
 
-  // Touch events for mobile devices.
+  // Touch events for mobile
   const handleTouchStart = useCallback((e: TouchEvent) => {
     touchStartYRef.current = e.touches[0].clientY;
   }, []);
@@ -116,8 +112,10 @@ export const useSectionScroller = (
   const handleTouchEnd = useCallback(
     (e: TouchEvent) => {
       if (touchStartYRef.current === null) return;
+
       const delta = touchStartYRef.current - e.changedTouches[0].clientY;
-      const sections = sectionsRef.current!;
+      const sections = sectionsRef.current || [];
+
       const currentSectionIndex = sections.findIndex((section) => {
         if (!section) return false;
         const rect = section.getBoundingClientRect();
@@ -127,12 +125,18 @@ export const useSectionScroller = (
         );
       });
       const currentSection = sections[currentSectionIndex];
+
+      // If "how", let normal scrolling happen
       if (currentSection?.dataset.sectionId === "how") {
+        touchStartYRef.current = null;
         return;
       }
+
+      // Otherwise, snap
       if (Math.abs(delta) > 50) {
         handleScroll(delta);
       }
+
       touchStartYRef.current = null;
     },
     [handleScroll, sectionsRef]
@@ -142,6 +146,7 @@ export const useSectionScroller = (
     window.addEventListener("wheel", handleWheel, { passive: false });
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
     return () => {
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("touchstart", handleTouchStart);
