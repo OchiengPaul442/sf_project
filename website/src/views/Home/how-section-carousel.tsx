@@ -149,6 +149,23 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       return () => clearTimeout(timer);
     }, [activeIndex]);
 
+    // When the carousel container enters the viewport, reset scroll and active index.
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            container.scrollTo({ top: 0, behavior: "smooth" });
+            setActiveIndex(0);
+          }
+        },
+        { threshold: 0.5 }
+      );
+      observer.observe(container);
+      return () => observer.disconnect();
+    }, []);
+
     // Use Framer Motion’s scroll hook to track progress in the container.
     const { scrollYProgress } = useScroll({ container: containerRef });
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
@@ -181,7 +198,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       }
     };
 
-    // Custom wheel handler for the carousel container.
+    // --- Wheel event handling with delta accumulation ---
+    const wheelDeltaAccumulator = useRef(0);
+    const wheelThreshold = 40; // Adjust threshold for touchpad sensitivity
+
     const handleWheel = useCallback(
       (e: WheelEvent) => {
         if (!containerRef.current) return;
@@ -190,48 +210,98 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         const atTop = scrollTop < 10;
         const atBottom = scrollTop > scrollHeight - clientHeight - 10;
 
-        // If we're at the top of the carousel (first slide) and the user scrolls up,
-        // let the event bubble to trigger the previous outer section.
+        // If at boundaries and the user scrolls beyond, let the event bubble.
         if (activeIndex === 0 && e.deltaY < 0 && atTop) {
           if (onExitCarousel) onExitCarousel("up");
+          wheelDeltaAccumulator.current = 0;
           return;
         }
-        // If we're at the bottom of the carousel (last slide) and the user scrolls down,
-        // let the event bubble to trigger the next outer section.
         if (activeIndex === steps.length - 1 && e.deltaY > 0 && atBottom) {
           if (onExitCarousel) onExitCarousel("down");
+          wheelDeltaAccumulator.current = 0;
           return;
         }
 
-        // Otherwise, prevent the event from bubbling.
-        e.preventDefault();
-        e.stopPropagation();
+        // Accumulate the delta
+        wheelDeltaAccumulator.current += e.deltaY;
 
-        // Update the slide index based on scroll direction.
-        if (e.deltaY > 0) {
+        // If the accumulated delta exceeds threshold, update the slide.
+        if (wheelDeltaAccumulator.current > wheelThreshold) {
           if (activeIndex < steps.length - 1) {
             setDirection(1);
             setActiveIndex((prev) => prev + 1);
           }
-        } else if (e.deltaY < 0) {
+          wheelDeltaAccumulator.current = 0;
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        } else if (wheelDeltaAccumulator.current < -wheelThreshold) {
           if (activeIndex > 0) {
             setDirection(-1);
             setActiveIndex((prev) => prev - 1);
           }
+          wheelDeltaAccumulator.current = 0;
+          e.preventDefault();
+          e.stopPropagation();
+          return;
         }
       },
       [activeIndex, steps.length, onExitCarousel]
     );
 
-    // Attach the wheel handler to the scrollable container.
+    // --- Touch event handling ---
+    const touchStartY = useRef<number | null>(null);
+
+    const handleTouchStart = useCallback((e: TouchEvent) => {
+      touchStartY.current = e.touches[0].clientY;
+    }, []);
+
+    const handleTouchEnd = useCallback(
+      (e: TouchEvent) => {
+        if (touchStartY.current === null) return;
+        const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+        const swipeThreshold = 30; // minimum swipe distance in px
+        if (Math.abs(deltaY) < swipeThreshold) {
+          touchStartY.current = null;
+          return;
+        }
+        if (deltaY > 0) {
+          // Swipe up
+          if (activeIndex < steps.length - 1) {
+            setDirection(1);
+            setActiveIndex((prev) => prev + 1);
+          } else if (activeIndex === steps.length - 1 && onExitCarousel) {
+            onExitCarousel("down");
+          }
+        } else {
+          // Swipe down
+          if (activeIndex > 0) {
+            setDirection(-1);
+            setActiveIndex((prev) => prev - 1);
+          } else if (activeIndex === 0 && onExitCarousel) {
+            onExitCarousel("up");
+          }
+        }
+        touchStartY.current = null;
+      },
+      [activeIndex, steps.length, onExitCarousel]
+    );
+
+    // Attach wheel and touch handlers to the container.
     useEffect(() => {
       const container = containerRef.current;
       if (!container) return;
       container.addEventListener("wheel", handleWheel, { passive: false });
+      container.addEventListener("touchstart", handleTouchStart, {
+        passive: true,
+      });
+      container.addEventListener("touchend", handleTouchEnd, { passive: true });
       return () => {
         container.removeEventListener("wheel", handleWheel);
+        container.removeEventListener("touchstart", handleTouchStart);
+        container.removeEventListener("touchend", handleTouchEnd);
       };
-    }, [handleWheel]);
+    }, [handleWheel, handleTouchStart, handleTouchEnd]);
 
     const currentStep = steps[activeIndex] || steps[0];
 
@@ -257,7 +327,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                   onNavItemClick={handleNavItemClick}
                 />
               </div>
-
               {/* Carousel Content */}
               <div className="lg:col-span-2 flex items-center justify-center">
                 <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl overflow-hidden">
