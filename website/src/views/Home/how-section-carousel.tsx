@@ -158,7 +158,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           setDirection(1);
           return nextIndex;
         });
-      }, 2000); // 5000ms delay, adjust as needed
+      }, 3000); // 3000ms delay, adjust as needed
 
       return () => clearInterval(autoRotateTimer);
     }, [steps.length]);
