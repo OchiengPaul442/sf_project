@@ -174,9 +174,10 @@ const TextReveal = React.memo(
       });
     };
 
-    // Improved responsive typography
+    // Increased responsive typography for mobile.
+    // Mobile base size updated from text-lg to text-xl and small breakpoint from text-2xl to text-3xl.
     const textStyles = cn(
-      "text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-[3.38rem]",
+      "text-xl sm:text-3xl md:text-3xl lg:text-4xl xl:text-[3.38rem]",
       "font-normal leading-[1.3] sm:leading-[1.35] md:leading-[1.4] lg:leading-[1.35]",
       "tracking-tight break-words"
     );

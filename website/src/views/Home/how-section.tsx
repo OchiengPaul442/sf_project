@@ -17,7 +17,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
 
   // For mobile, use a reduced dynamic viewport height (dvh) value.
   // For desktop, keep the current vh value.
-  const sectionHeight = isMobile ? "150dvh" : "150vh";
+  const sectionHeight = isMobile ? "120dvh" : "150vh";
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
