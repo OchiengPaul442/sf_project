@@ -15,9 +15,8 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  // Adjust the section height and sticky container offset based on the device.
+  // Adjust the section height based on the device.
   const sectionHeight = isMobile ? "200vh" : "150vh";
-  const stickyTop = isMobile ? "top-0" : "top-1/4";
 
   // Compute scroll progress over this section.
   const { scrollYProgress } = useScroll({
@@ -62,10 +61,8 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       className="relative snap-start w-full bg-black overflow-hidden"
       style={{ height: sectionHeight }}
     >
-      {/* The sticky container adapts its top offset based on the device. */}
-      <div
-        className={`sticky ${stickyTop} flex items-center justify-center h-[75vh]`}
-      >
+      {/* Sticky container centered vertically and horizontally */}
+      <div className="sticky top-1/2 transform -translate-y-1/2 flex items-center justify-center w-full">
         <div
           className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-10 md:space-y-40`}
         >
@@ -94,7 +91,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
               text={paragraphs.second}
               progress={progress}
               range={paragraphRanges.second}
-              align="right"
+              align={isMobile ? "left" : "right"}
             />
           </div>
         </div>

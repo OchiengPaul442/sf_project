@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { isMobileDevice } from "@/utils/deviceDetection";
+import { useIsMobile } from "@/hooks/useIsMobile"; // Import your hook here
 import { cn } from "@/lib/utils";
 
 export interface TextRevealProps {
@@ -18,8 +18,9 @@ const TextReveal = React.memo(
     align = "left",
     className,
   }: TextRevealProps) => {
-    // Determine whether the device is mobile.
-    const isMobile = isMobileDevice();
+    // Always call the hook at the top level.
+    const isMobile = useIsMobile();
+
     const containerRef = useRef<HTMLDivElement>(null);
     const [lineBreaks, setLineBreaks] = useState<number[]>([]);
 
@@ -40,13 +41,24 @@ const TextReveal = React.memo(
       }));
     }, [text]);
 
+    // Debounce function to limit how often the line break detection runs.
+    const debounce = (func: () => void, delay: number) => {
+      let timeoutId: NodeJS.Timeout;
+      return () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          func();
+        }, delay);
+      };
+    };
+
     // Detect line breaks by checking the top position of each word span.
     useEffect(() => {
       if (!containerRef.current) return;
 
       const detectLineBreaks = () => {
         const container = containerRef.current;
-        if (!container) return; // Guard against container being null
+        if (!container) return;
 
         const spans = container.querySelectorAll<HTMLSpanElement>(".word-span");
         const breaks: number[] = [];
@@ -68,9 +80,10 @@ const TextReveal = React.memo(
       // Run initial detection.
       detectLineBreaks();
 
-      // Re-run detection on window resize.
-      window.addEventListener("resize", detectLineBreaks);
-      return () => window.removeEventListener("resize", detectLineBreaks);
+      // Re-run detection on window resize with debouncing.
+      const debouncedDetect = debounce(detectLineBreaks, 100);
+      window.addEventListener("resize", debouncedDetect);
+      return () => window.removeEventListener("resize", debouncedDetect);
     }, [words]);
 
     // Group words into lines based on the detected line breaks.
@@ -191,12 +204,12 @@ const TextReveal = React.memo(
       "tracking-tight break-words"
     );
 
-    // Container alignment classes.
+    // Container alignment: force left alignment on mobile.
     const containerClasses = cn(
       "relative",
       {
-        "text-left sm:text-right": align === "right" && !isMobile,
         "text-left": isMobile || align === "left",
+        "text-right": !isMobile && align === "right",
       },
       className
     );
