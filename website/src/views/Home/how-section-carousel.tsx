@@ -11,6 +11,7 @@ import dynamic from "next/dynamic";
 import type { LottieRefCurrentProps } from "lottie-react";
 import type { StepWithData } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 // Dynamically load Lottie with a fallback spinner.
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -130,26 +131,27 @@ export interface HowSectionCarouselProps {
 
 const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
   function HowSectionCarousel({ id, title, steps, onExitCarousel }) {
+    const isMobile = useIsMobile();
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(0);
     const [animationLoaded, setAnimationLoaded] = useState(false);
     const lottieRef = useRef<LottieRefCurrentProps>(null);
 
-    // Reference to the outer scrollable container (200vh).
+    // Reference to the carousel container.
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Reset animation loaded state on slide change.
+    // Reset animation state when slide changes.
     useEffect(() => {
       setAnimationLoaded(false);
     }, [activeIndex]);
 
-    // Fallback effect: if onDOMLoaded/onDataReady never fire, mark as loaded after 500ms.
+    // Fallback: mark animation as loaded after 500ms.
     useEffect(() => {
       const timer = setTimeout(() => setAnimationLoaded(true), 500);
       return () => clearTimeout(timer);
     }, [activeIndex]);
 
-    // When the carousel container enters the viewport, reset scroll and active index.
+    // When the carousel container enters the viewport, reset its scroll and active index.
     useEffect(() => {
       const container = containerRef.current;
       if (!container) return;
@@ -166,13 +168,16 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       return () => observer.disconnect();
     }, []);
 
-    // Use Framer Motion’s scroll hook to track progress in the container.
+    // ----------------------------------------------------------------
+    // Scroll-Based Navigation (Only enabled for non‑mobile devices)
+    // ----------------------------------------------------------------
+
     const { scrollYProgress } = useScroll({ container: containerRef });
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
-      // When near the boundaries, do nothing so that the outer scroller can take over.
-      if (latest < 0.05 || latest > 0.95) return;
+      // Skip scroll-based navigation on mobile devices.
+      if (isMobile) return;
 
-      // Map progress to an index.
+      if (latest < 0.05 || latest > 0.95) return;
       const segment = 1 / steps.length;
       const newIndex = Math.min(steps.length - 1, Math.floor(latest / segment));
       if (newIndex !== activeIndex) {
@@ -181,13 +186,12 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       }
     });
 
-    // Handler for manual navigation clicks.
+    // Manual navigation via nav items.
     const handleNavItemClick = (index: number) => {
       if (index === activeIndex) return;
       setDirection(index > activeIndex ? 1 : -1);
       setActiveIndex(index);
       if (containerRef.current) {
-        // Scroll the container to the corresponding offset.
         const scrollableHeight =
           containerRef.current.scrollHeight - containerRef.current.clientHeight;
         const targetScroll = (scrollableHeight * index) / steps.length;
@@ -198,19 +202,20 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       }
     };
 
-    // --- Wheel event handling with delta accumulation ---
+    // --- Wheel handling with delta accumulation (Desktop only) ---
     const wheelDeltaAccumulator = useRef(0);
-    const wheelThreshold = 40; // Adjust threshold for touchpad sensitivity
-
+    const wheelThreshold = 40;
     const handleWheel = useCallback(
       (e: WheelEvent) => {
+        // Disable wheel handling on mobile devices.
+        if (isMobile) return;
         if (!containerRef.current) return;
 
         const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
         const atTop = scrollTop < 10;
         const atBottom = scrollTop > scrollHeight - clientHeight - 10;
 
-        // If at boundaries and the user scrolls beyond, let the event bubble.
+        // When at boundaries, allow outer scroll.
         if (activeIndex === 0 && e.deltaY < 0 && atTop) {
           if (onExitCarousel) onExitCarousel("up");
           wheelDeltaAccumulator.current = 0;
@@ -222,10 +227,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           return;
         }
 
-        // Accumulate the delta
         wheelDeltaAccumulator.current += e.deltaY;
-
-        // If the accumulated delta exceeds threshold, update the slide.
         if (wheelDeltaAccumulator.current > wheelThreshold) {
           if (activeIndex < steps.length - 1) {
             setDirection(1);
@@ -246,89 +248,100 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           return;
         }
       },
-      [activeIndex, steps.length, onExitCarousel]
+      [activeIndex, steps.length, onExitCarousel, isMobile]
     );
 
-    // --- Touch event handling ---
+    // --- Touch handling (Desktop only) ---
     const touchStartY = useRef<number | null>(null);
-
-    const handleTouchStart = useCallback((e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY;
-    }, []);
-
+    const handleTouchStart = useCallback(
+      (e: TouchEvent) => {
+        // Disable custom touch handling on mobile devices.
+        if (isMobile) return;
+        touchStartY.current = e.touches[0].clientY;
+        // On mobile, let native panning occur by not preventing default.
+      },
+      [isMobile]
+    );
     const handleTouchEnd = useCallback(
       (e: TouchEvent) => {
+        if (isMobile) return;
         if (touchStartY.current === null) return;
         const deltaY = touchStartY.current - e.changedTouches[0].clientY;
-        const swipeThreshold = 30; // minimum swipe distance in px
+        const swipeThreshold = 30;
         if (Math.abs(deltaY) < swipeThreshold) {
           touchStartY.current = null;
           return;
         }
+        // Boundary handling: if at first or last slide, trigger onExitCarousel.
+        if (deltaY < 0 && activeIndex === 0) {
+          if (onExitCarousel) onExitCarousel("up");
+          touchStartY.current = null;
+          return;
+        }
+        if (deltaY > 0 && activeIndex === steps.length - 1) {
+          if (onExitCarousel) onExitCarousel("down");
+          touchStartY.current = null;
+          return;
+        }
+        // Otherwise, update active index.
         if (deltaY > 0) {
-          // Swipe up
+          // Swipe up.
           if (activeIndex < steps.length - 1) {
             setDirection(1);
             setActiveIndex((prev) => prev + 1);
-          } else if (activeIndex === steps.length - 1 && onExitCarousel) {
-            onExitCarousel("down");
           }
         } else {
-          // Swipe down
+          // Swipe down.
           if (activeIndex > 0) {
             setDirection(-1);
             setActiveIndex((prev) => prev - 1);
-          } else if (activeIndex === 0 && onExitCarousel) {
-            onExitCarousel("up");
           }
         }
         touchStartY.current = null;
       },
-      [activeIndex, steps.length, onExitCarousel]
+      [activeIndex, steps.length, onExitCarousel, isMobile]
     );
 
-    // Attach wheel and touch handlers to the container.
+    // Attach wheel and touch event listeners only for non‑mobile devices.
     useEffect(() => {
       const container = containerRef.current;
       if (!container) return;
+      if (isMobile) return; // Do not attach custom scroll events on mobile.
       container.addEventListener("wheel", handleWheel, { passive: false });
       container.addEventListener("touchstart", handleTouchStart, {
         passive: true,
       });
-      container.addEventListener("touchend", handleTouchEnd, { passive: true });
+      container.addEventListener("touchend", handleTouchEnd, {
+        passive: false,
+      });
       return () => {
         container.removeEventListener("wheel", handleWheel);
         container.removeEventListener("touchstart", handleTouchStart);
         container.removeEventListener("touchend", handleTouchEnd);
       };
-    }, [handleWheel, handleTouchStart, handleTouchEnd]);
+    }, [handleWheel, handleTouchStart, handleTouchEnd, isMobile]);
 
     const currentStep = steps[activeIndex] || steps[0];
 
     return (
       <section id={id} className="bg-black">
-        {/* The scrollable container is 200vh tall */}
+        {/* The container is 200vh tall. On mobile, we set touchAction to "pan-y" to allow outer scrolling;
+            on desktop we disable it ("none"). */}
         <div
           ref={containerRef}
-          className="relative h-[200vh] overflow-y-scroll"
-          style={{ scrollBehavior: "smooth" }}
+          className="relative h-dvh-mobile md:h-[200vh] overflow-y-scroll"
+          style={{
+            scrollBehavior: "smooth",
+            touchAction: isMobile ? "pan-y" : "none",
+          }}
         >
-          {/* Sticky container positioned 150px from the top */}
-          <div className="sticky top-[150px]">
+          {/* Sticky container: on mobile, stick to top; on larger screens, offset by 150px. */}
+          <div className={`sticky ${isMobile ? "top-0" : "top-[150px]"}`}>
             <div
-              className={`${mainConfigs.SECTION_CONTAINER_CLASS} grid grid-cols-1 lg:grid-cols-3 items-center gap-8 w-full`}
+              className={`${mainConfigs.SECTION_CONTAINER_CLASS} flex flex-col lg:grid lg:grid-cols-3 items-center gap-8 w-full`}
             >
-              {/* Navigation */}
-              <div className="lg:col-span-1 flex flex-col items-center justify-center">
-                <CarouselNav
-                  title={title}
-                  steps={steps}
-                  activeIndex={activeIndex}
-                  onNavItemClick={handleNavItemClick}
-                />
-              </div>
-              {/* Carousel Content */}
-              <div className="lg:col-span-2 flex items-center justify-center">
+              {/* Carousel Content: on mobile, appears first; on desktop, spans two columns. */}
+              <div className="order-1 w-full lg:col-span-2 flex items-center justify-center">
                 <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl overflow-hidden">
                   <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
@@ -360,7 +373,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                               style={{ objectFit: "contain" }}
                             />
                           </div>
-                          {/* Loading overlay: only shown when animation is not loaded */}
                           {!animationLoaded && (
                             <div className="absolute inset-0 flex items-center justify-center z-20">
                               <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
@@ -378,6 +390,15 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                     </motion.div>
                   </AnimatePresence>
                 </div>
+              </div>
+              {/* Navigation: on mobile, appears below with some top margin; on desktop, in a dedicated column. */}
+              <div className="order-2 w-full lg:col-span-1 flex items-center justify-center mt-6 lg:mt-0">
+                <CarouselNav
+                  title={title}
+                  steps={steps}
+                  activeIndex={activeIndex}
+                  onNavItemClick={handleNavItemClick}
+                />
               </div>
             </div>
           </div>
