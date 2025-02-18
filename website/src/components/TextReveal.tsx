@@ -195,7 +195,7 @@ const TextReveal = React.memo(
         <p className={cn("invisible", textStyles)}>{text}</p>
         <div className="absolute top-0 left-0 right-0">
           <p className={textStyles}>
-            <span className="absolute top-0 left-0 right-0 text-white/30">
+            <span className="absolute top-0 left-0 right-0 text-white/30 md:text-white/20">
               {words.map((word) => (
                 <span
                   key={`ghost-${word.id}`}
