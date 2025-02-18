@@ -71,7 +71,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   return (
     <section
       id={id}
-      className="relative w-full h-dvh md:min-h-screen bg-black flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
+      className="relative w-full h-dvh md:min-h-screen flex flex-col items-center justify-center py-20 px-4 overflow-hidden"
     >
       {/* Glow effect behind the animation */}
       <GlowEffect />

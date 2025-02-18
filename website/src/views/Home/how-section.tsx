@@ -62,7 +62,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       id={id}
       ref={containerRef}
       data-section-id="how"
-      className="relative snap-start w-full bg-black overflow-hidden"
+      className="relative snap-start w-full overflow-hidden"
       style={{ height: sectionHeight }}
     >
       <div className="sticky top-1/2 transform -translate-y-1/2 flex items-center justify-center w-full px-4 md:px-0">
