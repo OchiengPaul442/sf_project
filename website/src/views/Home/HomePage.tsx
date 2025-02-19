@@ -126,7 +126,13 @@ const HomePage: React.FC = () => {
           );
           break;
         case "footer":
-          content = <FooterSection {...section} image="/logo-white.png" />;
+          content = (
+            <FooterSection
+              {...section}
+              image="/logo-white.png"
+              scrollToTop={() => scrollToSection(0)}
+            />
+          );
           break;
         default:
           content = null;
