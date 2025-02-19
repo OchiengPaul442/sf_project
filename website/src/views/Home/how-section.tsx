@@ -16,6 +16,10 @@ export interface HowSectionProps {
   onSectionComplete?: () => void;
 }
 
+/**
+ * Maps a MotionValue from an input range to an output range while clamping
+ * the result.
+ */
 function useClampedProgress(
   value: MotionValue<number>,
   inputRange: [number, number],
@@ -54,15 +58,25 @@ const HowSection: React.FC<HowSectionProps> = ({ id, onSectionComplete }) => {
     mass: 0.8,
   });
 
-  // Always call useTransform; if not mobile, we override the output.
+  /**
+   * For mobile we want the section to:
+   * - Fade in from 0 to full opacity between 0% and 10% of scroll progress.
+   * - Stay fully opaque while text is being revealed.
+   * - Fade out between 90% and 100% of scroll progress so that once the text
+   *   has been fully revealed, the section gradually disappears.
+   */
   const mobileSectionOpacity = useTransform(
     smoothProgress,
-    [0, 0.05, 0.95, 1],
+    [0, 0.1, 0.9, 1],
     [0, 1, 1, 0]
   );
   const sectionOpacity = isMobile ? mobileSectionOpacity : 1;
 
-  // Define breakpoints for text reveal.
+  /**
+   * Define breakpoints for text reveal.
+   * The first text block reveals from 10% to 45% of the section scroll,
+   * and the second text block reveals from 45% to 90%.
+   */
   const revealBreak = isMobile ? 0.45 : 0.5;
   const gradientBuffer = isMobile ? 0.1 : 0.08;
 
@@ -75,7 +89,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id, onSectionComplete }) => {
     second: [revealBreak, 0.9] as [number, number],
   };
 
-  // Calculate progress for each element.
+  // Calculate progress for each text element.
   const firstTextProgress = useClampedProgress(
     smoothProgress,
     paragraphRanges.first,
@@ -92,7 +106,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id, onSectionComplete }) => {
     [0, 1]
   );
 
-  // Auto-scroll to the next section on mobile once the section is nearly done.
+  // On mobile, auto-scroll to the next section once the section is nearly done.
   const [autoScrolled, setAutoScrolled] = useState(false);
   useEffect(() => {
     if (isMobile && onSectionComplete && !autoScrolled) {
