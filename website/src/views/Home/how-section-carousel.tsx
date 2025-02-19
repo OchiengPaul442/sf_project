@@ -179,10 +179,9 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       const onScroll = () => {
         const { top, effectiveHeight: effHeight } = spacerMetrics.current;
         const scrollY = window.scrollY;
-        // While within the carousel region, fix the carousel.
+        // While within the carousel region, keep it fixed.
         if (scrollY >= top && scrollY < top + effHeight) {
           setIsFixed(true);
-          // Map progress (0 to 1) to slide index.
           const progress = effHeight > 0 ? (scrollY - top) / effHeight : 0;
           const newIndex = Math.min(
             steps.length - 1,
@@ -194,7 +193,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           }
         } else {
           setIsFixed(false);
-          // When scrolling above the carousel region.
+          // When scrolling above the region.
           if (scrollY < top && activeIndex === 0 && onExitCarousel) {
             onExitCarousel("up");
           }
@@ -334,7 +333,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       if (isMobile) {
         if (spacerRef.current) {
           const { top, effectiveHeight } = spacerMetrics.current;
-          // Scroll to the point in the spacer that corresponds to the chosen index.
           const targetScroll = top + (effectiveHeight * index) / steps.length;
           window.scrollTo({ top: targetScroll, behavior: "smooth" });
         }
@@ -356,9 +354,8 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const currentStep = steps[activeIndex] || steps[0];
 
     return (
-      <section id={id} className="bg-black relative">
-        {/* Spacer Element: Reserves vertical space for mobile.
-            Adjust the height ("200vh") as needed. */}
+      <section id={id} className="relative">
+        {/* Spacer Element: Reserves vertical space for mobile */}
         <div
           ref={spacerRef}
           className="w-full"
@@ -390,7 +387,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
             >
               {/* Carousel Content */}
               <div className="order-1 w-full lg:col-span-2 flex items-center justify-center">
-                <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl overflow-hidden">
+                <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl overflow-hidden flex items-center justify-center">
                   <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                       key={currentStep.id}
@@ -403,7 +400,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                       transition={{ duration: 0.5, ease: "easeInOut" }}
                     >
                       {currentStep.animationData ? (
-                        <div className="w-full h-full relative">
+                        <div className="w-full h-full relative flex items-center justify-center">
                           <div className="w-[90%] h-[90%] lg:w-[85%] lg:h-[85%] mx-auto">
                             <Lottie
                               animationData={currentStep.animationData}
