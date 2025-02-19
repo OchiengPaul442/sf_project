@@ -98,7 +98,12 @@ const HomePage: React.FC = () => {
           );
           break;
         case "how":
-          content = <HowSection id={section.id} />;
+          content = (
+            <HowSection
+              id={section.id}
+              onSectionComplete={() => scrollToSection(index + 1)}
+            />
+          );
           break;
         case "how-carousel":
           content = (

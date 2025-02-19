@@ -354,7 +354,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const currentStep = steps[activeIndex] || steps[0];
 
     return (
-      <section id={id} className="relative">
+      <section id={id} className="relative snap-start">
         {/* Spacer Element: Reserves vertical space for mobile */}
         <div
           ref={spacerRef}

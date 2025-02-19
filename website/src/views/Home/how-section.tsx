@@ -1,5 +1,11 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useScroll, useSpring, useTransform, MotionValue } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useSpring,
+  useTransform,
+  MotionValue,
+} from "framer-motion";
 import { TextReveal } from "@/components/TextReveal";
 import { GradientSeparator } from "@/components/GradientSeparator";
 import { mainConfigs } from "@/utils/configs";
@@ -7,6 +13,7 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 
 export interface HowSectionProps {
   id: string;
+  onSectionComplete?: () => void;
 }
 
 function useClampedProgress(
@@ -25,30 +32,37 @@ function useClampedProgress(
   return progress;
 }
 
-const HowSection: React.FC<HowSectionProps> = ({ id }) => {
+const HowSection: React.FC<HowSectionProps> = ({ id, onSectionComplete }) => {
   const spacerRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const [isFixed, setIsFixed] = useState(false);
 
-  // Store metrics for scroll calculations
+  // Store metrics for scroll calculations.
   const spacerMetrics = useRef({ top: 0, effectiveHeight: 0 });
 
-  // Track scroll progress for the entire section
+  // Track scroll progress for the entire section.
   const { scrollYProgress } = useScroll({
     target: spacerRef,
     offset: ["start start", "end end"],
   });
 
-  // Smoother animations
+  // Create a smoothed version of scroll progress.
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 40,
     damping: 25,
     mass: 0.8,
   });
 
-  // Define breakpoints for text reveal
+  // Always call useTransform; if not mobile, we override the output.
+  const mobileSectionOpacity = useTransform(
+    smoothProgress,
+    [0, 0.05, 0.95, 1],
+    [0, 1, 1, 0]
+  );
+  const sectionOpacity = isMobile ? mobileSectionOpacity : 1;
+
+  // Define breakpoints for text reveal.
   const revealBreak = isMobile ? 0.45 : 0.5;
   const gradientBuffer = isMobile ? 0.1 : 0.08;
 
@@ -61,7 +75,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     second: [revealBreak, 0.9] as [number, number],
   };
 
-  // Calculate progress for each element
+  // Calculate progress for each element.
   const firstTextProgress = useClampedProgress(
     smoothProgress,
     paragraphRanges.first,
@@ -78,7 +92,21 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     [0, 1]
   );
 
-  // Update spacer metrics and handle scroll behavior
+  // Auto-scroll to the next section on mobile once the section is nearly done.
+  const [autoScrolled, setAutoScrolled] = useState(false);
+  useEffect(() => {
+    if (isMobile && onSectionComplete && !autoScrolled) {
+      const unsubscribe = smoothProgress.onChange((value) => {
+        if (value >= 0.99) {
+          setAutoScrolled(true);
+          onSectionComplete();
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [isMobile, onSectionComplete, autoScrolled, smoothProgress]);
+
+  // Update spacer metrics and handle scroll behavior for fixed positioning.
   useEffect(() => {
     if (!spacerRef.current) return;
 
@@ -96,20 +124,14 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       const { top, effectiveHeight } = spacerMetrics.current;
       const scrollY = window.scrollY;
 
-      // Control fixed state based on scroll position
+      // Fix the container during scrolling within the section.
       if (scrollY >= top && scrollY < top + effectiveHeight) {
-        setIsFixed(true);
         containerRef.current.style.position = "fixed";
         containerRef.current.style.top = "0";
       } else {
-        setIsFixed(false);
         containerRef.current.style.position = "absolute";
-
-        if (scrollY < top) {
-          containerRef.current.style.top = "0";
-        } else {
-          containerRef.current.style.top = `${effectiveHeight}px`;
-        }
+        containerRef.current.style.top =
+          scrollY < top ? "0" : `${effectiveHeight}px`;
       }
     };
 
@@ -135,13 +157,16 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       id={id}
       ref={spacerRef}
       data-section-id="how"
-      className="relative w-full"
+      className="relative w-full overflow-hidden"
       style={{ height: isMobile ? "200vh" : "250vh" }}
     >
-      <div
+      <motion.div
         ref={containerRef}
         className="absolute inset-0 w-full"
-        style={{ height: "100vh" }}
+        style={{
+          height: "100vh",
+          opacity: sectionOpacity,
+        }}
       >
         <div
           ref={contentRef}
@@ -171,7 +196,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
