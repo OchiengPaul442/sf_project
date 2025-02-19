@@ -6,6 +6,9 @@ import ThemeProvider from "@/components/ThemeProvider";
 import ReduxProvider from "@/components/ReduxProvider";
 import React from "react";
 
+// TODO:Remove this analytics later
+import { Analytics } from "@vercel/analytics/react";
+
 export default function RootLayout({
   children,
 }: {
@@ -20,6 +23,7 @@ export default function RootLayout({
           </ThemeProvider>
         </ReduxProvider>
         <ToastContainer position="top-center" autoClose={5000} />
+        <Analytics />
       </body>
     </html>
   );
