@@ -365,7 +365,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         {/* Carousel Container */}
         <div
           ref={containerRef}
-          className={`w-full overflow-y-scroll ${
+          className={`w-full overflow-y-auto ${
             isMobile ? "absolute inset-0" : ""
           }`}
           style={{
@@ -387,7 +387,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
             >
               {/* Carousel Content */}
               <div className="order-1 w-full lg:col-span-2 flex items-center justify-center">
-                <div className="relative w-full h-[50vh] lg:h-[70vh] max-w-3xl overflow-hidden flex items-center justify-center">
+                <div className="relative w-full h-[50vh] lg:h-[100vh] overflow-hidden flex items-center justify-center">
                   <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                       key={currentStep.id}
