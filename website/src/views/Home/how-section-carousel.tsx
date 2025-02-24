@@ -227,7 +227,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
 
     // --- DESKTOP Custom Wheel & Touch Handlers ---
     const wheelDeltaAccumulator = useRef(0);
-    const wheelThreshold = 40;
+    const wheelThreshold = 30;
     const handleWheel = useCallback(
       (e: WheelEvent) => {
         if (!containerRef.current) return;
