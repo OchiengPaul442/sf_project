@@ -192,13 +192,13 @@ export default function MenuModal({
               transition={{ delay: 0.8, duration: 0.5 }}
               className="mt-8 pt-6 border-t border-gray-800"
             >
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-center mb-1 gap-4">
                 <p className="text-sm text-gray-400">
                   &copy; {new Date().getFullYear()} SavingFood.ai. All rights
                   reserved.
                 </p>
                 <div className="flex gap-6">
-                  <a
+                  {/* <a
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
@@ -227,7 +227,7 @@ export default function MenuModal({
                     className="text-sm hover:text-green-400 transition-colors"
                   >
                     Instagram
-                  </a>
+                  </a> */}
                 </div>
               </div>
             </motion.footer>
