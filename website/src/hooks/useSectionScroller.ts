@@ -10,23 +10,15 @@ interface SectionScrollerOptions {
 
 /**
  * A custom hook for snapping smoothly between sections on both mobile and desktop.
- *
- * - Mobile:
- *   - Mostly uses native scrolling except for special handling of `home` and `robot` sections.
- *   - "robot" snaps back to "home" if user swipes down significantly.
- *   - "home" snaps on significant swipes up/down.
- *
- * - Desktop:
- *   - If a touchpad is detected (small wheel deltas), allow native scrolling unless in `home`.
- *   - If a mouse wheel is detected (large deltas), snap on scroll for all sections,
- *     with extra special-casing for "how" and "work" sections.
+ * This version increases the scroll duration and uses locking to prevent too-fast snaps.
  */
 export const useSectionScroller = (
   sectionsRef: RefObject<(HTMLElement | null)[]>,
   options: SectionScrollerOptions = {}
 ) => {
+  // Increase default scroll duration to slow down snapping.
   const {
-    scrollDuration = 800,
+    scrollDuration = 1000,
     globalLock = false,
     wheelThreshold = 40,
     swipeThreshold = 30,
@@ -34,25 +26,21 @@ export const useSectionScroller = (
 
   const isMobile = useIsMobile();
 
-  /** Local lock that prevents repeated snap triggers */
+  // Local lock to prevent repeated snap triggers.
   const [localLock, setLocalLock] = useState(false);
-
-  /** Last snap time to rate-limit consecutive scrolls */
+  // Timestamp of the last scroll snap.
   const lastScrollTimeRef = useRef(0);
-
-  /** Store touch start Y to compute swipe distance */
+  // Record the starting Y for touch swipes.
   const touchStartYRef = useRef<number | null>(null);
-
-  /** Used to clear lock timeout after scroll animation */
+  // Ref to hold timeout ID for unlocking scroll.
   const lockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  /** Anim frame ID for throttling wheel events */
+  // RAF ref for throttling wheel events.
   const wheelRAFRef = useRef<number | null>(null);
-  /** Store the last wheel event so we can process it in a single rAF callback */
+  // Store last wheel event for processing.
   const lastWheelEventRef = useRef<WheelEvent | null>(null);
 
   /**
-   * Scroll smoothly to a given section index, respecting the lock and rate limits.
+   * Smoothly scroll to a given section index, respecting lock and rate limits.
    */
   const scrollToSection = useCallback(
     (index: number) => {
@@ -61,14 +49,11 @@ export const useSectionScroller = (
       if (!targetSection) return;
 
       const now = Date.now();
-
-      // Rate-limiting: ensure we don’t trigger new snaps too quickly
+      // Rate limit scroll snaps.
       if (now - lastScrollTimeRef.current < scrollDuration) return;
 
-      // Perform the smooth scroll
       targetSection.scrollIntoView({ behavior: "smooth" });
-
-      // Lock local scrolling
+      // Lock local scrolling to prevent rapid triggers.
       setLocalLock(true);
       lastScrollTimeRef.current = now;
 
@@ -106,15 +91,14 @@ export const useSectionScroller = (
   }, [sectionsRef]);
 
   /**
-   * A utility to safely snap to the "next" or "previous" section from the current one.
+   * Snap relative to the current section index in the given direction.
    */
   const snapRelative = useCallback(
     (direction: "next" | "prev") => {
       const sections = sectionsRef.current || [];
       const currentIndex = getCenteredSectionIndex();
       let newIndex = direction === "next" ? currentIndex + 1 : currentIndex - 1;
-
-      // Clamp indices
+      // Clamp the index.
       newIndex = Math.max(0, Math.min(newIndex, sections.length - 1));
       if (newIndex !== currentIndex) {
         scrollToSection(newIndex);
@@ -124,7 +108,7 @@ export const useSectionScroller = (
   );
 
   /**
-   * Core logic that decides how to respond to a "delta" scroll (positive or negative).
+   * Process a scroll delta and determine whether to snap to a new section.
    */
   const handleDelta = useCallback(
     (delta: number) => {
@@ -139,7 +123,7 @@ export const useSectionScroller = (
 
       // --- MOBILE LOGIC ---
       if (isMobile) {
-        // "robot": if user swipes downward, snap to previous (likely "home")
+        // For "robot": if the user swipes downward significantly, snap to previous (likely "home").
         if (
           sectionId === "robot" &&
           delta < -swipeThreshold &&
@@ -148,8 +132,7 @@ export const useSectionScroller = (
           snapRelative("prev");
           return;
         }
-
-        // "home": snap on big swipes
+        // For "home": snap on significant swipes up or down.
         if (sectionId === "home") {
           if (delta > swipeThreshold) {
             snapRelative("next");
@@ -159,13 +142,12 @@ export const useSectionScroller = (
             return;
           }
         }
-
-        // Other sections: let native scrolling occur
+        // Other sections on mobile: allow native scrolling.
         return;
       }
 
       // --- DESKTOP LOGIC ---
-      // "how": only snap forward if bottom is within a small offset
+      // Special handling for "how": snap forward if bottom is nearly visible.
       if (sectionId === "how") {
         const bottom = currentSection.getBoundingClientRect().bottom;
         if (delta > 0 && bottom <= window.innerHeight + 40) {
@@ -173,8 +155,7 @@ export const useSectionScroller = (
         }
         return;
       }
-
-      // "work": similarly handle forward snap
+      // Special handling for "work": similar logic.
       if (sectionId === "work") {
         const bottom = currentSection.getBoundingClientRect().bottom;
         if (delta > 0 && bottom <= window.innerHeight + 60) {
@@ -183,7 +164,7 @@ export const useSectionScroller = (
         return;
       }
 
-      // Otherwise, general snapping (if threshold is reached)
+      // General snapping for other sections.
       if (delta > 0) snapRelative("next");
       else if (delta < 0) snapRelative("prev");
     },
@@ -199,12 +180,10 @@ export const useSectionScroller = (
   );
 
   /**
-   * Throttled wheel handler that uses requestAnimationFrame for best performance.
-   * We store the last wheel event and process it once per frame.
+   * Throttled wheel event handler using requestAnimationFrame.
    */
   const onWheel = useCallback(
     (e: WheelEvent) => {
-      // We only want to store the event if we intend to handle it.
       lastWheelEventRef.current = e;
 
       if (wheelRAFRef.current === null) {
@@ -213,58 +192,53 @@ export const useSectionScroller = (
           const event = lastWheelEventRef.current;
           if (!event) return;
 
-          // Because we’re preventing default on large deltas, mark the event if needed:
-          if (event.cancelable && !event.defaultPrevented) {
-            // Heuristic: small delta => touchpad
-            const isTouchpad = Math.abs(event.deltaY) < 20;
+          // Use heuristic: if delta is small, likely a touchpad.
+          const isTouchpad = Math.abs(event.deltaY) < 20;
+          const sections = sectionsRef.current || [];
+          const currentIndex = getCenteredSectionIndex();
+          const currentSection = sections[currentIndex];
+          if (!currentSection) return;
 
-            const sections = sectionsRef.current || [];
-            const currentIndex = getCenteredSectionIndex();
-            const currentSection = sections[currentIndex];
-            if (!currentSection) return;
+          const sectionId = currentSection.dataset.sectionId;
 
-            const sectionId = currentSection.dataset.sectionId;
+          // On mobile or when using a touchpad (except in "home"), let native scrolling occur.
+          if ((isMobile || isTouchpad) && sectionId !== "home") {
+            return;
+          }
 
-            // On mobile or if touchpad scrolling, allow native scroll except in home
-            if ((isMobile || isTouchpad) && sectionId !== "home") {
-              // Let the event pass
-              return;
-            }
-
-            // Special case: scrolling up from "work" to "how-carousel"
-            if (event.deltaY < 0 && sectionId === "work") {
-              const prevIndex = currentIndex - 1;
-              if (
-                prevIndex >= 0 &&
-                sections[prevIndex]?.dataset.sectionId === "how-carousel"
-              ) {
-                event.preventDefault();
-                scrollToSection(prevIndex);
-                return;
-              }
-            }
-
-            // Additional special handling for "how" and "work" to avoid partial scroll
+          // Special case: scrolling up from "work" to "how-carousel".
+          if (event.deltaY < 0 && sectionId === "work") {
+            const prevIndex = currentIndex - 1;
             if (
-              (sectionId === "how" &&
-                event.deltaY > 0 &&
-                currentSection.getBoundingClientRect().bottom <=
-                  window.innerHeight + 40) ||
-              (sectionId === "work" &&
-                event.deltaY > 0 &&
-                currentSection.getBoundingClientRect().bottom <=
-                  window.innerHeight + 60)
+              prevIndex >= 0 &&
+              sections[prevIndex]?.dataset.sectionId === "how-carousel"
             ) {
               event.preventDefault();
-              handleDelta(event.deltaY);
+              scrollToSection(prevIndex);
               return;
             }
+          }
 
-            // For a large enough delta, snap
-            if (Math.abs(event.deltaY) > wheelThreshold) {
-              event.preventDefault();
-              handleDelta(event.deltaY);
-            }
+          // Special handling for "how" and "work" to avoid partial scroll.
+          if (
+            (sectionId === "how" &&
+              event.deltaY > 0 &&
+              currentSection.getBoundingClientRect().bottom <=
+                window.innerHeight + 40) ||
+            (sectionId === "work" &&
+              event.deltaY > 0 &&
+              currentSection.getBoundingClientRect().bottom <=
+                window.innerHeight + 60)
+          ) {
+            event.preventDefault();
+            handleDelta(event.deltaY);
+            return;
+          }
+
+          // For sufficiently large delta, snap to a new section.
+          if (Math.abs(event.deltaY) > wheelThreshold) {
+            event.preventDefault();
+            handleDelta(event.deltaY);
           }
         });
       }
@@ -280,21 +254,19 @@ export const useSectionScroller = (
   );
 
   /**
-   * Touch start: record the starting Y.
+   * Record the starting Y position for touch events.
    */
   const onTouchStart = useCallback((e: TouchEvent) => {
     touchStartYRef.current = e.touches[0].clientY;
   }, []);
 
   /**
-   * Touch end: calculate the delta and run snapping logic if needed.
+   * Handle the end of a touch event, calculate swipe delta, and process snapping.
    */
   const onTouchEnd = useCallback(
     (e: TouchEvent) => {
       if (touchStartYRef.current === null) return;
       const delta = touchStartYRef.current - e.changedTouches[0].clientY;
-
-      // Let the main delta logic handle everything
       handleDelta(delta);
       touchStartYRef.current = null;
     },
@@ -302,8 +274,7 @@ export const useSectionScroller = (
   );
 
   /**
-   * Attach the global event listeners on mount, and clean up on unmount.
-   * Use passive:false where we might call preventDefault.
+   * Attach event listeners on mount and clean up on unmount.
    */
   useEffect(() => {
     const wheelOptions: AddEventListenerOptions & { passive?: boolean } = {
@@ -325,9 +296,7 @@ export const useSectionScroller = (
     };
   }, [onWheel, onTouchStart, onTouchEnd]);
 
-  /**
-   * Clean up lock timeout on unmount.
-   */
+  // Clean up lock timeout on unmount.
   useEffect(() => {
     return () => {
       if (lockTimeoutRef.current) clearTimeout(lockTimeoutRef.current);
