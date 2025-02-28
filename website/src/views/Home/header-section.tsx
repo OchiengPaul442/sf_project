@@ -7,7 +7,6 @@ import {
   useAnimation,
   useScroll,
   useTransform,
-  useMotionValue,
   type MotionValue,
   type Variants,
 } from "framer-motion";
@@ -38,7 +37,7 @@ const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
 ));
 OptimizedImage.displayName = "OptimizedImage";
 
-// Floating effect variants for non‑mobile devices.
+// Floating effect variants (applied only on non‑mobile devices).
 const floatingVariants: Variants = {
   float: {
     y: [-10, 10],
@@ -68,27 +67,20 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     offset: ["start start", "end start"],
   });
 
-  // Thresholds.
+  // Thresholds and mapping ranges.
   const SCALE_START = 0.1;
   const SCALE_PEAK = 0.5;
   const FADE_START = 0.6;
-  const FADE_END = 0.8;
-  const TRANSITION_TRIGGER = 0.95;
-
+  const FADE_END = 0.8; // When the image is fully faded.
+  const TRANSITION_TRIGGER = FADE_END; // Trigger onNextSection when faded.
   const progressRange = [0, SCALE_START, SCALE_PEAK, FADE_START, FADE_END, 1];
 
-  // Desktop transform arrays.
+  // Desktop transform arrays (used on both mobile and desktop now).
   const imageScaleDesktop: number[] = [0.6, 1, 2.8, 3.5, 4.0, 4.2];
   const xMoveDesktop: number[] = [0, -2, -4, -6, -8, -10];
   const yMoveDesktop: number[] = [0, -1, -2, -3, -4, -5];
 
-  // Always create base motion values.
-  const baseImageScale = useMotionValue(1);
-  const baseXMove = useMotionValue(0);
-  const baseYMove = useMotionValue(0);
-  const baseImageOpacity = useMotionValue(1);
-
-  // Create desktop transforms.
+  // Transforms based on scroll progress.
   const desktopImageScale = useTransform(
     scrollYProgress,
     progressRange,
@@ -111,17 +103,13 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     { clamp: true }
   );
 
-  // Select transform values based on device.
-  const imageScale: MotionValue<number> = isMobile
-    ? baseImageScale
-    : desktopImageScale;
-  const xMove: MotionValue<number> = isMobile ? baseXMove : desktopXMove;
-  const yMove: MotionValue<number> = isMobile ? baseYMove : desktopYMove;
-  const imageOpacity: MotionValue<number> = isMobile
-    ? baseImageOpacity
-    : desktopImageOpacity;
+  // Use the desktop transforms for all devices.
+  const imageScale: MotionValue<number> = desktopImageScale;
+  const xMove: MotionValue<number> = desktopXMove;
+  const yMove: MotionValue<number> = desktopYMove;
+  const imageOpacity: MotionValue<number> = desktopImageOpacity;
 
-  // Navigation opacity.
+  // Navigation opacity remains the same.
   const navOpacity: MotionValue<number> = useTransform(
     scrollYProgress,
     [0, 0.2, 0.3],
@@ -149,10 +137,11 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   useEffect(() => {
     const unsubscribe = scrollYProgress.on("change", (value) => {
       if (onScrollProgress) onScrollProgress(value);
+      // When the image has faded, trigger next section.
       if (value >= TRANSITION_TRIGGER && onNextSection) onNextSection();
     });
     return () => unsubscribe();
-  }, [scrollYProgress, onScrollProgress, onNextSection]);
+  }, [scrollYProgress, onScrollProgress, onNextSection, TRANSITION_TRIGGER]);
 
   const handleNextSection = () => {
     onNextSection?.();
@@ -184,7 +173,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
           <NextButton onClick={handleNextSection} />
         </motion.div>
 
-        {/* Centered Image with Floating and Zoom-Out effect (desktop only) */}
+        {/* Centered Image with Floating and Transform effects */}
         <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center z-40">
           <motion.div
             style={{
@@ -196,6 +185,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             className={`mx-auto ${
               isMobile ? "max-w-[200px]" : "max-w-[400px]"
             }`}
+            // Apply floating only on desktop.
             variants={!isMobile ? floatingVariants : undefined}
             animate={!isMobile ? "float" : undefined}
           >
