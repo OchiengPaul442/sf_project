@@ -1,4 +1,3 @@
-// FooterSection.tsx
 "use client";
 
 import React from "react";
@@ -8,22 +7,19 @@ import { motion } from "framer-motion";
 import type { SectionProps } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
 
-// Extend your props to include an optional scrollToTop callback.
 interface FooterSectionProps extends SectionProps {
   image: string;
-  scrollToTop?: () => void;
 }
 
-const FooterSection: React.FC<FooterSectionProps> = ({
-  id,
-  title,
-  image,
-  scrollToTop,
-}) => {
+const FooterSection: React.FC<FooterSectionProps> = ({ id, title, image }) => {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <footer
       id={id}
-      className="snap-start w-full bg-black flex flex-col justify-end relative p-4 sm:p-6 md:p-8 lg:p-12 min-h-screen"
+      className="w-full bg-black flex flex-col justify-end z-50 relative p-4 sm:p-6 md:p-8 lg:p-12 h-screen"
     >
       <div className={`${mainConfigs.SECTION_CONTAINER_CLASS}`}>
         <motion.button

@@ -19,7 +19,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   ) as boolean;
   const isMobile = useIsMobile();
 
-  // Open and close the contact form modal
   const handleOpenForm = useCallback(() => {
     dispatch(setContactModalOpen(true));
   }, [dispatch]);
@@ -28,7 +27,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
-  // Initialize Lottie animation (using canvas renderer on mobile for performance)
   useEffect(() => {
     let animation: AnimationItem | null = null;
     if (lottieContainerRef.current && animationData) {
@@ -46,14 +44,12 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
     };
   }, [animationData, isMobile]);
 
-  // Add keydown listener for Escape to close modal and control body overflow
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && contactModalOpen) {
         handleCloseForm();
       }
     };
-
     document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
     window.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -65,7 +61,7 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   return (
     <section
       id={id}
-      className="w-full h-dvh md:min-h-screen overflow-y-auto bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
+      className="w-full h-screen overflow-y-auto z-50 bg-[#f5f5f5] text-black relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8"
     >
       <motion.div
         className={`container mx-auto flex flex-col lg:flex-row items-center justify-center h-full relative ${mainConfigs.SECTION_CONTAINER_CLASS}`}
@@ -102,7 +98,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
             </button>
           </div>
         </div>
-
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end items-center">
           <div className="w-[200px] h-[200px] sm:w-[250px] sm:h-[250px] md:w-[300px] md:h-[300px] lg:w-[350px] lg:h-[350px] relative">
             <div ref={lottieContainerRef} className="w-full h-full" />
