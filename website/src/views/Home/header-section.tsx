@@ -56,7 +56,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   const isMobile = useIsMobile();
 
   // Adjust section height and transformation values for mobile devices.
-  const sectionHeight = isMobile ? "150vh" : "180vh";
+  const sectionHeight = isMobile ? "150dvh" : "180vh";
   const imageScaleRange = isMobile ? [1, 2.5] : [1, 3.5];
   const yMoveRange = isMobile ? [0, -60] : [0, -120];
 
