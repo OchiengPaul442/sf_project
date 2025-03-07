@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, memo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useDispatch, useSelector } from "@/redux-store/hooks";
+import { motion } from "framer-motion";
+import { useDispatch } from "@/redux-store/hooks";
 import lottie, { type AnimationItem } from "lottie-web";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
-import { ContactForm } from "@/components/forms/contact-form";
 import type { SectionProps } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -14,17 +13,11 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieContainerRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
-  const contactModalOpen = useSelector(
-    (state) => state.ui.contactModalOpen
-  ) as boolean;
+
   const isMobile = useIsMobile();
 
   const handleOpenForm = useCallback(() => {
     dispatch(setContactModalOpen(true));
-  }, [dispatch]);
-
-  const handleCloseForm = useCallback(() => {
-    dispatch(setContactModalOpen(false));
   }, [dispatch]);
 
   useEffect(() => {
@@ -43,20 +36,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
       animation?.destroy();
     };
   }, [animationData, isMobile]);
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && contactModalOpen) {
-        handleCloseForm();
-      }
-    };
-    document.body.style.overflow = contactModalOpen ? "hidden" : "unset";
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = "unset";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [contactModalOpen, handleCloseForm]);
 
   return (
     <section
@@ -104,36 +83,6 @@ const WorkSection: React.FC<SectionProps> = ({ id, animationData }) => {
           </div>
         </div>
       </motion.div>
-
-      <AnimatePresence>
-        {contactModalOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: "0%" }}
-            exit={{ opacity: 0, x: "100%" }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-              mass: 0.8,
-            }}
-            className="fixed inset-0 bg-white z-50 overflow-y-scroll md:overflow-hidden"
-          >
-            <div className="relative h-full">
-              <button
-                onClick={handleCloseForm}
-                className="absolute right-4 top-4 p-2 bg-gray-100 text-green-600 hover:bg-gray-200 hover:text-green-700 rounded-full transition-colors z-50"
-                aria-label="Close Contact Form"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <div className="h-full">
-                <ContactForm />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 };

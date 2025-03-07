@@ -38,7 +38,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   const isMobile = useIsMobile();
 
   // Reduce scroll height on mobile to prevent overscrolling
-  const scrollHeight = isMobile ? "200vh" : "350vh";
+  const scrollHeight = isMobile ? "230vh" : "350vh";
 
   const inView = useInView(spacerRef, { margin: "-40% 0px" });
 
