@@ -106,15 +106,17 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(0);
     const [animationLoaded, setAnimationLoaded] = useState(false);
+    const [touchStartY, setTouchStartY] = useState(0);
+    const [isTouching, setIsTouching] = useState(false);
+    const [lastScrollTime, setLastScrollTime] = useState(0);
 
     const lottieRef = useRef<LottieRefCurrentProps>(null);
     const spacerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const swipeAreaRef = useRef<HTMLDivElement>(null);
 
     // Increase the scrollable area based on the number of steps
-    const wrapperHeight = isMobile
-      ? `${(steps.length + 2) * 100}vh`
-      : `${(steps.length + 2) * 100}vh`;
+    const wrapperHeight = `${(steps.length + 2) * 100}vh`;
 
     // Use an inView threshold to trigger the fixed container earlier/later as needed
     const inView = useInView(spacerRef, { margin: "-30% 0px" });
@@ -131,17 +133,118 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       return 1;
     });
 
-    // Update the active index on desktop based on scroll progress
+    // Handle scroll for all devices
+    const handleScroll = (newIndex: number) => {
+      if (
+        newIndex !== activeIndex &&
+        newIndex >= 0 &&
+        newIndex < steps.length
+      ) {
+        setDirection(newIndex > activeIndex ? 1 : -1);
+        setActiveIndex(newIndex);
+      }
+    };
+
+    // Update the active index based on scroll progress
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
-      if (!isMobile && steps.length > 0) {
-        // Multiply scroll progress by steps count for a smoother transition
+      if (steps.length > 0) {
+        // Multiply scroll progress by steps count
         const newIndex = Math.floor(latest * steps.length);
-        if (newIndex !== activeIndex) {
-          setDirection(newIndex > activeIndex ? 1 : -1);
-          setActiveIndex(newIndex);
-        }
+        handleScroll(newIndex);
       }
     });
+
+    // Mobile touch and scroll handling
+    useEffect(() => {
+      if (inView) {
+        const element = swipeAreaRef.current || containerRef.current;
+        if (!element) return;
+
+        const handleTouchStart = (e: TouchEvent) => {
+          setTouchStartY(e.touches[0].clientY);
+          setIsTouching(true);
+        };
+
+        const handleTouchMove = (e: TouchEvent) => {
+          if (!isTouching) return;
+
+          const touchY = e.touches[0].clientY;
+          const diff = touchStartY - touchY;
+
+          // Threshold to register a swipe
+          if (Math.abs(diff) > 50) {
+            // Throttle navigation to prevent rapid changes
+            const now = Date.now();
+            if (now - lastScrollTime > 300) {
+              if (diff > 0 && activeIndex < steps.length - 1) {
+                // Swipe up - go to next
+                setDirection(1);
+                setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
+              } else if (diff < 0 && activeIndex > 0) {
+                // Swipe down - go to previous
+                setDirection(-1);
+                setActiveIndex((prev) => Math.max(prev - 1, 0));
+              }
+
+              setLastScrollTime(now);
+              setTouchStartY(touchY);
+            }
+
+            // Prevent default scroll behavior
+            e.preventDefault();
+          }
+        };
+
+        const handleTouchEnd = () => {
+          setIsTouching(false);
+        };
+
+        // Add wheel event for mousewheel/trackpad scrolling on all devices
+        const handleWheel = (e: WheelEvent) => {
+          if (inView) {
+            // Throttle scroll events
+            const now = Date.now();
+            if (now - lastScrollTime > 300) {
+              if (e.deltaY > 0 && activeIndex < steps.length - 1) {
+                // Scroll down - go to next
+                setDirection(1);
+                setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
+                e.preventDefault();
+              } else if (e.deltaY < 0 && activeIndex > 0) {
+                // Scroll up - go to previous
+                setDirection(-1);
+                setActiveIndex((prev) => Math.max(prev - 1, 0));
+                e.preventDefault();
+              }
+              setLastScrollTime(now);
+            }
+          }
+        };
+
+        element.addEventListener("touchstart", handleTouchStart, {
+          passive: false,
+        });
+        element.addEventListener("touchmove", handleTouchMove, {
+          passive: false,
+        });
+        element.addEventListener("touchend", handleTouchEnd);
+        element.addEventListener("wheel", handleWheel, { passive: false });
+
+        return () => {
+          element.removeEventListener("touchstart", handleTouchStart);
+          element.removeEventListener("touchmove", handleTouchMove);
+          element.removeEventListener("touchend", handleTouchEnd);
+          element.removeEventListener("wheel", handleWheel);
+        };
+      }
+    }, [
+      inView,
+      activeIndex,
+      steps.length,
+      lastScrollTime,
+      isTouching,
+      touchStartY,
+    ]);
 
     // Reset animation state when activeIndex changes
     useEffect(() => {
@@ -184,6 +287,13 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
             <div
               className={`${mainConfigs.SECTION_CONTAINER_CLASS} w-full h-full flex flex-col lg:grid lg:grid-cols-3 items-center gap-8`}
             >
+              {/* Swipe/scroll area overlay for all devices */}
+              <div
+                ref={swipeAreaRef}
+                className="absolute inset-0 z-10"
+                aria-hidden="true"
+              />
+
               {/* LEFT: Carousel content */}
               <div className="order-1 w-full lg:col-span-2 flex items-center justify-center">
                 <div className="relative w-full h-[50vh] lg:h-[100vh] flex items-center justify-center">
@@ -243,6 +353,21 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                   activeIndex={activeIndex}
                   onNavItemClick={handleNavItemClick}
                 />
+              </div>
+
+              {/* Navigation indicators for all devices */}
+              <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20">
+                {/* Scroll/swipe instructions (shows briefly on mobile) */}
+                <motion.div
+                  className="absolute bottom-3 text-xs text-white/70 text-center"
+                  initial={{ opacity: 1 }}
+                  animate={{ opacity: 0 }}
+                  transition={{ delay: 3, duration: 1 }}
+                >
+                  {isMobile
+                    ? "Swipe up/down to navigate"
+                    : "Scroll to navigate"}
+                </motion.div>
               </div>
             </div>
           </motion.div>
