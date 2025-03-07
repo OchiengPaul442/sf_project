@@ -6,7 +6,6 @@ import { ArrowLeft, Code2, Store, Wallet } from "lucide-react";
 import { EngineerForm } from "./engineer-form";
 import { RestaurantForm } from "./restaurant-form";
 import { InvestorForm } from "./investor-form";
-import lottie, { AnimationItem } from "lottie-web"; // Import the type AnimationItem here
 import AngelAnimation from "@/public/lottie/angel.json";
 
 type FormType = "engineer" | "restaurant" | "investor";
@@ -59,22 +58,25 @@ export const ContactForm = memo(function ContactForm() {
   const angelContainerRef = useRef<HTMLDivElement>(null);
   const [isAnimationReady, setIsAnimationReady] = useState(false);
 
-  // Initialize the Lottie animation only if the investor option is selected.
   useEffect(() => {
-    let animation: AnimationItem | null = null; // Use the imported AnimationItem type
-
-    // Only initialize when investor form is selected.
-    if (selectedForm === "investor" && angelContainerRef.current) {
-      animation = lottie.loadAnimation({
-        container: angelContainerRef.current,
-        renderer: "canvas", // Use canvas renderer for improved performance
-        loop: true,
-        autoplay: true,
-        animationData: AngelAnimation,
-      });
-      // When the DOM is loaded, mark the animation as ready.
-      animation.addEventListener("DOMLoaded", () => {
-        setIsAnimationReady(true);
+    let animation: any = null;
+    if (
+      selectedForm === "investor" &&
+      angelContainerRef.current &&
+      typeof window !== "undefined"
+    ) {
+      // Dynamically import lottie-web and cast to any before calling loadAnimation
+      import("lottie-web").then((lottie) => {
+        animation = (lottie as any).loadAnimation({
+          container: angelContainerRef.current,
+          renderer: "canvas",
+          loop: true,
+          autoplay: true,
+          animationData: AngelAnimation,
+        });
+        animation.addEventListener("DOMLoaded", () => {
+          setIsAnimationReady(true);
+        });
       });
     } else {
       setIsAnimationReady(false);
@@ -93,7 +95,7 @@ export const ContactForm = memo(function ContactForm() {
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-[#f5f5f5] p-4"
-      style={{ transform: "translateZ(0)" }} // trigger GPU acceleration
+      style={{ transform: "translateZ(0)" }}
     >
       <motion.div
         className="w-full max-w-6xl bg-white rounded-3xl shadow-xl overflow-hidden"
