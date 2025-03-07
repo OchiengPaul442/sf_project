@@ -51,8 +51,8 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
 
-  // Reduce scrollable area on mobile for a better user experience.
   const isMobile = isMobileDevice();
+  // On mobile, use full viewport height for a more compact, smooth scroll.
   const sectionHeight = isMobile ? "100vh" : "150vh";
 
   // Set up scroll progress relative to this section
@@ -61,31 +61,33 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
     offset: ["start start", "end start"],
   });
 
-  // Smooth scroll progress for refined transitions
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
 
-  // Mapping transforms so that at load (scrollYProgress = 0) the section is fully visible.
+  // Adjusted breakpoints for smoother transitions
   const containerOpacity = useTransform(
     smoothProgress,
-    [0, 0.1, 0.7, 0.9],
-    [1, 1, 1, 0]
+    [0, 0.2, 0.8, 1],
+    [1, 1, 1, 0],
+    { clamp: true }
   );
   const containerScale = useTransform(
     smoothProgress,
-    [0, 0.1, 0.7, 0.9],
-    [1, 1, 1, 0.95]
+    [0, 0.2, 0.8, 1],
+    [1, 1, 1, 0.95],
+    { clamp: true }
   );
   const containerY = useTransform(
     smoothProgress,
-    [0, 0.1, 0.7, 0.9],
-    [0, 0, 0, -20]
+    [0, 0.2, 0.8, 1],
+    [0, 0, 0, -20],
+    { clamp: true }
   );
 
-  // Simplified animation variants for child elements (they are visible by default)
+  // Variants for child elements – visible immediately with subtle entrance transition
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.1 } },
