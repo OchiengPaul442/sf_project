@@ -1,7 +1,13 @@
 "use client";
 
 import React, { memo, useRef, useEffect } from "react";
-import { motion, useAnimation, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  useAnimation,
+  useScroll,
+  useTransform,
+  useInView,
+} from "framer-motion";
 import dynamic from "next/dynamic";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { LottieRefCurrentProps } from "lottie-react";
@@ -47,33 +53,47 @@ GlowEffect.displayName = "GlowEffect";
 
 const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const sectionRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const controls = useAnimation();
 
-  // Outer wrapper height for spacing
-  const sectionHeight = "300vh";
+  // Check if the content is in view for fade-in animation
+  const isInView = useInView(contentRef, {
+    once: false,
+    amount: 0.2,
+    margin: "-10% 0px -10% 0px",
+  });
 
-  // Use scroll on the RobotSection’s wrapper
+  // Optimized section height to properly transition to HowSection
+  const sectionHeight = "230vh";
+
+  // Use scroll on the RobotSection's wrapper
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
   // Fade out the Robot content from 80% → 100% scroll
-  const containerOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
+  // Adjusted for smoother transition to the next section
+  const containerOpacity = useTransform(scrollYProgress, [0.7, 0.85], [1, 0]);
 
+  // Use effect to trigger animations when section comes into view
   useEffect(() => {
-    // Start the fade-in animation for the content
-    controls.start("visible");
-  }, [controls]);
+    if (isInView) {
+      controls.start("visible");
+    }
+  }, [controls, isInView]);
 
-  // Basic fade/slide variant
+  // Smoother variants for fade-in
   const variants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" },
+      transition: {
+        duration: 1.2,
+        ease: [0.25, 0.1, 0.25, 1.0], // cubic-bezier for smoother animation
+      },
     },
   };
 
@@ -87,17 +107,21 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
       {/* Fixed container for Robot content */}
       <motion.div
         className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center"
-        style={{ opacity: containerOpacity }}
+        style={{
+          opacity: containerOpacity,
+          willChange: "opacity, transform",
+        }}
       >
         <GlowEffect />
 
         <motion.div
+          ref={contentRef}
           initial="hidden"
           animate={controls}
           variants={variants}
           viewport={{ once: true, amount: 0.3 }}
           className="relative z-10 flex flex-col items-center text-center"
-          style={{ willChange: "transform" }}
+          style={{ willChange: "transform, opacity" }}
         >
           <h2 className="text-white text-3xl sm:text-4xl font-light mb-12 tracking-tight">
             with{" "}
@@ -116,6 +140,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
                   filter: "brightness(0) invert(1)",
                   width: "100%",
                   height: "100%",
+                  transform: "translateZ(0)", // Force GPU acceleration
                 }}
                 renderer={isMobileDevice() ? ("canvas" as any) : "svg"}
                 rendererSettings={{

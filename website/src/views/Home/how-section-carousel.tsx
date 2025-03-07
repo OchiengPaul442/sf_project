@@ -31,7 +31,12 @@ const carouselVariants = {
     scale: 0.95,
     filter: "blur(4px)",
   }),
-  center: { y: 0, opacity: 1, scale: 1, filter: "blur(0px)" },
+  center: {
+    y: 0,
+    opacity: 1,
+    scale: 1,
+    filter: "blur(0px)",
+  },
   exit: (direction: number) => ({
     y: direction < 0 ? 80 : -80,
     opacity: 0,
@@ -106,23 +111,42 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const spacerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Outer wrapper for 5 items, ~350vh
+    // Adjusted for better transition from HowSection
     const wrapperHeight = isMobile ? "300vh" : "350vh";
 
-    // Only render fixed container when in view
-    const inView = useInView(spacerRef);
+    // Improved inView settings for better transition
+    const inView = useInView(spacerRef, { margin: "-30% 0px" });
 
     const { scrollYProgress } = useScroll({
       target: spacerRef,
       offset: ["start start", "end start"],
     });
 
+    // Improved fade-in timing to match fade-out of previous section
+    // Adding a fade-in effect
+    const initialOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
     // Fade out from 80% → 100%
-    const containerOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
+    const exitOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
+
+    // Combine both transitions
+    const [containerOpacity, setContainerOpacity] = useState(0);
+
+    useEffect(() => {
+      const unsubscribeInitial = initialOpacity.onChange((v) => {
+        setContainerOpacity(Math.min(v, exitOpacity.get()));
+      });
+      const unsubscribeExit = exitOpacity.onChange((v) => {
+        setContainerOpacity(Math.min(initialOpacity.get(), v));
+      });
+      return () => {
+        unsubscribeInitial();
+        unsubscribeExit();
+      };
+    }, [initialOpacity, exitOpacity]);
 
     // On desktop, update activeIndex based on scroll
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
-      if (!isMobile) {
+      if (!isMobile && steps.length > 0) {
         const segment = 1 / steps.length;
         const newIndex = Math.min(
           steps.length - 1,
@@ -149,6 +173,11 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       setActiveIndex(index);
     };
 
+    // Safety check for empty steps array
+    if (!steps.length) {
+      return null;
+    }
+
     const currentStep = steps[activeIndex] || steps[0];
 
     return (
@@ -162,7 +191,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           <motion.div
             ref={containerRef}
             className="fixed top-0 left-0 w-full h-screen overflow-hidden"
-            style={{ opacity: containerOpacity }}
+            style={{
+              opacity: containerOpacity,
+              willChange: "opacity, transform",
+            }}
           >
             <div
               className={`${mainConfigs.SECTION_CONTAINER_CLASS} w-full h-full flex flex-col lg:grid lg:grid-cols-3 items-center gap-8`}
@@ -195,7 +227,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                               renderer={isMobile ? ("canvas" as any) : "svg"}
                               rendererSettings={{
                                 preserveAspectRatio: "xMidYMid meet",
-                                progressiveLoad: isMobile ? false : true,
+                                progressiveLoad: !isMobile,
                               }}
                               style={{ objectFit: "contain" }}
                             />

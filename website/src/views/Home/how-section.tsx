@@ -36,24 +36,46 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   const spacerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  // Outer container ~350vh
+  // Adjusted for better transition from RobotSection
   const scrollHeight = isMobile ? "300vh" : "350vh";
 
-  // Only render the fixed container when in view
-  const inView = useInView(spacerRef);
+  // Improved viewport margin for smoother transition
+  const inView = useInView(spacerRef, { margin: "-40% 0px" });
 
   const { scrollYProgress } = useScroll({
     target: spacerRef,
     offset: ["start start", "end end"],
   });
+
+  // Smoother spring for all animations
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 40,
     damping: 25,
     mass: 0.8,
+    restDelta: 0.0005,
   });
 
+  // Enhanced entrance transition
+  // Start entrance earlier for seamless fade from RobotSection
+  const initialOpacity = useTransform(smoothProgress, [0, 0.15], [0, 1]);
+
   // Fade out container from 80% → 100%
-  const containerOpacity = useTransform(smoothProgress, [0.8, 1], [1, 0]);
+  const exitOpacity = useTransform(smoothProgress, [0.8, 1], [1, 0]);
+
+  // Calculate combined opacity for container
+  const [opacity, setOpacity] = useState(0);
+  useEffect(() => {
+    const unsubscribeInitial = initialOpacity.onChange((v) => {
+      setOpacity(Math.min(v, exitOpacity.get()));
+    });
+    const unsubscribeExit = exitOpacity.onChange((v) => {
+      setOpacity(Math.min(initialOpacity.get(), v));
+    });
+    return () => {
+      unsubscribeInitial();
+      unsubscribeExit();
+    };
+  }, [initialOpacity, exitOpacity]);
 
   // Breakpoints for text reveal
   const revealBreak = isMobile ? 0.45 : 0.5;
@@ -93,7 +115,13 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
       {inView && (
         <motion.div
           className="fixed top-0 left-0 w-full h-screen"
-          style={{ opacity: containerOpacity }}
+          style={{
+            opacity,
+            willChange: "opacity, transform",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: opacity }}
+          transition={{ duration: 0.4 }}
         >
           <div className="relative h-full flex flex-col items-center justify-center w-full px-4 md:px-0">
             <div
