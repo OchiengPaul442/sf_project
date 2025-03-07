@@ -11,6 +11,7 @@ import {
 } from "framer-motion";
 import { Nav } from "@/components/layout/Navs/nav";
 import NextButton from "@/components/NextButton";
+import { mainConfigs } from "@/utils/configs";
 
 export interface HeaderSectionProps {
   id: string;
@@ -163,10 +164,12 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
 
         {/* Navigation */}
         <motion.div
-          className="absolute top-4 right-4"
+          className="absolute w-full top-4 right-4"
           style={{ opacity: uiOpacity }}
         >
-          <Nav />
+          <div className={`${mainConfigs.SECTION_CONTAINER_CLASS} `}>
+            <Nav />
+          </div>
         </motion.div>
 
         {/* Next Button */}
