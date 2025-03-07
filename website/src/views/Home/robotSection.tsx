@@ -65,7 +65,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   });
 
   // Optimized section height to properly transition to HowSection
-  const sectionHeight = "230vh";
+  const sectionHeight = "200vh";
 
   // Use scroll on the RobotSection's wrapper
   const { scrollYProgress } = useScroll({

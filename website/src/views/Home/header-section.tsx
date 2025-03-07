@@ -56,33 +56,30 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     offset: ["start start", "end start"],
   });
 
-  // Use a spring to smooth the scroll progress
+  // Increase stiffness and lower damping for a faster, snappier reset
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 20,
-    damping: 30,
+    stiffness: 100,
+    damping: 20,
     restDelta: 0.0001,
   });
 
-  // Adjust the ranges to have faster fade transitions.
-  // The image scales up and moves up as you scroll.
-  const imageScale = useTransform(smoothProgress, [0, 0.4], [1, 3]);
-  const yMove = useTransform(smoothProgress, [0, 0.4], [0, -50]);
+  // Adjusted ranges: image scales from 1 to 3 quickly, then resets fast when scrolling back.
+  const imageScale = useTransform(smoothProgress, [0, 0.3], [1, 3]);
+  const yMove = useTransform(smoothProgress, [0, 0.3], [0, -50]);
 
-  // Fade out the header content faster.
-  const contentOpacity = useTransform(smoothProgress, [0.15, 0.3], [1, 0]);
+  // Content fades out quickly as you scroll down, and resets fast on scroll up.
+  const contentOpacity = useTransform(smoothProgress, [0.1, 0.25], [1, 0]);
+  const uiOpacity = useTransform(smoothProgress, [0.1, 0.25], [1, 0]);
 
-  // Fade out the Nav and NextButton sooner.
-  const uiOpacity = useTransform(smoothProgress, [0.15, 0.3], [1, 0]);
-
-  // Faster background color transition.
+  // Background color changes faster for a more immediate transition.
   const backgroundColor = useTransform(
     smoothProgress,
-    [0, 0.6],
+    [0, 0.5],
     ["rgba(255,255,255,1)", "rgba(0,0,0,1)"]
   );
 
-  // Faster gradient transition for a more natural cutoff.
-  const gradientOpacity = useTransform(smoothProgress, [0.3, 0.45], [0, 1]);
+  // Gradient overlay appears quickly for a natural cutoff.
+  const gradientOpacity = useTransform(smoothProgress, [0.25, 0.35], [0, 1]);
 
   // Scroll to the next section on click.
   const handleNext = useCallback(() => {
