@@ -6,7 +6,6 @@ import {
   AnimatePresence,
   useScroll,
   useMotionValueEvent,
-  useTransform,
   useInView,
 } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -115,23 +114,22 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const containerRef = useRef<HTMLDivElement>(null);
     const swipeAreaRef = useRef<HTMLDivElement>(null);
 
-    // Adjust the scrollable area for mobile to avoid excessive scrolling.
+    // Adjust the scrollable area for mobile vs. desktop.
     const wrapperHeight = isMobile
       ? `${steps.length * 50}vh`
       : `${steps.length * 100}vh`;
 
-    const inView = useInView(spacerRef, { margin: "-30% 0px" });
+    // Use margin option to simulate a threshold of 50%.
+    const inView = useInView(spacerRef, { margin: "-50% 0px" });
 
+    // Adjust offset so that scroll progress only starts once the section is partially visible.
     const { scrollYProgress } = useScroll({
       target: spacerRef,
-      offset: ["start start", "end start"],
+      offset: ["start 80%", "end start"],
     });
 
-    const containerOpacity = useTransform(scrollYProgress, (v) => {
-      if (v < 0.1) return v / 0.1;
-      if (v > 0.9) return (1 - v) / 0.1;
-      return 1;
-    });
+    // Fixed opacity for the carousel container.
+    const fixedOpacity = 1;
 
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
       if (steps.length > 0) {
@@ -254,8 +252,8 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
             ref={containerRef}
             className="fixed top-0 left-0 w-full h-screen overflow-hidden"
             style={{
-              opacity: containerOpacity,
-              willChange: "opacity, transform",
+              opacity: fixedOpacity,
+              willChange: "transform",
             }}
           >
             <div

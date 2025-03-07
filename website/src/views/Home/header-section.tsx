@@ -12,6 +12,7 @@ import {
 import { Nav } from "@/components/layout/Navs/nav";
 import NextButton from "@/components/NextButton";
 import { mainConfigs } from "@/utils/configs";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export interface HeaderSectionProps {
   id: string;
@@ -52,6 +53,12 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
 }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const headerContentRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+
+  // Adjust section height and transformation values for mobile devices.
+  const sectionHeight = isMobile ? "150vh" : "180vh";
+  const imageScaleRange = isMobile ? [1, 2.5] : [1, 3.5];
+  const yMoveRange = isMobile ? [0, -60] : [0, -120];
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -64,8 +71,8 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     restDelta: 0.0001,
   });
 
-  const imageScale = useTransform(smoothProgress, [0, 0.45], [1, 3.5]);
-  const yMove = useTransform(smoothProgress, [0, 0.45], [0, -120]);
+  const imageScale = useTransform(smoothProgress, [0, 0.45], imageScaleRange);
+  const yMove = useTransform(smoothProgress, [0, 0.45], yMoveRange);
   const contentOpacity = useTransform(smoothProgress, [0, 0.35], [1, 0]);
   const uiOpacity = useTransform(smoothProgress, [0, 0.15], [1, 0]);
   const backgroundColor = useTransform(
@@ -100,10 +107,9 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
 
   useEffect(() => {
     const unsubscribe = smoothProgress.onChange((latest) => {
-      if (headerContentRef.current && latest > 0.6) {
-        headerContentRef.current.style.pointerEvents = "none";
-      } else if (headerContentRef.current) {
-        headerContentRef.current.style.pointerEvents = "auto";
+      if (headerContentRef.current) {
+        headerContentRef.current.style.pointerEvents =
+          latest > 0.6 ? "none" : "auto";
       }
     });
     return () => unsubscribe();
@@ -115,7 +121,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
       id={id}
       className="relative w-full z-50"
       style={{
-        height: "180vh",
+        height: sectionHeight,
         backgroundColor,
         zIndex: headerZIndex,
       }}
@@ -174,4 +180,4 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
 };
 
 HeaderSection.displayName = "HeaderSection";
-export default HeaderSection;
+export default memo(HeaderSection);
