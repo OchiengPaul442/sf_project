@@ -346,7 +346,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                 </div>
               </div>
               {/* RIGHT: Navigation */}
-              <div className="order-2 w-full lg:col-span-1 flex items-center justify-center mt-6 lg:mt-0">
+              <div
+                className="order-2 w-full lg:col-span-1 flex items-center justify-center mt-6 lg:mt-0"
+                style={{ pointerEvents: "auto" }}
+              >
                 <CarouselNav
                   title={title}
                   steps={steps}
