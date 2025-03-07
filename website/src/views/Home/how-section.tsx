@@ -18,15 +18,16 @@ export interface HowSectionProps {
   id: string;
 }
 
+// Updated hook: subscribe to the MotionValue and return its number value.
 function useClampedProgress(
   value: MotionValue<number>,
   inputRange: [number, number],
   outputRange: [number, number]
-) {
+): number {
   const transformed = useTransform(value, inputRange, outputRange);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState<number>(transformed.get());
   useEffect(() => {
-    const unsubscribe = transformed.onChange((v) => setProgress(v));
+    const unsubscribe = transformed.on("change", setProgress);
     return () => unsubscribe();
   }, [transformed]);
   return progress;
@@ -53,23 +54,14 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     restDelta: 0.0005,
   });
 
-  const initialOpacity = useTransform(smoothProgress, [0, 0.15], [0, 1]);
-  const exitOpacity = useTransform(smoothProgress, [0.8, 1], [1, 0]);
+  // Combined opacity transform: fade in from 0 to 0.15, then remain, then fade out between 0.8 and 1.
+  const combinedOpacity = useTransform(
+    smoothProgress,
+    [0, 0.15, 0.8, 1],
+    [0, 1, 1, 0]
+  );
 
-  const [opacity, setOpacity] = useState(0);
-  useEffect(() => {
-    const unsubscribeInitial = initialOpacity.onChange((v) => {
-      setOpacity(Math.min(v, exitOpacity.get()));
-    });
-    const unsubscribeExit = exitOpacity.onChange((v) => {
-      setOpacity(Math.min(initialOpacity.get(), v));
-    });
-    return () => {
-      unsubscribeInitial();
-      unsubscribeExit();
-    };
-  }, [initialOpacity, exitOpacity]);
-
+  // Breakpoints for text reveal
   const revealBreak = isMobile ? 0.45 : 0.5;
   const gradientBuffer = isMobile ? 0.1 : 0.08;
   const paragraphRanges = {
@@ -108,11 +100,10 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
         <motion.div
           className="fixed top-0 left-0 w-full h-screen"
           style={{
-            opacity,
+            opacity: combinedOpacity,
             willChange: "opacity, transform",
           }}
           initial={{ opacity: 0 }}
-          animate={{ opacity: opacity }}
           transition={{ duration: 0.4 }}
         >
           <div className="relative h-full flex flex-col items-center justify-center w-full px-4 md:px-0">
