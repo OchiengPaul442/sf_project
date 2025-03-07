@@ -109,7 +109,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     <section
       id={id}
       ref={spacerRef}
-      className="relative w-full bg-black text-white overflow-hidden"
+      className="relative w-full text-white overflow-hidden"
       style={{ height: scrollHeight }}
     >
       {inView && (

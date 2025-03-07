@@ -271,7 +271,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     return (
       <section
         id={id}
-        className="relative w-full bg-black text-white"
+        className="relative w-full text-white"
         style={{ height: wrapperHeight }}
         ref={spacerRef}
       >
