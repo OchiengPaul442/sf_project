@@ -36,10 +36,9 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   const spacerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  // Adjusted for better transition from RobotSection
-  const scrollHeight = isMobile ? "300vh" : "350vh";
+  // Reduce scroll height on mobile to prevent overscrolling
+  const scrollHeight = isMobile ? "200vh" : "350vh";
 
-  // Improved viewport margin for smoother transition
   const inView = useInView(spacerRef, { margin: "-40% 0px" });
 
   const { scrollYProgress } = useScroll({
@@ -47,7 +46,6 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     offset: ["start start", "end end"],
   });
 
-  // Smoother spring for all animations
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 40,
     damping: 25,
@@ -55,14 +53,9 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     restDelta: 0.0005,
   });
 
-  // Enhanced entrance transition
-  // Start entrance earlier for seamless fade from RobotSection
   const initialOpacity = useTransform(smoothProgress, [0, 0.15], [0, 1]);
-
-  // Fade out container from 80% → 100%
   const exitOpacity = useTransform(smoothProgress, [0.8, 1], [1, 0]);
 
-  // Calculate combined opacity for container
   const [opacity, setOpacity] = useState(0);
   useEffect(() => {
     const unsubscribeInitial = initialOpacity.onChange((v) => {
@@ -77,7 +70,6 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     };
   }, [initialOpacity, exitOpacity]);
 
-  // Breakpoints for text reveal
   const revealBreak = isMobile ? 0.45 : 0.5;
   const gradientBuffer = isMobile ? 0.1 : 0.08;
   const paragraphRanges = {

@@ -115,10 +115,11 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const containerRef = useRef<HTMLDivElement>(null);
     const swipeAreaRef = useRef<HTMLDivElement>(null);
 
-    // Reduced the scrollable area so scrolling isn't too long.
-    const wrapperHeight = `${steps.length * 100}vh`;
+    // Adjust the scrollable area for mobile to avoid excessive scrolling.
+    const wrapperHeight = isMobile
+      ? `${steps.length * 50}vh`
+      : `${steps.length * 100}vh`;
 
-    // Use an inView threshold to trigger the fixed container earlier/later as needed.
     const inView = useInView(spacerRef, { margin: "-30% 0px" });
 
     const { scrollYProgress } = useScroll({
@@ -126,17 +127,14 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       offset: ["start start", "end start"],
     });
 
-    // Smooth the container opacity based on scroll progress.
     const containerOpacity = useTransform(scrollYProgress, (v) => {
       if (v < 0.1) return v / 0.1;
       if (v > 0.9) return (1 - v) / 0.1;
       return 1;
     });
 
-    // Update the active index based on scroll progress with a snap offset.
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
       if (steps.length > 0) {
-        // Adding 0.5 allows the active index to switch only after crossing the midpoint.
         const newIndex = Math.min(
           Math.floor(latest * steps.length + 0.5),
           steps.length - 1
@@ -148,7 +146,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       }
     });
 
-    // Mobile touch and wheel handling for smooth navigation.
     useEffect(() => {
       if (inView) {
         const element = swipeAreaRef.current || containerRef.current;
@@ -161,10 +158,8 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
 
         const handleTouchMove = (e: TouchEvent) => {
           if (!isTouching) return;
-
           const touchY = e.touches[0].clientY;
           const diff = touchStartY - touchY;
-
           if (Math.abs(diff) > 50) {
             const now = Date.now();
             if (now - lastScrollTime > 300) {
@@ -227,12 +222,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       touchStartY,
     ]);
 
-    // Reset animation state when activeIndex changes.
     useEffect(() => {
       setAnimationLoaded(false);
     }, [activeIndex]);
 
-    // Give a slight delay for the animation to load.
     useEffect(() => {
       const timer = setTimeout(() => setAnimationLoaded(true), 500);
       return () => clearTimeout(timer);
@@ -326,6 +319,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                   </AnimatePresence>
                 </div>
               </div>
+
               {/* RIGHT: Navigation */}
               <div
                 className="order-2 w-full lg:col-span-1 flex items-center justify-center mt-6 lg:mt-0"

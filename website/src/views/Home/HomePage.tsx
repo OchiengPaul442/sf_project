@@ -11,7 +11,6 @@ import { JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
 import dynamic from "next/dynamic";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
 
-// Dynamically import all sections
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {
   ssr: false,
 });
@@ -36,7 +35,6 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const isMenuOpen = useSelector((state) => state.menu.isOpen);
 
-  // Load animation data for Lottie
   const { isLoading, hasErrors, errors, animationDataMap } =
     useAnimationData(STEPS_WITH_IDS);
   const [pageLoaded, setPageLoaded] = useState(false);
@@ -51,7 +49,6 @@ const HomePage: React.FC = () => {
     return <ErrorDisplay errors={errors} />;
   }
 
-  // Scroll helper for MenuModal
   const scrollToSection = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
@@ -78,24 +75,20 @@ const HomePage: React.FC = () => {
 
       {pageLoaded && (
         <>
-          {/* Header */}
           <HeaderSection
             id="home"
             image="/Vector.svg"
             nextSectionId="robot-section"
           />
 
-          {/* Robot */}
           <RobotSection
             id="robot-section"
             title="Robot Section"
             animationData={animationDataMap?.["/lottie/robot.json"]}
           />
 
-          {/* How Section */}
           <HowSection id="how" />
 
-          {/* How Carousel */}
           <HowSectionCarousel
             id="how-carousel"
             title="How It Works"
@@ -105,14 +98,12 @@ const HomePage: React.FC = () => {
             }))}
           />
 
-          {/* Work Section */}
           <WorkSection
             id="work"
             title="Work Section"
             animationData={animationDataMap?.["/lottie/contruction.json"]}
           />
 
-          {/* Footer */}
           <FooterSection
             id="footer"
             title="Footer Section"

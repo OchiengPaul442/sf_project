@@ -51,8 +51,9 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
 
-  // Define overall section height for smooth transition if user scrolls
-  const sectionHeight = "150vh";
+  // Reduce scrollable area on mobile for a better user experience.
+  const isMobile = isMobileDevice();
+  const sectionHeight = isMobile ? "100vh" : "150vh";
 
   // Set up scroll progress relative to this section
   const { scrollYProgress } = useScroll({
@@ -159,10 +160,10 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
                   height: "100%",
                   transform: "translateZ(0)",
                 }}
-                renderer={isMobileDevice() ? ("canvas" as any) : "svg"}
+                renderer={isMobile ? ("canvas" as any) : "svg"}
                 rendererSettings={{
                   preserveAspectRatio: "xMidYMid slice",
-                  progressiveLoad: !isMobileDevice(),
+                  progressiveLoad: !isMobile,
                   hideOnTransparent: true,
                 }}
               />
