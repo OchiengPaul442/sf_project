@@ -24,18 +24,16 @@ const Lottie = dynamic(() => import("lottie-react"), {
   ),
 });
 
-// Enhanced Glow effect behind the robot with more futuristic feel
+// Enhanced Glow effect behind the robot with a futuristic feel
 const GlowEffect = memo(() => {
   const isMobile = isMobileDevice();
   const mobileConfig = {
     outer: "w-[250px] h-[250px] blur-[50px] opacity-25",
     inner: "w-[150px] h-[150px] blur-[30px] opacity-35",
-    accent: "w-[100px] h-[100px] blur-[15px] opacity-40",
   };
   const desktopConfig = {
     outer: "w-[650px] h-[650px] blur-[130px] opacity-30",
     inner: "w-[400px] h-[400px] blur-[90px] opacity-40",
-    accent: "w-[250px] h-[250px] blur-[50px] opacity-50",
   };
   const config = isMobile ? mobileConfig : desktopConfig;
 
@@ -49,57 +47,13 @@ const GlowEffect = memo(() => {
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${config.inner} rounded-full bg-green-400/30`}
         aria-hidden="true"
       />
-      <div
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${config.accent} rounded-full bg-blue-400/20`}
-        aria-hidden="true"
-      />
-
-      {/* Added subtle grid pattern for futuristic feel */}
+      {/* Removed blue accent effect */}
+      {/* Subtle grid pattern for added futuristic detail */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(0,255,150,0.1)_1px,transparent_1px)] bg-[size:20px_20px] opacity-20" />
     </div>
   );
 });
 GlowEffect.displayName = "GlowEffect";
-
-// New particle effect component
-const ParticleEffect = memo(() => {
-  const particles = Array.from({ length: 20 }).map((_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 10 + 5,
-    delay: Math.random() * 5,
-  }));
-
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absolute rounded-full bg-green-400"
-          style={{
-            x: `${particle.x}%`,
-            y: `${particle.y}%`,
-            width: `${particle.size}px`,
-            height: `${particle.size}px`,
-          }}
-          animate={{
-            opacity: [0, 0.5, 0],
-            scale: [0, 1, 0],
-          }}
-          transition={{
-            duration: particle.duration,
-            delay: particle.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-});
-ParticleEffect.displayName = "ParticleEffect";
 
 const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const sectionRef = useRef<HTMLElement>(null);
@@ -107,58 +61,56 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const lottieRef = useRef<LottieRefCurrentProps>(null);
   const controls = useAnimation();
 
-  // Check if the content is in view for fade-in animation
+  // Check if content is in view to trigger fade-in animations
   const isInView = useInView(contentRef, {
     once: false,
     amount: 0.2,
     margin: "-10% 0px -10% 0px",
   });
 
-  // Set section height to cover the transition smoothly.
+  // Set section height to cover the transition smoothly
   const sectionHeight = "150vh";
 
-  // Ensure the RobotSection has a persistent black background.
+  // Persistent black background for the robot section
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  // Smooth out the progress for better animations
+  // Smooth out scroll progress for better animation transitions
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
 
-  // Enhanced robot reveal: start a bit more visible and fade out later
+  // Robot reveal: starts a bit visible and then fades out later
   const containerOpacity = useTransform(
     smoothProgress,
     [0, 0.1, 0.7, 0.9],
     [0.2, 1, 1, 0]
   );
 
-  // New: Scale and position effects for smoother transition
+  // Scale and parallax effects for smoother transitions
   const containerScale = useTransform(
     smoothProgress,
     [0, 0.1, 0.7, 0.9],
     [0.95, 1, 1, 0.95]
   );
-
-  // New: Move robot content slightly for parallax effect
   const containerY = useTransform(
     smoothProgress,
     [0, 0.1, 0.7, 0.9],
     [20, 0, 0, -20]
   );
 
-  // Trigger the fade-in animation when content comes into view.
+  // Trigger fade-in animation when content comes into view
   useEffect(() => {
     if (isInView) {
       controls.start("visible");
     }
   }, [controls, isInView]);
 
-  // Enhanced variants for the robot content with staggered children
+  // Animation variants for staggered children elements
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -187,10 +139,10 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
     <section
       ref={sectionRef}
       id={id}
-      className="relative w-full overflow-hidden bg-black z-20"
+      className="relative w-full overflow-hidden bg-black"
       style={{ height: sectionHeight }}
     >
-      {/* Fixed container for Robot content */}
+      {/* Fixed container for robot content */}
       <motion.div
         className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center"
         style={{
@@ -201,7 +153,6 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
         }}
       >
         <GlowEffect />
-        <ParticleEffect />
 
         <motion.div
           ref={contentRef}

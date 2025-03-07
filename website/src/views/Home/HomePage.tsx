@@ -79,11 +79,15 @@ const HomePage: React.FC = () => {
       {pageLoaded && (
         <>
           {/* Header */}
-          <HeaderSection id="home" image="/Vector.svg" nextSectionId="robot" />
+          <HeaderSection
+            id="home"
+            image="/Vector.svg"
+            nextSectionId="robot-section"
+          />
 
           {/* Robot */}
           <RobotSection
-            id="robot"
+            id="robot-section"
             title="Robot Section"
             animationData={animationDataMap?.["/lottie/robot.json"]}
           />

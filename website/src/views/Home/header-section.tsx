@@ -15,7 +15,7 @@ import NextButton from "@/components/NextButton";
 export interface HeaderSectionProps {
   id: string;
   image: string;
-  nextSectionId?: string;
+  nextSectionId?: string; // Pass in the ID of the next section to scroll to
 }
 
 const OptimizedImage = memo(({ src, alt }: { src: string; alt: string }) => (
@@ -52,58 +52,59 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   const sectionRef = useRef<HTMLElement>(null);
   const headerContentRef = useRef<HTMLDivElement>(null);
 
+  // Track scroll progress relative to this section
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  // Smoother spring for better transitions
+  // Smooth out the progress for better transitions
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 80,
     damping: 20,
     restDelta: 0.0001,
   });
 
-  // Adjusted image animations for a smoother transition to robot section
-  // Scale from 1 to 3.5 more gradually with faster upward movement
+  // Scale the image up from 1 to 3.5 as user scrolls 0 to ~45% down this section
   const imageScale = useTransform(smoothProgress, [0, 0.45], [1, 3.5]);
   const yMove = useTransform(smoothProgress, [0, 0.45], [0, -120]);
 
-  // Content fades out more gradually but completes earlier
+  // Fade out the main content by 35% scroll
   const contentOpacity = useTransform(smoothProgress, [0, 0.35], [1, 0]);
 
-  // UI elements (nav and button) fade out faster to clear space for transition
+  // Fade out the nav and next button by 15% scroll
   const uiOpacity = useTransform(smoothProgress, [0, 0.15], [1, 0]);
 
-  // Background color fades from white to transparent to blend with robot section
+  // Background color transitions to transparent by ~40% scroll
   const backgroundColor = useTransform(
     smoothProgress,
     [0, 0.4],
     ["rgba(255,255,255,1)", "rgba(255,255,255,0)"]
   );
 
-  // Create a black overlay that fades in to match the robot section background
+  // Dark overlay that fades in by ~45–60% scroll
   const overlayOpacity = useTransform(
     smoothProgress,
     [0.15, 0.45, 0.6],
     [0, 0.7, 1]
   );
 
-  // New: Display property for hiding the content after transition
+  // Visibility toggles off at ~60% scroll
   const headerVisibility = useTransform(
     smoothProgress,
     [0, 0.6, 0.61],
     ["visible", "visible", "hidden"]
   );
 
-  // New: Z-index transition to ensure content is behind other sections
+  // Keep the header on top (zIndex = 20) until ~80% scroll,
+  // so the Robot section doesn’t show behind it.
   const headerZIndex = useTransform(
     smoothProgress,
-    [0, 0.5, 0.51],
-    [10, 10, -1]
+    [0, 0.799, 0.8],
+    [20, 20, -1]
   );
 
-  // Scroll to the next section on click
+  // Scroll to the next section on button click
   const handleNext = useCallback(() => {
     if (nextSectionId) {
       const nextElem = document.getElementById(nextSectionId);
@@ -113,7 +114,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     }
   }, [nextSectionId]);
 
-  // Monitor progress value and apply display:none when fully transitioned
+  // Disable pointer events after ~60% scroll
   useEffect(() => {
     const unsubscribe = smoothProgress.onChange((latest) => {
       if (headerContentRef.current && latest > 0.6) {
@@ -122,7 +123,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         headerContentRef.current.style.pointerEvents = "auto";
       }
     });
-
     return () => unsubscribe();
   }, [smoothProgress]);
 
@@ -130,9 +130,9 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
     <motion.section
       ref={sectionRef}
       id={id}
-      className="relative w-full"
+      className="relative w-full z-50"
       style={{
-        height: "180vh", // Reduced from 200vh for quicker transition
+        height: "180vh",
         backgroundColor,
         zIndex: headerZIndex,
       }}
@@ -157,8 +157,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
           variants={floatingVariants}
           animate="float"
         >
-          {/* Add subtle glow effect to image */}
-          <div className="absolute inset-0 blur-lg opacity-30 bg-blue-400 rounded-full transform scale-75 -z-10" />
+          {/* Image (removed any extra glow layers) */}
           <OptimizedImage src={image} alt="Header Image" />
         </motion.div>
 
@@ -179,7 +178,7 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
         </motion.div>
       </motion.div>
 
-      {/* Enhanced overlay with gradient for more futuristic feel */}
+      {/* Dark overlay for transition effect */}
       <motion.div
         className="fixed inset-0 pointer-events-none"
         style={{
