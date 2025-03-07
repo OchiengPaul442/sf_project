@@ -1,14 +1,7 @@
 "use client";
 
-import React, { memo, useRef, useEffect } from "react";
-import {
-  motion,
-  useAnimation,
-  useScroll,
-  useTransform,
-  useInView,
-  useSpring,
-} from "framer-motion";
+import React, { memo, useRef } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import dynamic from "next/dynamic";
 import { isMobileDevice } from "@/utils/deviceDetection";
 import type { LottieRefCurrentProps } from "lottie-react";
@@ -47,7 +40,6 @@ const GlowEffect = memo(() => {
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 ${config.inner} rounded-full bg-green-400/30`}
         aria-hidden="true"
       />
-      {/* Removed blue accent effect */}
       {/* Subtle grid pattern for added futuristic detail */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(0,255,150,0.1)_1px,transparent_1px)] bg-[size:20px_20px] opacity-20" />
     </div>
@@ -57,82 +49,45 @@ GlowEffect.displayName = "GlowEffect";
 
 const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const lottieRef = useRef<LottieRefCurrentProps>(null);
-  const controls = useAnimation();
 
-  // Check if content is in view to trigger fade-in animations
-  const isInView = useInView(contentRef, {
-    once: false,
-    amount: 0.2,
-    margin: "-10% 0px -10% 0px",
-  });
-
-  // Set section height to cover the transition smoothly
+  // Define overall section height for smooth transition if user scrolls
   const sectionHeight = "150vh";
 
-  // Persistent black background for the robot section
+  // Set up scroll progress relative to this section
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
   });
 
-  // Smooth out scroll progress for better animation transitions
+  // Smooth scroll progress for refined transitions
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 100,
     damping: 30,
     restDelta: 0.001,
   });
 
-  // Robot reveal: starts a bit visible and then fades out later
+  // Mapping transforms so that at load (scrollYProgress = 0) the section is fully visible.
   const containerOpacity = useTransform(
     smoothProgress,
     [0, 0.1, 0.7, 0.9],
-    [0.2, 1, 1, 0]
+    [1, 1, 1, 0]
   );
-
-  // Scale and parallax effects for smoother transitions
   const containerScale = useTransform(
     smoothProgress,
     [0, 0.1, 0.7, 0.9],
-    [0.95, 1, 1, 0.95]
+    [1, 1, 1, 0.95]
   );
   const containerY = useTransform(
     smoothProgress,
     [0, 0.1, 0.7, 0.9],
-    [20, 0, 0, -20]
+    [0, 0, 0, -20]
   );
 
-  // Trigger fade-in animation when content comes into view
-  useEffect(() => {
-    if (isInView) {
-      controls.start("visible");
-    }
-  }, [controls, isInView]);
-
-  // Animation variants for staggered children elements
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-        duration: 0.5,
-      },
-    },
-  };
-
+  // Simplified animation variants for child elements (they are visible by default)
   const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: [0.25, 0.1, 0.25, 1.0],
-      },
-    },
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.1 } },
   };
 
   return (
@@ -142,7 +97,7 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
       className="relative w-full overflow-hidden bg-black"
       style={{ height: sectionHeight }}
     >
-      {/* Fixed container for robot content */}
+      {/* Fixed container for the robot content */}
       <motion.div
         className="fixed top-0 left-0 w-full h-screen flex flex-col items-center justify-center"
         style={{
@@ -155,10 +110,8 @@ const RobotSection: React.FC<SectionProps> = ({ id, animationData }) => {
         <GlowEffect />
 
         <motion.div
-          ref={contentRef}
-          initial="hidden"
-          animate={controls}
-          variants={containerVariants}
+          initial="visible"
+          animate="visible"
           className="relative z-10 flex flex-col items-center text-center"
           style={{ willChange: "transform, opacity" }}
         >
