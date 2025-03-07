@@ -116,7 +116,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
 
     // Adjust the scrollable area for mobile vs. desktop.
     const wrapperHeight = isMobile
-      ? `${steps.length * 50}vh`
+      ? `${steps.length * 80}vh`
       : `${steps.length * 100}vh`;
 
     // Use margin option to simulate a threshold of 50%.
