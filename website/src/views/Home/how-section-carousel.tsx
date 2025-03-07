@@ -72,14 +72,14 @@ const CarouselNav: React.FC<CarouselNavProps> = ({
           aria-pressed={activeIndex === index}
           aria-label={step.title}
         >
-          <div className="flex items-center pl-6 sm:pl-12 whitespace-nowrap">
+          <div className="flex items-center pl-6 sm:pl-12 whitespace-nowrap transition-all duration-300">
             <div
-              className={`mr-2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full ${
-                activeIndex === index ? "bg-white" : ""
+              className={`mr-2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
+                activeIndex === index ? "bg-white" : "bg-transparent"
               }`}
             />
             <span
-              className={`font-light tracking-wide transition-all duration-300 ${
+              className={`tracking-wide transition-all duration-300 ${
                 activeIndex === index
                   ? "text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl"
                   : "text-zinc-200 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl"
@@ -115,10 +115,10 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const containerRef = useRef<HTMLDivElement>(null);
     const swipeAreaRef = useRef<HTMLDivElement>(null);
 
-    // Increase the scrollable area based on the number of steps
-    const wrapperHeight = `${(steps.length + 2) * 100}vh`;
+    // Reduced the scrollable area so scrolling isn't too long.
+    const wrapperHeight = `${steps.length * 100}vh`;
 
-    // Use an inView threshold to trigger the fixed container earlier/later as needed
+    // Use an inView threshold to trigger the fixed container earlier/later as needed.
     const inView = useInView(spacerRef, { margin: "-30% 0px" });
 
     const { scrollYProgress } = useScroll({
@@ -126,35 +126,29 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       offset: ["start start", "end start"],
     });
 
-    // Create a custom container opacity: fade in at the start and fade out at the end
+    // Smooth the container opacity based on scroll progress.
     const containerOpacity = useTransform(scrollYProgress, (v) => {
       if (v < 0.1) return v / 0.1;
       if (v > 0.9) return (1 - v) / 0.1;
       return 1;
     });
 
-    // Handle scroll for all devices
-    const handleScroll = (newIndex: number) => {
-      if (
-        newIndex !== activeIndex &&
-        newIndex >= 0 &&
-        newIndex < steps.length
-      ) {
-        setDirection(newIndex > activeIndex ? 1 : -1);
-        setActiveIndex(newIndex);
-      }
-    };
-
-    // Update the active index based on scroll progress
+    // Update the active index based on scroll progress with a snap offset.
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
       if (steps.length > 0) {
-        // Multiply scroll progress by steps count
-        const newIndex = Math.floor(latest * steps.length);
-        handleScroll(newIndex);
+        // Adding 0.5 allows the active index to switch only after crossing the midpoint.
+        const newIndex = Math.min(
+          Math.floor(latest * steps.length + 0.5),
+          steps.length - 1
+        );
+        if (newIndex !== activeIndex) {
+          setDirection(newIndex > activeIndex ? 1 : -1);
+          setActiveIndex(newIndex);
+        }
       }
     });
 
-    // Mobile touch and scroll handling
+    // Mobile touch and wheel handling for smooth navigation.
     useEffect(() => {
       if (inView) {
         const element = swipeAreaRef.current || containerRef.current;
@@ -171,26 +165,19 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           const touchY = e.touches[0].clientY;
           const diff = touchStartY - touchY;
 
-          // Threshold to register a swipe
           if (Math.abs(diff) > 50) {
-            // Throttle navigation to prevent rapid changes
             const now = Date.now();
             if (now - lastScrollTime > 300) {
               if (diff > 0 && activeIndex < steps.length - 1) {
-                // Swipe up - go to next
                 setDirection(1);
                 setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
               } else if (diff < 0 && activeIndex > 0) {
-                // Swipe down - go to previous
                 setDirection(-1);
                 setActiveIndex((prev) => Math.max(prev - 1, 0));
               }
-
               setLastScrollTime(now);
               setTouchStartY(touchY);
             }
-
-            // Prevent default scroll behavior
             e.preventDefault();
           }
         };
@@ -199,25 +186,19 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
           setIsTouching(false);
         };
 
-        // Add wheel event for mousewheel/trackpad scrolling on all devices
         const handleWheel = (e: WheelEvent) => {
-          if (inView) {
-            // Throttle scroll events
-            const now = Date.now();
-            if (now - lastScrollTime > 300) {
-              if (e.deltaY > 0 && activeIndex < steps.length - 1) {
-                // Scroll down - go to next
-                setDirection(1);
-                setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
-                e.preventDefault();
-              } else if (e.deltaY < 0 && activeIndex > 0) {
-                // Scroll up - go to previous
-                setDirection(-1);
-                setActiveIndex((prev) => Math.max(prev - 1, 0));
-                e.preventDefault();
-              }
-              setLastScrollTime(now);
+          const now = Date.now();
+          if (now - lastScrollTime > 300) {
+            if (e.deltaY > 0 && activeIndex < steps.length - 1) {
+              setDirection(1);
+              setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
+              e.preventDefault();
+            } else if (e.deltaY < 0 && activeIndex > 0) {
+              setDirection(-1);
+              setActiveIndex((prev) => Math.max(prev - 1, 0));
+              e.preventDefault();
             }
+            setLastScrollTime(now);
           }
         };
 
@@ -246,11 +227,12 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       touchStartY,
     ]);
 
-    // Reset animation state when activeIndex changes
+    // Reset animation state when activeIndex changes.
     useEffect(() => {
       setAnimationLoaded(false);
     }, [activeIndex]);
 
+    // Give a slight delay for the animation to load.
     useEffect(() => {
       const timer = setTimeout(() => setAnimationLoaded(true), 500);
       return () => clearTimeout(timer);
@@ -261,7 +243,6 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       setActiveIndex(index);
     };
 
-    // If there are no steps, return null
     if (!steps.length) {
       return null;
     }
@@ -287,14 +268,14 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
             <div
               className={`${mainConfigs.SECTION_CONTAINER_CLASS} w-full h-full flex flex-col lg:grid lg:grid-cols-3 items-center gap-8`}
             >
-              {/* Swipe/scroll area overlay for all devices */}
+              {/* Swipe/scroll overlay */}
               <div
                 ref={swipeAreaRef}
                 className="absolute inset-0 z-10"
                 aria-hidden="true"
               />
 
-              {/* LEFT: Carousel content */}
+              {/* LEFT: Carousel Content */}
               <div className="order-1 w-full lg:col-span-2 flex items-center justify-center">
                 <div className="relative w-full h-[50vh] lg:h-[100vh] flex items-center justify-center">
                   <AnimatePresence mode="wait" custom={direction}>
@@ -358,9 +339,8 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                 />
               </div>
 
-              {/* Navigation indicators for all devices */}
+              {/* Navigation indicators */}
               <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20">
-                {/* Scroll/swipe instructions (shows briefly on mobile) */}
                 <motion.div
                   className="absolute bottom-3 text-xs text-white/70 text-center"
                   initial={{ opacity: 1 }}
