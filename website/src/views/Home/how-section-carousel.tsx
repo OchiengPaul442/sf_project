@@ -111,10 +111,12 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const spacerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Adjusted for better transition from HowSection
-    const wrapperHeight = isMobile ? "300vh" : "350vh";
+    // Increase the scrollable area based on the number of steps
+    const wrapperHeight = isMobile
+      ? `${(steps.length + 2) * 100}vh`
+      : `${(steps.length + 2) * 100}vh`;
 
-    // Improved inView settings for better transition
+    // Use an inView threshold to trigger the fixed container earlier/later as needed
     const inView = useInView(spacerRef, { margin: "-30% 0px" });
 
     const { scrollYProgress } = useScroll({
@@ -122,36 +124,18 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       offset: ["start start", "end start"],
     });
 
-    // Improved fade-in timing to match fade-out of previous section
-    // Adding a fade-in effect
-    const initialOpacity = useTransform(scrollYProgress, [0, 0.1], [0, 1]);
-    // Fade out from 80% → 100%
-    const exitOpacity = useTransform(scrollYProgress, [0.8, 1], [1, 0]);
+    // Create a custom container opacity: fade in at the start and fade out at the end
+    const containerOpacity = useTransform(scrollYProgress, (v) => {
+      if (v < 0.1) return v / 0.1;
+      if (v > 0.9) return (1 - v) / 0.1;
+      return 1;
+    });
 
-    // Combine both transitions
-    const [containerOpacity, setContainerOpacity] = useState(0);
-
-    useEffect(() => {
-      const unsubscribeInitial = initialOpacity.onChange((v) => {
-        setContainerOpacity(Math.min(v, exitOpacity.get()));
-      });
-      const unsubscribeExit = exitOpacity.onChange((v) => {
-        setContainerOpacity(Math.min(initialOpacity.get(), v));
-      });
-      return () => {
-        unsubscribeInitial();
-        unsubscribeExit();
-      };
-    }, [initialOpacity, exitOpacity]);
-
-    // On desktop, update activeIndex based on scroll
+    // Update the active index on desktop based on scroll progress
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
       if (!isMobile && steps.length > 0) {
-        const segment = 1 / steps.length;
-        const newIndex = Math.min(
-          steps.length - 1,
-          Math.floor(latest / segment)
-        );
+        // Multiply scroll progress by steps count for a smoother transition
+        const newIndex = Math.floor(latest * steps.length);
         if (newIndex !== activeIndex) {
           setDirection(newIndex > activeIndex ? 1 : -1);
           setActiveIndex(newIndex);
@@ -159,6 +143,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       }
     });
 
+    // Reset animation state when activeIndex changes
     useEffect(() => {
       setAnimationLoaded(false);
     }, [activeIndex]);
@@ -173,7 +158,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       setActiveIndex(index);
     };
 
-    // Safety check for empty steps array
+    // If there are no steps, return null
     if (!steps.length) {
       return null;
     }
@@ -250,7 +235,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
                   </AnimatePresence>
                 </div>
               </div>
-              {/* RIGHT: Nav */}
+              {/* RIGHT: Navigation */}
               <div className="order-2 w-full lg:col-span-1 flex items-center justify-center mt-6 lg:mt-0">
                 <CarouselNav
                   title={title}
