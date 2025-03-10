@@ -85,7 +85,7 @@ export function InvestorForm() {
 
   return (
     <motion.div
-      className="w-full max-w-2xl mx-auto bg-white md:rounded-2xl p-4 md:p-8"
+      className="w-full max-w-2xl mx-auto bg-white md:rounded-2xl p-0 md:p-8"
       initial="hidden"
       animate="show"
       variants={formAnimation}
