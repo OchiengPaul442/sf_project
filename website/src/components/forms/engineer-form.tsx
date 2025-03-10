@@ -27,20 +27,27 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 /**
  * Define the Yup schema for the Engineer form.
+ * Each text field is trimmed automatically.
  */
 const EngineerSchema = Yup.object({
-  fullName: Yup.string().required("Full Name is required."),
+  fullName: Yup.string()
+    .transform((value) => value.trim())
+    .required("Full Name is required."),
   email: Yup.string()
+    .transform((value) => value.trim())
     .email("Invalid email format.")
     .required("Email is required."),
   linkedInOrGithubURL: Yup.string()
+    .transform((value) => value.trim())
     .url("Invalid URL format.")
     .required("Profile URL is required."),
   primarySkillset: Yup.array()
     .of(Yup.string().required())
     .min(1, "At least one skill must be selected.")
     .required("Primary skills are required."),
-  reasonForInterest: Yup.string().optional(),
+  reasonForInterest: Yup.string()
+    .transform((value) => value.trim())
+    .optional(),
   resumeURL: Yup.mixed<File>()
     .test("fileSize", "File Size is too large (Max 10MB).", (value) => {
       if (!value) return true;

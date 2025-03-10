@@ -33,23 +33,34 @@ const BUSINESS_TYPES = [
 
 /**
  * Define the Yup schema.
- * We'll use the full schema but validate parts based on step.
+ * We'll use transformations to trim white spaces and automatically add the plus sign
+ * for the phone number if it's missing.
  */
 const RestaurantSchema = Yup.object({
-  restaurantName: Yup.string().required("Restaurant Name is required."),
-  contactPersonFullName: Yup.string().required(
-    "Contact Person Name is required."
-  ),
+  restaurantName: Yup.string()
+    .transform((value) => value.trim())
+    .required("Restaurant Name is required."),
+  contactPersonFullName: Yup.string()
+    .transform((value) => value.trim())
+    .required("Contact Person Name is required."),
   email: Yup.string()
+    .transform((value) => value.trim())
     .email("Invalid email format.")
     .required("Email is required."),
   phoneNumber: Yup.string()
+    .transform((value, originalValue) => {
+      const trimmed = originalValue.trim();
+      return trimmed.startsWith("+") ? trimmed : `+${trimmed}`;
+    })
+    // Updated regex: + followed by 7 to 15 digits
     .matches(
-      /^\+\d{1,3}-\d{3}-\d{3}-\d{3}$/,
-      "Phone number must be in the format: +xxx-xxx-xxx-xxx"
+      /^\+\d{7,15}$/,
+      "Phone number must include the country code. For example: +256333334456"
     )
     .required("Phone Number is required."),
-  location: Yup.string().required("Location is required."),
+  location: Yup.string()
+    .transform((value) => value.trim())
+    .required("Location is required."),
   BusinessType: Yup.array()
     .of(Yup.string().required())
     .min(1, "At least one business type must be selected.")
@@ -169,7 +180,7 @@ export function RestaurantForm() {
               id="phoneNumber"
               label="Phone Number"
               type="tel"
-              placeholder="+xxx-xxx-xxx-xxx"
+              placeholder="Enter your phone number with country code (e.g., 256333334456 or +256333334456)"
               required
               register={register}
               error={errors.phoneNumber}

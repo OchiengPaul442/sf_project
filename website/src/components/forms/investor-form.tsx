@@ -11,14 +11,18 @@ import { toast } from "react-toastify";
 import { motion } from "framer-motion";
 
 const InvestorSchema = Yup.object({
-  fullName: Yup.string().required("Full Name is required"),
+  fullName: Yup.string()
+    .transform((value) => value.trim())
+    .required("Full Name is required"),
   email: Yup.string()
+    .transform((value) => value.trim())
     .email("Invalid email format")
     .required("Email is required"),
-  fundOrOrganisationName: Yup.string().required(
-    "Organization name is required"
-  ),
+  fundOrOrganisationName: Yup.string()
+    .transform((value) => value.trim())
+    .required("Organization name is required"),
   websiteOrLinkedInProfile: Yup.string()
+    .transform((value) => value.trim())
     .url("Invalid URL format")
     .required("Profile URL is required"),
   investmentInterest: Yup.number()
