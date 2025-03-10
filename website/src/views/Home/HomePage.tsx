@@ -12,7 +12,7 @@ import dynamic from "next/dynamic";
 import { X } from "lucide-react";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
-import ContactForm from "@/components/forms/contact-form";
+import ContactForm from "@/components/dialog/contact-form";
 
 // Dynamic imports
 const HeaderSection = dynamic(() => import("@/views/Home/header-section"), {

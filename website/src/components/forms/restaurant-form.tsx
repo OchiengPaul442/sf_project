@@ -180,7 +180,7 @@ export function RestaurantForm() {
               id="phoneNumber"
               label="Phone Number"
               type="tel"
-              placeholder="Enter your phone number with country code (e.g., 256333334456 or +256333334456)"
+              placeholder="Enter your phone number with the international dialing code (e.g., +256772123456)"
               required
               register={register}
               error={errors.phoneNumber}

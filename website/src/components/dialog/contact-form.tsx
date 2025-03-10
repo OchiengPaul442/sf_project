@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Code2, Store, Wallet } from "lucide-react";
-import { EngineerForm } from "./engineer-form";
-import { RestaurantForm } from "./restaurant-form";
-import { InvestorForm } from "./investor-form";
+import { EngineerForm } from "../forms/engineer-form";
+import { RestaurantForm } from "../forms/restaurant-form";
+import { InvestorForm } from "../forms/investor-form";
 import AngelAnimation from "@/public/lottie/angel.json";
 
 type FormType = "engineer" | "restaurant" | "investor";
