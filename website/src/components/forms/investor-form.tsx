@@ -74,7 +74,7 @@ export function InvestorForm() {
       };
       await trigger(formattedData);
       toast.success("Form submitted successfully!");
-      reset();
+      reset(); // Clear form inputs after success
     } catch (err) {
       toast.error(
         "An error occurred while submitting the form. Please try again."

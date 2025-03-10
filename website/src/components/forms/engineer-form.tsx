@@ -72,6 +72,7 @@ export function EngineerForm() {
     control,
     setValue,
     formState: { errors },
+    reset,
   } = useForm<EngineerFormInputs>({
     resolver: yupResolver(EngineerSchema),
     defaultValues: {
@@ -98,6 +99,7 @@ export function EngineerForm() {
 
       await trigger(formData);
       toast.success("Application submitted successfully!");
+      reset(); // Clear form inputs after success
     } catch (error) {
       toast.error("Failed to submit application. Please try again.");
       console.error("Submission error:", error);

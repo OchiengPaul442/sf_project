@@ -52,10 +52,9 @@ const RestaurantSchema = Yup.object({
       const trimmed = originalValue.trim();
       return trimmed.startsWith("+") ? trimmed : `+${trimmed}`;
     })
-    // Updated regex: + followed by 7 to 15 digits
     .matches(
       /^\+\d{7,15}$/,
-      "Phone number must include the country code. For example: +256333334456"
+      "Phone number must include the country code. For example: +256772123456"
     )
     .required("Phone Number is required."),
   location: Yup.string()
@@ -88,6 +87,7 @@ export function RestaurantForm() {
     control,
     formState: { errors },
     trigger: triggerValidation,
+    reset,
   } = useForm<RestaurantFormInputs>({
     resolver: yupResolver(RestaurantSchema),
     defaultValues: {
@@ -108,6 +108,8 @@ export function RestaurantForm() {
       };
       await trigger(formattedData);
       toast.success("Form submitted successfully!");
+      reset(); // Clear form inputs after successful submission
+      setStep(1); // Reset the step to initial if desired
     } catch (error) {
       toast.error(
         "An error occurred while submitting the form. Please try again."
