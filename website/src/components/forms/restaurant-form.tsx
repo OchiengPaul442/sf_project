@@ -11,6 +11,11 @@ import { SectionInput } from "../ui/SectionInput";
 import { useState } from "react";
 import { useRestaurantsSubmission } from "@/hooks/useContactUsSubmission";
 import { toast } from "react-toastify";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+
+// For country-aware validation:
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 /** Dummy data sources */
 const SKILLS = [
@@ -32,21 +37,42 @@ const BUSINESS_TYPES = [
 ];
 
 /**
+ * Custom Yup test to ensure the phone number is valid
+ * for the selected country code using libphonenumber-js.
+ */
+const phoneValidationTest = Yup.string().test(
+  "is-valid-phone",
+  "Invalid phone number for the selected country.",
+  (value) => {
+    if (!value) return false;
+
+    // parsePhoneNumberFromString expects a full string with +countryCode
+    const phoneNumber = parsePhoneNumberFromString(value);
+
+    // Return true if phoneNumber exists and is valid
+    return phoneNumber ? phoneNumber.isValid() : false;
+  }
+);
+
+/**
  * Define the Yup schema.
- * We'll use transformations to trim white spaces and automatically add the plus sign
- * for the phone number if it's missing.
+ * We'll trim whitespace, ensure the number starts with '+',
+ * and then do the country-specific check with libphonenumber-js.
  */
 const RestaurantSchema = Yup.object({
   restaurantName: Yup.string()
     .transform((value) => value.trim())
     .required("Restaurant Name is required."),
+
   contactPersonFullName: Yup.string()
     .transform((value) => value.trim())
     .required("Contact Person Name is required."),
+
   email: Yup.string()
     .transform((value) => value.trim())
     .email("Invalid email format.")
     .required("Email is required."),
+
   phoneNumber: Yup.string()
     .transform((value, originalValue) => {
       const trimmed = originalValue.trim();
@@ -56,18 +82,23 @@ const RestaurantSchema = Yup.object({
       /^\+\d{7,15}$/,
       "Phone number must include the country code. For example: +256772123456"
     )
-    .required("Phone Number is required."),
+    .required("Phone Number is required.")
+    .concat(phoneValidationTest), // <-- country-aware validation
+
   location: Yup.string()
     .transform((value) => value.trim())
     .required("Location is required."),
+
   BusinessType: Yup.array()
     .of(Yup.string().required())
     .min(1, "At least one business type must be selected.")
     .required("Business Type is required."),
+
   estimatedAnnualCostOfGoodsSold: Yup.number()
     .min(10000, "Minimum annual cost is $10,000.")
     .max(5000000000, "Maximum annual cost is $5,000,000,000.")
     .required("Annual cost is required."),
+
   currentChallengesOrReasonForInterest: Yup.array()
     .of(Yup.string().required())
     .min(1, "At least one challenge must be selected.")
@@ -94,6 +125,7 @@ export function RestaurantForm() {
       estimatedAnnualCostOfGoodsSold: 100000,
       BusinessType: [],
       currentChallengesOrReasonForInterest: [],
+      phoneNumber: "",
     },
   });
 
@@ -161,6 +193,7 @@ export function RestaurantForm() {
               register={register}
               error={errors.restaurantName}
             />
+
             <SectionInput
               id="contactPersonFullName"
               label="Contact Person Name"
@@ -169,6 +202,7 @@ export function RestaurantForm() {
               register={register}
               error={errors.contactPersonFullName}
             />
+
             <SectionInput
               id="email"
               label="Email"
@@ -178,15 +212,45 @@ export function RestaurantForm() {
               register={register}
               error={errors.email}
             />
-            <SectionInput
-              id="phoneNumber"
-              label="Phone Number"
-              type="tel"
-              placeholder="Enter your phone number with the international dialing code (e.g., +256772123456)"
-              required
-              register={register}
-              error={errors.phoneNumber}
-            />
+
+            {/* Phone Number Input with Country Code Selector */}
+            <div>
+              <Label htmlFor="phoneNumber" className="text-sm font-medium mb-1">
+                Phone Number
+              </Label>
+              <Controller
+                control={control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <PhoneInput
+                    country={"us"}
+                    value={field.value}
+                    onChange={field.onChange}
+                    inputProps={{
+                      name: "phoneNumber",
+                      required: true,
+                      autoFocus: false,
+                    }}
+                    inputStyle={{
+                      width: "100%",
+                      height: "45px",
+                      borderRadius: "10px",
+                      backgroundColor: "#f7f7f7",
+                      border: "none",
+                    }}
+                    buttonStyle={{}}
+                    // Below are custom classes to mimic a "rounded, padded" input style
+                    containerClass="relative mt-2 w-full"
+                  />
+                )}
+              />
+              {errors.phoneNumber && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors.phoneNumber.message}
+                </p>
+              )}
+            </div>
+
             <SectionInput
               id="location"
               label="Location (City/Country)"
