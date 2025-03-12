@@ -193,7 +193,7 @@ export const ContactForm = memo(function ContactForm() {
             layout
           >
             <div
-              className="h-full overflow-y-auto custom-scrollbar"
+              className="h-full"
               style={{
                 WebkitOverflowScrolling: "touch",
                 transform: "translateZ(0)",
@@ -242,7 +242,7 @@ export const ContactForm = memo(function ContactForm() {
                     initial="hidden"
                     animate="visible"
                     exit="exit"
-                    className="h-full p-6 md:p-8 overflow-y-auto custom-scrollbar"
+                    className="h-full p-6 md:p-8 overflow-y-auto"
                     style={{
                       WebkitOverflowScrolling: "touch",
                       transform: "translateZ(0)",
