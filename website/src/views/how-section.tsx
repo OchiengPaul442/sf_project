@@ -108,7 +108,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
         >
           <div className="relative h-full flex flex-col items-center justify-center w-full px-4 md:px-0">
             <div
-              className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-8 md:space-y-32 py-8 md:py-16`}
+              className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-8 md:space-y-20 2xl:space-y-32 py-8 md:py-16`}
             >
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
