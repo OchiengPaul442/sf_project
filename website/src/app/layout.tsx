@@ -5,9 +5,9 @@ import { ToastContainer } from "react-toastify";
 import ThemeProvider from "@/components/ThemeProvider";
 import ReduxProvider from "@/components/ReduxProvider";
 import React from "react";
+import Script from "next/script";
 
-// TODO:Remove this analytics later
-import { Analytics } from "@vercel/analytics/react";
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export default function RootLayout({
   children,
@@ -16,6 +16,29 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${qanelasSoft.variable} font-sans`}>
+      <head>
+        <meta name="apple-mobile-web-app-title" content="Saving Food" />
+
+        {/* GA snippet must appear in <head> for Search Console verification */}
+        {GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="beforeInteractive"
+            />
+            <Script id="ga-init" strategy="beforeInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
+      </head>
       <body className="h-screen">
         <ReduxProvider>
           <ThemeProvider>
@@ -23,7 +46,6 @@ export default function RootLayout({
           </ThemeProvider>
         </ReduxProvider>
         <ToastContainer position="top-center" autoClose={5000} />
-        <Analytics />
       </body>
     </html>
   );
