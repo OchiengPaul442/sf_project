@@ -49,15 +49,30 @@ const EngineerSchema = Yup.object({
     .transform((value) => value.trim())
     .optional(),
   resumeURL: Yup.mixed<File>()
+    .nullable()
+    .transform((value, originalValue) => {
+      // If no file is selected, originalValue might be an empty string or FileList with length 0
+      if (
+        !originalValue ||
+        (originalValue instanceof FileList && originalValue.length === 0)
+      ) {
+        return null;
+      }
+      // If FileList is provided, return the first file
+      if (originalValue instanceof FileList) {
+        return originalValue.item(0);
+      }
+      return value;
+    })
     .test("fileSize", "File Size is too large (Max 10MB).", (value) => {
       if (!value) return true;
-      return value instanceof File && value.size <= MAX_FILE_SIZE;
+      return value.size <= MAX_FILE_SIZE;
     })
     .test("fileType", "Unsupported File Format (Only PDF).", (value) => {
       if (!value) return true;
-      return value instanceof File && value.type === "application/pdf";
+      return value.type === "application/pdf";
     })
-    .optional(),
+    .notRequired(),
 }).required();
 
 /** Derive form inputs from schema */
@@ -77,6 +92,7 @@ export function EngineerForm() {
     resolver: yupResolver(EngineerSchema),
     defaultValues: {
       primarySkillset: [],
+      resumeURL: null,
     },
   });
 
