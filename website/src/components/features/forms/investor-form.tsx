@@ -194,7 +194,7 @@ export function InvestorForm() {
               className="w-full h-12 rounded-full bg-black text-white hover:bg-gray-900 font-medium text-lg transition-colors"
               disabled={isMutating}
             >
-              {isMutating ? "Submitting..." : "Submit"}
+              {isMutating ? "Investment in progress..." : "Invest Now"}
             </Button>
           </motion.div>
         </form>
