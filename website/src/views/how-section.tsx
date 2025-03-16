@@ -18,7 +18,9 @@ export interface HowSectionProps {
   id: string;
 }
 
-// Updated hook: subscribe to the MotionValue and return its number value.
+/**
+ * Clamps and transforms a scroll progress MotionValue into a plain number.
+ */
 function useClampedProgress(
   value: MotionValue<number>,
   inputRange: [number, number],
@@ -26,10 +28,12 @@ function useClampedProgress(
 ): number {
   const transformed = useTransform(value, inputRange, outputRange);
   const [progress, setProgress] = useState<number>(transformed.get());
+
   useEffect(() => {
     const unsubscribe = transformed.on("change", setProgress);
     return () => unsubscribe();
   }, [transformed]);
+
   return progress;
 }
 
@@ -40,13 +44,16 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
   // Reduce scroll height on mobile to prevent overscrolling
   const scrollHeight = isMobile ? "230vh" : "350vh";
 
+  // Check if section is in view
   const inView = useInView(spacerRef, { margin: "-40% 0px" });
 
+  // Framer Motion scroll progress
   const { scrollYProgress } = useScroll({
     target: spacerRef,
     offset: ["start start", "end end"],
   });
 
+  // Smooth the scroll progress
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 40,
     damping: 25,
@@ -54,16 +61,20 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     restDelta: 0.0005,
   });
 
-  // Combined opacity transform: fade in from 0 to 0.15, then remain, then fade out between 0.8 and 1.
+  // Combined opacity for the entire fixed container
+  // - fade in from 0 to 0.15,
+  // - remain visible until 0.8,
+  // - fade out from 0.8 to 1
   const combinedOpacity = useTransform(
     smoothProgress,
     [0, 0.15, 0.8, 1],
     [0, 1, 1, 0]
   );
 
-  // Breakpoints for text reveal
+  // Determine breakpoints for text reveal
   const revealBreak = isMobile ? 0.45 : 0.5;
   const gradientBuffer = isMobile ? 0.1 : 0.08;
+
   const paragraphRanges = {
     first: [0.1, revealBreak] as [number, number],
     gradient: [revealBreak - gradientBuffer, revealBreak + gradientBuffer] as [
@@ -73,6 +84,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
     second: [revealBreak, 0.9] as [number, number],
   };
 
+  // Convert MotionValue progress to numeric for each text
   const firstTextProgress = useClampedProgress(
     smoothProgress,
     paragraphRanges.first,
@@ -110,6 +122,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
             <div
               className={`${mainConfigs.SECTION_CONTAINER_CLASS} space-y-8 md:space-y-20 2xl:space-y-32 py-8 md:py-16`}
             >
+              {/* First text block (left-aligned) */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -119,9 +132,11 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
                   text="By building a platform that empowers restaurants to cut food waste, protect their bottom line, and have a meaningful, cumulative impact on global sustainability."
                   progress={firstTextProgress}
                   align="left"
-                  className="text-left md:text-left text-lg md:text-xl lg:text-2xl"
+                  className="text-lg md:text-xl lg:text-2xl"
                 />
               </motion.div>
+
+              {/* Gradient Separator */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -130,6 +145,8 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
               >
                 <GradientSeparator progress={gradientProgress} />
               </motion.div>
+
+              {/* Second text block (right-aligned) */}
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -139,7 +156,7 @@ const HowSection: React.FC<HowSectionProps> = ({ id }) => {
                   text="Our team blends more than a decade of Food and AI experience, in a packaged solution that lets you focus on creating while we handle the rest."
                   progress={secondTextProgress}
                   align="right"
-                  className="text-left md:text-right text-lg md:text-xl lg:text-2xl"
+                  className="text-lg md:text-xl lg:text-2xl"
                 />
               </motion.div>
             </div>
