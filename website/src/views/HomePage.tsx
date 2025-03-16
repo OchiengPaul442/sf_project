@@ -3,8 +3,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "@/redux-store/hooks";
-import Loader from "@/components/loader";
-import MenuModal from "@/components/dialog/menu-modal";
 import { ErrorDisplay } from "@/components/ErrorDisplay";
 import { useAnimationData } from "@/hooks/useIntersectionObserverAndAnimationData";
 import { JSON_PATHS, STEPS_WITH_IDS } from "@/lib/constants";
@@ -12,7 +10,9 @@ import dynamic from "next/dynamic";
 import { X } from "lucide-react";
 import { setContactModalOpen } from "@/redux-store/slices/uiSlice";
 import { toggleMenu } from "@/redux-store/slices/menuSlice";
-import ContactForm from "@/components/dialog/contact-form";
+import MenuModal from "@/components/features/dialog/menu-modal";
+import ContactForm from "@/components/features/dialog/contact-form";
+import Loader from "@/components/features/loader";
 
 // Dynamic imports
 const HeaderSection = dynamic(() => import("@/views/header-section"), {

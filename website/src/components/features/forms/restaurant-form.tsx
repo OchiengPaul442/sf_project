@@ -7,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { SectionInput } from "../ui/SectionInput";
 import { useState } from "react";
 import { useRestaurantsSubmission } from "@/hooks/useContactUsSubmission";
 import { toast } from "react-toastify";
@@ -16,6 +15,7 @@ import "react-phone-input-2/lib/style.css";
 
 // For country-aware validation:
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { SectionInput } from "@/components/ui/SectionInput";
 
 /** Dummy data sources */
 const SKILLS = [

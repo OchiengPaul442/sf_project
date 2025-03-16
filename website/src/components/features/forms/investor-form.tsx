@@ -5,10 +5,10 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { SectionInput } from "../ui/SectionInput";
 import { useInvestmentSubmission } from "@/hooks/useContactUsSubmission";
 import { toast } from "react-toastify";
 import { motion } from "framer-motion";
+import { SectionInput } from "@/components/ui/SectionInput";
 
 const InvestorSchema = Yup.object({
   fullName: Yup.string()
