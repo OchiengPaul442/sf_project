@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, memo } from "react";
+import React, { useState, useRef, useEffect, memo, useCallback } from "react";
 import {
   motion,
   AnimatePresence,
@@ -14,15 +14,13 @@ import type { StepWithData } from "@/utils/types/section";
 import { mainConfigs } from "@/utils/configs";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
+// Dynamic import with loading fallback
 const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
-    </div>
-  ),
+  loading: () => <LoadingIndicator />,
 });
 
+// Animation variants extracted for reuse
 const carouselVariants = {
   enter: (direction: number) => ({
     y: direction > 0 ? 80 : -80,
@@ -44,6 +42,16 @@ const carouselVariants = {
   }),
 };
 
+// Reusable UI components
+const LoadingIndicator = () => (
+  <div className="w-full h-full flex items-center justify-center">
+    <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
+  </div>
+);
+
+// Constants
+const SCROLL_DEBOUNCE_TIME = 300;
+
 interface CarouselNavProps {
   steps: StepWithData[];
   activeIndex: number;
@@ -51,46 +59,111 @@ interface CarouselNavProps {
   title: string;
 }
 
-const CarouselNav: React.FC<CarouselNavProps> = ({
+const CarouselNav: React.FC<CarouselNavProps> = memo(function CarouselNav({
   steps,
   activeIndex,
   onNavItemClick,
   title,
-}) => (
-  <div className="relative">
-    <div className="absolute left-[1.7rem] sm:left-[3.25rem] top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
-    <nav
-      className="space-y-6 sm:space-y-8 lg:space-y-10"
-      aria-label={`${title} navigation`}
-    >
-      {steps.map((step, index) => (
-        <button
-          key={step.id}
-          className="relative cursor-pointer focus:outline-none w-full"
-          onClick={() => onNavItemClick(index)}
-          aria-pressed={activeIndex === index}
-          aria-label={step.title}
-        >
-          <div className="flex items-center pl-6 sm:pl-12 whitespace-nowrap transition-all duration-300">
-            <div
-              className={`mr-2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
-                activeIndex === index ? "bg-white" : "bg-transparent"
-              }`}
-            />
-            <span
-              className={`tracking-wide transition-all duration-300 ${
-                activeIndex === index
-                  ? "text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl"
-                  : "text-zinc-200 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl"
-              }`}
-            >
-              {step.title}
-            </span>
+}) {
+  return (
+    <div className="relative">
+      <div className="absolute left-[1.7rem] sm:left-[3.25rem] top-0 w-[1px] sm:w-[1.2px] h-full bg-gradient-to-b from-white via-white to-transparent" />
+      <nav
+        className="space-y-6 sm:space-y-8 lg:space-y-10"
+        aria-label={`${title} navigation`}
+      >
+        {steps.map((step, index) => (
+          <button
+            key={step.id}
+            className="relative cursor-pointer focus:outline-none w-full"
+            onClick={() => onNavItemClick(index)}
+            aria-pressed={activeIndex === index}
+            aria-label={step.title}
+          >
+            <div className="flex items-center pl-6 sm:pl-12 whitespace-nowrap transition-all duration-300">
+              <div
+                className={`mr-2 w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full transition-all duration-300 
+                  ${activeIndex === index ? "bg-white" : "bg-transparent"}`}
+              />
+              <span
+                className={`tracking-wide transition-all duration-300 
+                  ${
+                    activeIndex === index
+                      ? "text-white text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl"
+                      : "text-zinc-200 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl"
+                  }`}
+              >
+                {step.title}
+              </span>
+            </div>
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+});
+
+interface CarouselContentProps {
+  currentStep: StepWithData;
+  direction: number;
+  isMobile: boolean;
+}
+
+const CarouselContent: React.FC<CarouselContentProps> = memo(
+  function CarouselContent({ currentStep, direction, isMobile }) {
+    const lottieRef = useRef<LottieRefCurrentProps>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+      setIsLoading(true);
+      const timer = setTimeout(() => setIsLoading(false), 500);
+      return () => clearTimeout(timer);
+    }, [currentStep.id]);
+
+    const handleAnimationLoaded = useCallback(() => {
+      setIsLoading(false);
+    }, []);
+
+    return (
+      <motion.div
+        key={currentStep.id}
+        className="absolute inset-0 flex items-center justify-center"
+        custom={direction}
+        variants={carouselVariants}
+        initial="enter"
+        animate="center"
+        exit="exit"
+        transition={{ duration: 0.5, ease: "easeInOut" }}
+      >
+        {currentStep.animationData ? (
+          <div className="w-full h-full relative flex items-center justify-center">
+            <div className="w-[90%] h-[90%] lg:w-[85%] lg:h-[85%] mx-auto">
+              <Lottie
+                animationData={currentStep.animationData}
+                loop
+                autoplay
+                lottieRef={lottieRef}
+                onDOMLoaded={handleAnimationLoaded}
+                onDataReady={handleAnimationLoaded}
+                className="w-full h-full"
+                renderer={isMobile ? ("canvas" as any) : "svg"}
+                rendererSettings={{
+                  preserveAspectRatio: "xMidYMid meet",
+                  progressiveLoad: !isMobile,
+                }}
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+            {isLoading && <LoadingIndicator />}
           </div>
-        </button>
-      ))}
-    </nav>
-  </div>
+        ) : (
+          <div className="text-white text-center" aria-live="polite">
+            No animation available for this step
+          </div>
+        )}
+      </motion.div>
+    );
+  }
 );
 
 export interface HowSectionCarouselProps {
@@ -104,33 +177,42 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const isMobile = useIsMobile();
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(0);
-    const [animationLoaded, setAnimationLoaded] = useState(false);
-    const [touchStartY, setTouchStartY] = useState(0);
-    const [isTouching, setIsTouching] = useState(false);
-    const [lastScrollTime, setLastScrollTime] = useState(0);
 
-    const lottieRef = useRef<LottieRefCurrentProps>(null);
+    // Touch state
+    const touchState = useRef({
+      startY: 0,
+      isTouching: false,
+      lastScrollTime: 0,
+    });
+
     const spacerRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const swipeAreaRef = useRef<HTMLDivElement>(null);
 
-    // Adjust the scrollable area for mobile vs. desktop.
+    // Calculate dimensions
     const wrapperHeight = isMobile
       ? `${steps.length * 80}vh`
       : `${steps.length * 100}vh`;
 
-    // Use margin option to simulate a threshold of 50%.
+    // InView detection with threshold
     const inView = useInView(spacerRef, { margin: "-50% 0px" });
 
-    // Adjust offset so that scroll progress only starts once the section is partially visible.
+    // Scroll progress tracking
     const { scrollYProgress } = useScroll({
       target: spacerRef,
       offset: ["start 80%", "end start"],
     });
 
-    // Fixed opacity for the carousel container.
-    const fixedOpacity = 1;
+    // Handle navigation click
+    const handleNavItemClick = useCallback(
+      (index: number) => {
+        setDirection(index > activeIndex ? 1 : -1);
+        setActiveIndex(index);
+      },
+      [activeIndex]
+    );
 
+    // Update active index based on scroll position
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
       if (steps.length > 0) {
         const newIndex = Math.min(
@@ -144,95 +226,77 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       }
     });
 
+    // Set up touch and wheel event handlers
     useEffect(() => {
-      if (inView) {
-        const element = swipeAreaRef.current || containerRef.current;
-        if (!element) return;
+      if (!inView || !steps.length) return;
 
-        const handleTouchStart = (e: TouchEvent) => {
-          setTouchStartY(e.touches[0].clientY);
-          setIsTouching(true);
-        };
+      const element = swipeAreaRef.current || containerRef.current;
+      if (!element) return;
 
-        const handleTouchMove = (e: TouchEvent) => {
-          if (!isTouching) return;
-          const touchY = e.touches[0].clientY;
-          const diff = touchStartY - touchY;
-          if (Math.abs(diff) > 50) {
-            const now = Date.now();
-            if (now - lastScrollTime > 300) {
-              if (diff > 0 && activeIndex < steps.length - 1) {
-                setDirection(1);
-                setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
-              } else if (diff < 0 && activeIndex > 0) {
-                setDirection(-1);
-                setActiveIndex((prev) => Math.max(prev - 1, 0));
-              }
-              setLastScrollTime(now);
-              setTouchStartY(touchY);
-            }
+      const changeSlide = (delta: number) => {
+        const now = Date.now();
+        if (now - touchState.current.lastScrollTime > SCROLL_DEBOUNCE_TIME) {
+          if (delta > 0 && activeIndex < steps.length - 1) {
+            setDirection(1);
+            setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
+          } else if (delta < 0 && activeIndex > 0) {
+            setDirection(-1);
+            setActiveIndex((prev) => Math.max(prev - 1, 0));
+          }
+          touchState.current.lastScrollTime = now;
+          return true;
+        }
+        return false;
+      };
+
+      const handleTouchStart = (e: TouchEvent) => {
+        touchState.current.startY = e.touches[0].clientY;
+        touchState.current.isTouching = true;
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        if (!touchState.current.isTouching) return;
+
+        const touchY = e.touches[0].clientY;
+        const diff = touchState.current.startY - touchY;
+
+        if (Math.abs(diff) > 50) {
+          const changed = changeSlide(diff);
+          if (changed) {
+            touchState.current.startY = touchY;
             e.preventDefault();
           }
-        };
+        }
+      };
 
-        const handleTouchEnd = () => {
-          setIsTouching(false);
-        };
+      const handleTouchEnd = () => {
+        touchState.current.isTouching = false;
+      };
 
-        const handleWheel = (e: WheelEvent) => {
-          const now = Date.now();
-          if (now - lastScrollTime > 300) {
-            if (e.deltaY > 0 && activeIndex < steps.length - 1) {
-              setDirection(1);
-              setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
-              e.preventDefault();
-            } else if (e.deltaY < 0 && activeIndex > 0) {
-              setDirection(-1);
-              setActiveIndex((prev) => Math.max(prev - 1, 0));
-              e.preventDefault();
-            }
-            setLastScrollTime(now);
-          }
-        };
+      const handleWheel = (e: WheelEvent) => {
+        if (changeSlide(e.deltaY)) {
+          e.preventDefault();
+        }
+      };
 
-        element.addEventListener("touchstart", handleTouchStart, {
-          passive: false,
-        });
-        element.addEventListener("touchmove", handleTouchMove, {
-          passive: false,
-        });
-        element.addEventListener("touchend", handleTouchEnd);
-        element.addEventListener("wheel", handleWheel, { passive: false });
+      // Add event listeners
+      element.addEventListener("touchstart", handleTouchStart, {
+        passive: false,
+      });
+      element.addEventListener("touchmove", handleTouchMove, {
+        passive: false,
+      });
+      element.addEventListener("touchend", handleTouchEnd);
+      element.addEventListener("wheel", handleWheel, { passive: false });
 
-        return () => {
-          element.removeEventListener("touchstart", handleTouchStart);
-          element.removeEventListener("touchmove", handleTouchMove);
-          element.removeEventListener("touchend", handleTouchEnd);
-          element.removeEventListener("wheel", handleWheel);
-        };
-      }
-    }, [
-      inView,
-      activeIndex,
-      steps.length,
-      lastScrollTime,
-      isTouching,
-      touchStartY,
-    ]);
-
-    useEffect(() => {
-      setAnimationLoaded(false);
-    }, [activeIndex]);
-
-    useEffect(() => {
-      const timer = setTimeout(() => setAnimationLoaded(true), 500);
-      return () => clearTimeout(timer);
-    }, [activeIndex]);
-
-    const handleNavItemClick = (index: number) => {
-      setDirection(index > activeIndex ? 1 : -1);
-      setActiveIndex(index);
-    };
+      // Clean up
+      return () => {
+        element.removeEventListener("touchstart", handleTouchStart);
+        element.removeEventListener("touchmove", handleTouchMove);
+        element.removeEventListener("touchend", handleTouchEnd);
+        element.removeEventListener("wheel", handleWheel);
+      };
+    }, [inView, activeIndex, steps.length]);
 
     if (!steps.length) {
       return null;
@@ -252,7 +316,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
             ref={containerRef}
             className="fixed top-0 left-0 w-full h-screen overflow-hidden"
             style={{
-              opacity: fixedOpacity,
+              opacity: 1,
               willChange: "transform",
             }}
           >
@@ -270,50 +334,11 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
               <div className="order-1 w-full lg:col-span-2 flex items-center justify-center">
                 <div className="relative w-full h-[50vh] lg:h-[100vh] flex items-center justify-center">
                   <AnimatePresence mode="wait" custom={direction}>
-                    <motion.div
-                      key={currentStep.id}
-                      className="absolute inset-0 flex items-center justify-center"
-                      custom={direction}
-                      variants={carouselVariants}
-                      initial="enter"
-                      animate="center"
-                      exit="exit"
-                      transition={{ duration: 0.5, ease: "easeInOut" }}
-                    >
-                      {currentStep.animationData ? (
-                        <div className="w-full h-full relative flex items-center justify-center">
-                          <div className="w-[90%] h-[90%] lg:w-[85%] lg:h-[85%] mx-auto">
-                            <Lottie
-                              animationData={currentStep.animationData}
-                              loop
-                              autoplay
-                              lottieRef={lottieRef}
-                              onDOMLoaded={() => setAnimationLoaded(true)}
-                              onDataReady={() => setAnimationLoaded(true)}
-                              className="w-full h-full"
-                              renderer={isMobile ? ("canvas" as any) : "svg"}
-                              rendererSettings={{
-                                preserveAspectRatio: "xMidYMid meet",
-                                progressiveLoad: !isMobile,
-                              }}
-                              style={{ objectFit: "contain" }}
-                            />
-                          </div>
-                          {!animationLoaded && (
-                            <div className="absolute inset-0 flex items-center justify-center z-20">
-                              <div className="w-16 h-16 bg-green-400/40 rounded-full animate-pulse" />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div
-                          className="text-white text-center"
-                          aria-live="polite"
-                        >
-                          No animation available for this step
-                        </div>
-                      )}
-                    </motion.div>
+                    <CarouselContent
+                      currentStep={currentStep}
+                      direction={direction}
+                      isMobile={isMobile}
+                    />
                   </AnimatePresence>
                 </div>
               </div>
