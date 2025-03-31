@@ -10,10 +10,11 @@ export interface TextRevealProps {
 }
 
 /**
- * A simplified TextReveal that:
+ * An improved TextReveal that:
  * 1) Cleans up any newlines from the text (turns them into spaces).
- * 2) Renders a letter-by-letter reveal in one continuous paragraph.
- * 3) Lets the browser handle natural line breaks (no forced splits).
+ * 2) Preserves whole words to prevent awkward line breaks.
+ * 3) Renders a letter-by-letter reveal while maintaining word integrity.
+ * 4) Lets the browser handle natural line breaks at word boundaries.
  */
 const TextReveal = memo(function TextReveal({
   text,
@@ -27,23 +28,24 @@ const TextReveal = memo(function TextReveal({
   const t = (progress - start) / (end - start);
   const normalizedProgress = Math.max(0, Math.min(1, t));
 
-  // Remove any embedded newlines
+  // Remove any embedded newlines and standardize spaces
   const sanitizedText = useMemo(() => text.replace(/\s*\n\s*/g, " "), [text]);
 
-  // Split into individual characters (including spaces)
-  const letters = useMemo(() => sanitizedText.split(""), [sanitizedText]);
+  // Split into words (preserving spaces as separate items)
+  const words = useMemo(() => {
+    return sanitizedText.split(/(\s+)/).filter(Boolean);
+  }, [sanitizedText]);
 
-  // Count how many non-space letters we have (for letter-based reveal)
-  const totalLetters = useMemo(
-    () => letters.filter((ch) => !/\s/.test(ch)).length,
-    [letters]
-  );
+  // Count total non-space characters for progress calculation
+  const totalChars = useMemo(() => {
+    return sanitizedText.replace(/\s+/g, "").length;
+  }, [sanitizedText]);
 
   // Basic styling
   const textStyles = cn(
     "text-xl sm:text-3xl md:text-3xl lg:text-4xl xl:text-[3.38rem]",
     "font-normal leading-[1.3] sm:leading-[1.35] md:leading-[1.4] lg:leading-[1.35]",
-    "tracking-tight whitespace-normal" // Let the container’s width dictate line breaks
+    "tracking-tight"
   );
 
   const containerClasses = cn(
@@ -52,44 +54,62 @@ const TextReveal = memo(function TextReveal({
     "relative w-full"
   );
 
-  let revealedCount = 0;
+  // Track how many characters we've processed so far
+  let processedChars = 0;
 
   return (
     <div className={containerClasses}>
       <div className={cn(textStyles, "relative z-10")}>
-        {letters.map((char, i) => {
-          if (/\s/.test(char)) {
-            // For spaces, just render a space with no reveal effect
-            return <span key={i}>{char}</span>;
+        {words.map((word, wordIndex) => {
+          // If it's a space, just render it directly
+          if (/^\s+$/.test(word)) {
+            return <span key={`space-${wordIndex}`}>{word}</span>;
           }
 
-          // Each time we hit a non-space character, increment revealedCount
-          revealedCount++;
-          // Reveal factor for this specific letter
-          const revealAmount = Math.max(
-            0,
-            Math.min(1, normalizedProgress * totalLetters - (revealedCount - 1))
-          );
+          // For actual words, we need to do the character-by-character reveal
+          const letters = word.split("");
 
           return (
-            <span key={i} className="relative inline-block">
-              {/* Ghost letter behind (faded) */}
-              <span
-                className="absolute inset-0 pointer-events-none"
-                style={{ color: "rgba(255,255,255,0.25)" }}
-                aria-hidden="true"
-              >
-                {char}
-              </span>
-              {/* Actual reveal letter */}
-              <span
-                style={{
-                  opacity: revealAmount,
-                  transition: "opacity 0.3s ease-out",
-                }}
-              >
-                {char}
-              </span>
+            // This wrapper prevents words from breaking across lines
+            <span
+              key={`word-${wordIndex}`}
+              className="inline-block whitespace-nowrap"
+            >
+              {letters.map((char, charIndex) => {
+                processedChars++;
+                const revealAmount = Math.max(
+                  0,
+                  Math.min(
+                    1,
+                    normalizedProgress * totalChars - (processedChars - 1)
+                  )
+                );
+
+                return (
+                  <span
+                    key={`char-${charIndex}`}
+                    className="relative inline-block"
+                  >
+                    {/* Ghost letter behind (faded) */}
+                    <span
+                      className="absolute inset-0 pointer-events-none"
+                      style={{ color: "rgba(255,255,255,0.25)" }}
+                      aria-hidden="true"
+                    >
+                      {char}
+                    </span>
+                    {/* Actual reveal letter */}
+                    <span
+                      style={{
+                        opacity: revealAmount,
+                        transition: "opacity 0.3s ease-out",
+                      }}
+                    >
+                      {char}
+                    </span>
+                  </span>
+                );
+              })}
             </span>
           );
         })}
