@@ -23,10 +23,10 @@ const Lottie = dynamic(() => import("lottie-react"), {
 // Animation variants extracted for reuse
 const carouselVariants = {
   enter: (direction: number) => ({
-    y: direction > 0 ? 80 : -80,
+    y: direction > 0 ? 60 : -60,
     opacity: 0,
-    scale: 0.95,
-    filter: "blur(4px)",
+    scale: 0.97,
+    filter: "blur(3px)",
   }),
   center: {
     y: 0,
@@ -35,10 +35,10 @@ const carouselVariants = {
     filter: "blur(0px)",
   },
   exit: (direction: number) => ({
-    y: direction < 0 ? 80 : -80,
+    y: direction < 0 ? 60 : -60,
     opacity: 0,
-    scale: 0.95,
-    filter: "blur(4px)",
+    scale: 0.97,
+    filter: "blur(3px)",
   }),
 };
 
@@ -50,7 +50,7 @@ const LoadingIndicator = () => (
 );
 
 // Constants
-const SCROLL_DEBOUNCE_TIME = 300;
+const SCROLL_THROTTLE_TIME = 250;
 
 interface CarouselNavProps {
   steps: StepWithData[];
@@ -116,7 +116,7 @@ const CarouselContent: React.FC<CarouselContentProps> = memo(
 
     useEffect(() => {
       setIsLoading(true);
-      const timer = setTimeout(() => setIsLoading(false), 500);
+      const timer = setTimeout(() => setIsLoading(false), 300);
       return () => clearTimeout(timer);
     }, [currentStep.id]);
 
@@ -133,7 +133,10 @@ const CarouselContent: React.FC<CarouselContentProps> = memo(
         initial="enter"
         animate="center"
         exit="exit"
-        transition={{ duration: 0.5, ease: "easeInOut" }}
+        transition={{
+          duration: 0.45,
+          ease: "easeInOut",
+        }}
       >
         {currentStep.animationData ? (
           <div className="w-full h-full relative flex items-center justify-center">
@@ -177,6 +180,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
     const isMobile = useIsMobile();
     const [activeIndex, setActiveIndex] = useState(0);
     const [direction, setDirection] = useState(0);
+    const [scrollLocked, setScrollLocked] = useState(false);
 
     // Touch state
     const touchState = useRef({
@@ -195,26 +199,31 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       : `${steps.length * 100}vh`;
 
     // InView detection with threshold
-    const inView = useInView(spacerRef, { margin: "-50% 0px" });
+    const inView = useInView(spacerRef, { margin: "-40% 0px" });
 
     // Scroll progress tracking
     const { scrollYProgress } = useScroll({
       target: spacerRef,
-      offset: ["start 80%", "end start"],
+      offset: ["start 70%", "end start"],
     });
 
     // Handle navigation click
     const handleNavItemClick = useCallback(
       (index: number) => {
+        if (scrollLocked) return;
+        setScrollLocked(true);
         setDirection(index > activeIndex ? 1 : -1);
         setActiveIndex(index);
+
+        // Release scroll lock after animation completes
+        setTimeout(() => setScrollLocked(false), 500);
       },
-      [activeIndex]
+      [activeIndex, scrollLocked]
     );
 
     // Update active index based on scroll position
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
-      if (steps.length > 0) {
+      if (steps.length > 0 && !scrollLocked) {
         const newIndex = Math.min(
           Math.floor(latest * steps.length + 0.5),
           steps.length - 1
@@ -235,14 +244,23 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
 
       const changeSlide = (delta: number) => {
         const now = Date.now();
-        if (now - touchState.current.lastScrollTime > SCROLL_DEBOUNCE_TIME) {
+        if (scrollLocked) return false;
+
+        if (now - touchState.current.lastScrollTime > SCROLL_THROTTLE_TIME) {
           if (delta > 0 && activeIndex < steps.length - 1) {
+            setScrollLocked(true);
             setDirection(1);
             setActiveIndex((prev) => Math.min(prev + 1, steps.length - 1));
+            setTimeout(() => setScrollLocked(false), 500);
           } else if (delta < 0 && activeIndex > 0) {
+            setScrollLocked(true);
             setDirection(-1);
             setActiveIndex((prev) => Math.max(prev - 1, 0));
+            setTimeout(() => setScrollLocked(false), 500);
+          } else {
+            return false;
           }
+
           touchState.current.lastScrollTime = now;
           return true;
         }
@@ -260,7 +278,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         const touchY = e.touches[0].clientY;
         const diff = touchState.current.startY - touchY;
 
-        if (Math.abs(diff) > 50) {
+        if (Math.abs(diff) > 40) {
           const changed = changeSlide(diff);
           if (changed) {
             touchState.current.startY = touchY;
@@ -274,14 +292,17 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
       };
 
       const handleWheel = (e: WheelEvent) => {
-        if (changeSlide(e.deltaY)) {
-          e.preventDefault();
+        // Only handle significant wheel movements
+        if (Math.abs(e.deltaY) > 20) {
+          if (changeSlide(e.deltaY)) {
+            e.preventDefault();
+          }
         }
       };
 
       // Add event listeners
       element.addEventListener("touchstart", handleTouchStart, {
-        passive: false,
+        passive: true,
       });
       element.addEventListener("touchmove", handleTouchMove, {
         passive: false,
@@ -296,7 +317,7 @@ const HowSectionCarousel: React.FC<HowSectionCarouselProps> = memo(
         element.removeEventListener("touchend", handleTouchEnd);
         element.removeEventListener("wheel", handleWheel);
       };
-    }, [inView, activeIndex, steps.length]);
+    }, [inView, activeIndex, steps.length, scrollLocked]);
 
     if (!steps.length) {
       return null;
