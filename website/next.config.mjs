@@ -13,16 +13,6 @@ const nextConfig = {
   generateBuildId: async () => {
     return "build-" + Date.now();
   },
-  redirects: async () => {
-    return [
-      {
-        source: "/home",
-        destination: "/",
-        permanent: true,
-        locale: false,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
